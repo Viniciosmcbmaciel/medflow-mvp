@@ -1,70 +1,74 @@
-import { Router } from 'express';
-import { z } from 'zod';
-import { prisma } from '../config/prisma.js';
-import { createAuditLog } from '../utils/audit.js';
+import { Router } from "express";
+import { z } from "zod";
+import { prisma } from "../config/prisma.js";
 
 const router = Router();
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   const schema = z.object({
     patientId: z.string().min(1),
-    chiefComplaint: z.string().optional(),
-    clinicalNotes: z.string().optional(),
-    anamnesis: z.object({
-      currentIllness: z.string().optional(),
-      medicalHistory: z.string().optional(),
-      familyHistory: z.string().optional(),
-      habits: z.string().optional(),
-      medicationsInUse: z.string().optional(),
-      physicalExam: z.string().optional(),
-    }).optional(),
+    chiefComplaint: z.string().min(1, "Queixa principal é obrigatória."),
+    historyPresentIllness: z.string().optional().nullable(),
+    medications: z.string().optional().nullable(),
+    physicalExam: z.string().optional().nullable(),
+    conduct: z.string().optional().nullable(),
+    notes: z.string().optional().nullable(),
   });
 
   const parsed = schema.safeParse(req.body);
-  if (!parsed.success || !req.user) {
-    return res.status(400).json({ message: 'Dados inválidos ou usuário não autenticado.' });
+
+  if (!parsed.success) {
+    return res.status(400).json({
+      message: "Dados inválidos.",
+      errors: parsed.error.flatten(),
+    });
   }
 
-  const record = await prisma.medicalRecord.create({
-    data: {
-      patientId: parsed.data.patientId,
-      professionalId: req.user.id,
-      chiefComplaint: parsed.data.chiefComplaint,
-      clinicalNotes: parsed.data.clinicalNotes,
-      anamnesis: parsed.data.anamnesis
-        ? {
-            create: parsed.data.anamnesis,
-          }
-        : undefined,
-    },
-    include: { anamnesis: true },
-  });
+  try {
+    const record = await prisma.medicalRecord.create({
+      data: {
+        patientId: parsed.data.patientId,
+        chiefComplaint: parsed.data.chiefComplaint,
+        historyPresentIllness: parsed.data.historyPresentIllness ?? null,
+        medications: parsed.data.medications ?? null,
+        physicalExam: parsed.data.physicalExam ?? null,
+        conduct: parsed.data.conduct ?? null,
+        notes: parsed.data.notes ?? null,
+      },
+    });
 
-  await createAuditLog({
-    userId: req.user.id,
-    action: 'CREATE',
-    entity: 'MEDICAL_RECORD',
-    entityId: record.id,
-    details: 'Prontuário criado',
-    ipAddress: req.ip,
-  });
-
-  return res.status(201).json(record);
+    return res.status(201).json(record);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Erro ao criar registro clínico." });
+  }
 });
 
-router.get('/patient/:patientId', async (req, res) => {
-  const { patientId } = req.params;
-  const records = await prisma.medicalRecord.findMany({
-    where: { patientId },
-    include: {
-      anamnesis: true,
-      prescriptions: { include: { items: true, document: { include: { signature: true } } } },
-      examOrders: { include: { items: true, document: { include: { signature: true } } } },
-      professional: { select: { name: true, email: true, role: true } },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
-  return res.json(records);
+router.get("/:patientId", async (req, res) => {
+  try {
+    const records = await prisma.medicalRecord.findMany({
+      where: { patientId: req.params.patientId },
+      include: {
+        patient: {
+          select: {
+            id: true,
+            fullName: true,
+            cpf: true,
+            phone: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return res.json(records);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Erro ao buscar registros clínicos." });
+  }
 });
 
 export default router;
