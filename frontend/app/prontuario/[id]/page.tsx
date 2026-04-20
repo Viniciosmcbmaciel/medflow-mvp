@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AppHeader from "../../../components/AppHeader";
 import { useRequireAuth } from "../../../lib/auth";
@@ -88,13 +89,10 @@ function openPdf(url: string) {
     });
 }
 
-export default function ProntuarioPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function ProntuarioPage() {
   const { ready } = useRequireAuth();
-  const patientId = params.id;
+  const params = useParams();
+  const patientId = params?.id as string;
 
   const [activeTab, setActiveTab] = useState<TabType>("anamnese");
 
@@ -379,12 +377,12 @@ export default function ProntuarioPage({
   }
 
   useEffect(() => {
-    if (ready) {
+    if (ready && patientId) {
       loadRecords();
       loadPrescriptions();
       loadExams();
     }
-  }, [ready]);
+  }, [ready, patientId]);
 
   if (!ready) {
     return <div className="container">Carregando...</div>;
