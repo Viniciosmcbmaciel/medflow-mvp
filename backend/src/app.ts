@@ -12,6 +12,9 @@ import { authMiddleware } from "./middleware/auth.js";
 
 const app = express();
 
+/**
+ * 🔐 CORS MANUAL (100% compatível com Vercel + Railway)
+ */
 const allowedOrigins = [
   "http://localhost:3000",
   "https://medflow-mvp.vercel.app",
@@ -24,17 +27,21 @@ app.use((req, res, next) => {
     origin &&
     (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app"))
   ) {
-    res.header("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Origin", origin);
   }
 
-  res.header("Vary", "Origin");
-  res.header(
+  res.setHeader("Vary", "Origin");
+  res.setHeader(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Credentials", "true");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true");
 
+  // 🚨 MUITO IMPORTANTE → responde preflight
   if (req.method === "OPTIONS") {
     return res.sendStatus(204);
   }
@@ -44,8 +51,21 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
+/**
+ * 🔓 ROTAS PÚBLICAS
+ */
 app.use("/auth", authRoutes);
 
+/**
+ * 🧪 ROTA DE TESTE (IMPORTANTE)
+ */
+app.get("/health", (_req, res) => {
+  res.json({ ok: true, cors: "ok-v3" });
+});
+
+/**
+ * 🔐 IGNORA OPTIONS NO AUTH
+ */
 app.use((req, res, next) => {
   if (req.method === "OPTIONS") {
     return res.sendStatus(204);
@@ -53,6 +73,9 @@ app.use((req, res, next) => {
   next();
 });
 
+/**
+ * 🔐 ROTAS PROTEGIDAS
+ */
 app.use(authMiddleware);
 
 app.use("/patients", patientsRoutes);
@@ -61,9 +84,5 @@ app.use("/medical-records", medicalRecordsRoutes);
 app.use("/prescriptions", prescriptionsRoutes);
 app.use("/exams", examsRoutes);
 app.use("/users", usersRoutes);
-
-app.get("/health", (_req, res) => {
-  res.json({ ok: true, cors: "manual-v2" });
-});
 
 export default app;
