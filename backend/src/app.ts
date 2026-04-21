@@ -1,5 +1,5 @@
 import express from "express";
-import cors from "cors";
+import cors, { CorsOptions } from "cors";
 
 import authRoutes from "./routes/auth.routes.js";
 import patientsRoutes from "./routes/patients.routes.js";
@@ -18,32 +18,30 @@ const allowedOrigins = [
   "https://medflow-mvp.vercel.app",
 ];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) {
-        callback(null, true);
-        return;
-      }
+const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
 
-      const isAllowed =
-        allowedOrigins.includes(origin) ||
-        origin.endsWith(".vercel.app");
+    const isAllowed =
+      allowedOrigins.includes(origin) || origin.endsWith(".vercel.app");
 
-      if (isAllowed) {
-        callback(null, true);
-        return;
-      }
+    if (isAllowed) {
+      callback(null, true);
+      return;
+    }
 
-      callback(new Error("Not allowed by CORS"));
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
+    callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
 
-app.options("*", cors());
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use(express.json());
 
