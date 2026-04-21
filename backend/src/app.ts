@@ -62,4 +62,8 @@ app.use("/prescriptions", prescriptionsRoutes);
 app.use("/exams", examsRoutes);
 app.use("/users", usersRoutes);
 
+app.get("/health", (_req, res) => {
+  res.json({ ok: true, cors: "manual-v2" });
+});
+
 export default app;
