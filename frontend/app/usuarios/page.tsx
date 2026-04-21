@@ -1,20 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import AppHeader from "../../components/AppHeader";
-import { useRequireAuth } from "../../lib/auth";
+import { getStoredUser, useRequireAuth } from "../../lib/auth";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+type UserRole = "ADMIN" | "MEDICO" | "RECEPCAO";
 
 type User = {
   id: string;
   name: string;
   email: string;
-  role: "ADMIN" | "MEDICO" | "SECRETARIA";
+  role: UserRole;
   crm?: string | null;
   specialty?: string | null;
-  createdAt: string;
+  createdAt?: string;
 };
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 function getAuthHeaders() {
   const token = localStorage.getItem("medflow_token");
@@ -25,19 +27,37 @@ function getAuthHeaders() {
   };
 }
 
-export default function UsuariosPage() {
-  const { ready } = useRequireAuth(true);
+function getRoleLabel(role: UserRole) {
+  switch (role) {
+    case "ADMIN":
+      return "Administrador";
+    case "MEDICO":
+      return "Médico";
+    case "RECEPCAO":
+      return "Secretaria";
+    default:
+      return role;
+  }
+}
+
+function UsuariosPageContent() {
+  const { ready } = useRequireAuth();
+  const loggedUser = getStoredUser();
 
   const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<User["role"]>("MEDICO");
+  const [role, setRole] = useState<UserRole>("MEDICO");
   const [crm, setCrm] = useState("");
   const [specialty, setSpecialty] = useState("");
 
   async function loadUsers() {
     try {
+      setLoading(true);
+
       const res = await fetch(`${API_URL}/users`, {
         headers: getAuthHeaders(),
       });
@@ -50,31 +70,36 @@ export default function UsuariosPage() {
 
       setUsers(data);
     } catch (error: any) {
+      console.error(error);
       alert(error.message || "Erro ao carregar usuários");
+    } finally {
+      setLoading(false);
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleCreateUser(e: React.FormEvent) {
     e.preventDefault();
 
     try {
+      const payload = {
+        name,
+        email,
+        password,
+        role,
+        crm: role === "MEDICO" ? crm : undefined,
+        specialty: role === "MEDICO" ? specialty : undefined,
+      };
+
       const res = await fetch(`${API_URL}/users`, {
         method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          role,
-          crm,
-          specialty,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Erro ao criar usuário");
+        throw new Error(data.message || "Erro ao cadastrar usuário");
       }
 
       setName("");
@@ -85,20 +110,37 @@ export default function UsuariosPage() {
       setSpecialty("");
 
       await loadUsers();
-      alert("Usuário criado com sucesso");
+      alert("Usuário cadastrado com sucesso");
     } catch (error: any) {
-      alert(error.message || "Erro ao criar usuário");
+      console.error(error);
+      alert(error.message || "Erro ao cadastrar usuário");
     }
   }
 
   useEffect(() => {
-    if (ready) {
+    if (ready && loggedUser?.role === "ADMIN") {
       loadUsers();
     }
-  }, [ready]);
+  }, [ready, loggedUser?.role]);
 
   if (!ready) {
     return <div className="container">Carregando...</div>;
+  }
+
+  if (loggedUser?.role !== "ADMIN") {
+    return (
+      <>
+        <AppHeader />
+        <main className="container">
+          <div className="form-card">
+            <h1 className="section-title">Acesso restrito</h1>
+            <p className="page-subtitle">
+              Somente administradores podem acessar o cadastro de usuários.
+            </p>
+          </div>
+        </main>
+      </>
+    );
   }
 
   return (
@@ -111,7 +153,7 @@ export default function UsuariosPage() {
           Somente administradores podem cadastrar médicos e secretárias.
         </p>
 
-        <form onSubmit={handleSubmit} className="form-card">
+        <form onSubmit={handleCreateUser} className="form-card">
           <h2 className="section-title">Novo usuário</h2>
 
           <div className="field">
@@ -127,8 +169,8 @@ export default function UsuariosPage() {
           <div className="field">
             <label className="label">E-mail</label>
             <input
-              className="input"
               type="email"
+              className="input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -138,8 +180,8 @@ export default function UsuariosPage() {
           <div className="field">
             <label className="label">Senha</label>
             <input
-              className="input"
               type="password"
+              className="input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -151,10 +193,10 @@ export default function UsuariosPage() {
             <select
               className="select"
               value={role}
-              onChange={(e) => setRole(e.target.value as User["role"])}
+              onChange={(e) => setRole(e.target.value as UserRole)}
             >
               <option value="MEDICO">Médico</option>
-              <option value="SECRETARIA">Secretária</option>
+              <option value="RECEPCAO">Secretaria</option>
               <option value="ADMIN">Administrador</option>
             </select>
           </div>
@@ -189,32 +231,56 @@ export default function UsuariosPage() {
         <section className="form-card">
           <h2 className="section-title">Usuários cadastrados</h2>
 
-          <div className="list">
-            {users.map((user) => (
-              <div key={user.id} className="item-card">
-                <div className="item-title">{user.name}</div>
-                <div className="item-text">
-                  <strong>Email:</strong> {user.email}
-                </div>
-                <div className="item-text">
-                  <strong>Perfil:</strong> {user.role}
-                </div>
+          {loading ? (
+            <div className="empty-state">Carregando usuários...</div>
+          ) : users.length === 0 ? (
+            <div className="empty-state">Nenhum usuário encontrado.</div>
+          ) : (
+            <div className="list">
+              {users.map((user) => (
+                <div key={user.id} className="item-card">
+                  <div className="item-title">{user.name}</div>
 
-                {user.role === "MEDICO" && (
-                  <>
+                  <div className="item-text">
+                    <strong>E-mail:</strong> {user.email}
+                  </div>
+
+                  <div className="item-text">
+                    <strong>Perfil:</strong> {getRoleLabel(user.role)}
+                  </div>
+
+                  {user.role === "MEDICO" && (
+                    <>
+                      <div className="item-text">
+                        <strong>CRM:</strong> {user.crm || "—"}
+                      </div>
+
+                      <div className="item-text">
+                        <strong>Especialidade:</strong> {user.specialty || "—"}
+                      </div>
+                    </>
+                  )}
+
+                  {user.createdAt && (
                     <div className="item-text">
-                      <strong>CRM:</strong> {user.crm || "—"}
+                      <strong>Criado em:</strong>{" "}
+                      {new Date(user.createdAt).toLocaleString("pt-BR")}
                     </div>
-                    <div className="item-text">
-                      <strong>Especialidade:</strong> {user.specialty || "—"}
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       </main>
     </>
+  );
+}
+
+export default function UsuariosPage() {
+  return (
+    <Suspense fallback={<div className="container">Carregando...</div>}>
+      <UsuariosPageContent />
+    </Suspense>
   );
 }

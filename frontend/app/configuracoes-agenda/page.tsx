@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import AppHeader from "../../components/AppHeader";
 import { useRequireAuth } from "../../lib/auth";
 
@@ -18,7 +18,7 @@ const defaultConfig: AgendaConfig = {
   intervalMinutes: 30,
 };
 
-export default function ConfiguracoesAgendaPage() {
+function ConfiguracoesAgendaPageContent() {
   const { ready } = useRequireAuth();
   const [startHour, setStartHour] = useState(defaultConfig.startHour);
   const [endHour, setEndHour] = useState(defaultConfig.endHour);
@@ -128,5 +128,13 @@ export default function ConfiguracoesAgendaPage() {
         </form>
       </main>
     </>
+  );
+}
+
+export default function ConfiguracoesAgendaPage() {
+  return (
+    <Suspense fallback={<div className="container">Carregando...</div>}>
+      <ConfiguracoesAgendaPageContent />
+    </Suspense>
   );
 }
