@@ -1,7 +1,7 @@
 "use client";
 
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import AppHeader from "../../components/AppHeader";
 import { useRequireAuth } from "../../lib/auth";
 
@@ -16,7 +16,10 @@ type Patient = {
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 function getAuthHeaders() {
-  const token = localStorage.getItem("medflow_token");
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("medflow_token")
+      : null;
 
   return {
     "Content-Type": "application/json",
@@ -24,7 +27,7 @@ function getAuthHeaders() {
   };
 }
 
-export default function PacientesPage() {
+function PacientesContent() {
   const { ready } = useRequireAuth();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(false);
@@ -32,6 +35,10 @@ export default function PacientesPage() {
   async function loadPatients() {
     try {
       setLoading(true);
+
+      if (!API_URL) {
+        throw new Error("NEXT_PUBLIC_API_URL não configurada");
+      }
 
       const res = await fetch(`${API_URL}/patients`, {
         headers: getAuthHeaders(),
@@ -111,5 +118,13 @@ export default function PacientesPage() {
         )}
       </main>
     </>
+  );
+}
+
+export default function PacientesPage() {
+  return (
+    <Suspense fallback={<div className="container">Carregando...</div>}>
+      <PacientesContent />
+    </Suspense>
   );
 }
