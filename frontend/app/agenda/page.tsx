@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import AppHeader from "../../components/AppHeader";
 import { useRequireAuth } from "../../lib/auth";
 
@@ -145,7 +145,11 @@ function formatWeekday(date: Date) {
   });
 }
 
-function getTimeSlots(startHour: string, endHour: string, intervalMinutes: number) {
+function getTimeSlots(
+  startHour: string,
+  endHour: string,
+  intervalMinutes: number
+) {
   const [startH, startM] = startHour.split(":").map(Number);
   const [endH, endM] = endHour.split(":").map(Number);
 
@@ -219,7 +223,7 @@ function toDateTimeLocalFromIso(isoString: string) {
   return `${year}-${month}-${day}T${hh}:${mm}`;
 }
 
-export default function AgendaPage() {
+function AgendaPageContent() {
   const { ready } = useRequireAuth();
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -369,9 +373,7 @@ export default function AgendaPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(
-          data.error || data.message || "Erro ao salvar consulta"
-        );
+        throw new Error(data.error || data.message || "Erro ao salvar consulta");
       }
 
       resetForm();
@@ -773,15 +775,12 @@ export default function AgendaPage() {
                                   const statusStyle = getStatusStyles(
                                     appointment.status
                                   );
-                                  const isEditing =
-                                    editingId === appointment.id;
+                                  const isEditing = editingId === appointment.id;
 
                                   return (
                                     <div
                                       key={appointment.id}
-                                      onClick={() =>
-                                        handleEditAppointment(appointment)
-                                      }
+                                      onClick={() => handleEditAppointment(appointment)}
                                       style={{
                                         border: isEditing
                                           ? "2px solid #16a34a"
@@ -843,10 +842,7 @@ export default function AgendaPage() {
                                           type="button"
                                           className="button button-green"
                                           onClick={() =>
-                                            updateStatus(
-                                              appointment.id,
-                                              "CONFIRMED"
-                                            )
+                                            updateStatus(appointment.id, "CONFIRMED")
                                           }
                                         >
                                           Confirmar
@@ -856,10 +852,7 @@ export default function AgendaPage() {
                                           type="button"
                                           className="button button-blue"
                                           onClick={() =>
-                                            updateStatus(
-                                              appointment.id,
-                                              "COMPLETED"
-                                            )
+                                            updateStatus(appointment.id, "COMPLETED")
                                           }
                                         >
                                           Concluir
@@ -869,10 +862,7 @@ export default function AgendaPage() {
                                           type="button"
                                           className="button button-yellow"
                                           onClick={() =>
-                                            updateStatus(
-                                              appointment.id,
-                                              "CANCELED"
-                                            )
+                                            updateStatus(appointment.id, "CANCELED")
                                           }
                                         >
                                           Cancelar
@@ -905,5 +895,13 @@ export default function AgendaPage() {
         </section>
       </main>
     </>
+  );
+}
+
+export default function AgendaPage() {
+  return (
+    <Suspense fallback={<div className="container">Carregando...</div>}>
+      <AgendaPageContent />
+    </Suspense>
   );
 }
