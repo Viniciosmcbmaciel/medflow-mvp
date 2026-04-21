@@ -1,10 +1,11 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import AppHeader from "../components/AppHeader";
 import { useRequireAuth } from "../lib/auth";
 
-export default function HomePage() {
+function HomePageContent() {
   const { ready, user } = useRequireAuth();
 
   if (!ready) {
@@ -48,5 +49,13 @@ export default function HomePage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="container">Carregando...</div>}>
+      <HomePageContent />
+    </Suspense>
   );
 }
