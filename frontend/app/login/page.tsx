@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getStoredUser, getToken } from "../../lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const [email, setEmail] = useState("admin@medflow.com");
   const [password, setPassword] = useState("123456");
@@ -127,11 +127,19 @@ export default function LoginPage() {
             />
           </div>
 
-          <button type="submit" className="button button-primary">
+          <button type="submit" className="button button-primary" disabled={loading}>
             {loading ? "Entrando..." : "Entrar"}
           </button>
         </form>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="container">Carregando...</div>}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

@@ -22,9 +22,7 @@ function ConfiguracoesAgendaPageContent() {
   const { ready } = useRequireAuth();
   const [startHour, setStartHour] = useState(defaultConfig.startHour);
   const [endHour, setEndHour] = useState(defaultConfig.endHour);
-  const [intervalMinutes, setIntervalMinutes] = useState(
-    defaultConfig.intervalMinutes
-  );
+  const [intervalMinutes, setIntervalMinutes] = useState(defaultConfig.intervalMinutes);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);

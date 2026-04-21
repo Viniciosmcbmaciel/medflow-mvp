@@ -83,35 +83,15 @@ function getAppointmentTypeLabel(type: AppointmentType) {
 function getStatusStyles(status: Appointment["status"]) {
   switch (status) {
     case "SCHEDULED":
-      return {
-        background: "#eff6ff",
-        border: "#93c5fd",
-        title: "#1d4ed8",
-      };
+      return { background: "#eff6ff", border: "#93c5fd", title: "#1d4ed8" };
     case "CONFIRMED":
-      return {
-        background: "#ecfdf5",
-        border: "#86efac",
-        title: "#166534",
-      };
+      return { background: "#ecfdf5", border: "#86efac", title: "#166534" };
     case "CANCELED":
-      return {
-        background: "#fef2f2",
-        border: "#fca5a5",
-        title: "#b91c1c",
-      };
+      return { background: "#fef2f2", border: "#fca5a5", title: "#b91c1c" };
     case "COMPLETED":
-      return {
-        background: "#f5f3ff",
-        border: "#c4b5fd",
-        title: "#6d28d9",
-      };
+      return { background: "#f5f3ff", border: "#c4b5fd", title: "#6d28d9" };
     default:
-      return {
-        background: "#f9fafb",
-        border: "#d1d5db",
-        title: "#111827",
-      };
+      return { background: "#f9fafb", border: "#d1d5db", title: "#111827" };
   }
 }
 
@@ -145,11 +125,7 @@ function formatWeekday(date: Date) {
   });
 }
 
-function getTimeSlots(
-  startHour: string,
-  endHour: string,
-  intervalMinutes: number
-) {
+function getTimeSlots(startHour: string, endHour: string, intervalMinutes: number) {
   const [startH, startM] = startHour.split(":").map(Number);
   const [endH, endM] = endHour.split(":").map(Number);
 
@@ -236,8 +212,7 @@ function AgendaPageContent() {
   const [date, setDate] = useState("");
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState<Appointment["status"]>("SCHEDULED");
-  const [appointmentType, setAppointmentType] =
-    useState<AppointmentType>("PARTICULAR");
+  const [appointmentType, setAppointmentType] = useState<AppointmentType>("PARTICULAR");
   const [insuranceName, setInsuranceName] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -275,9 +250,7 @@ function AgendaPageContent() {
         headers: getAuthHeaders(),
       });
 
-      if (!res.ok) {
-        throw new Error("Erro ao buscar consultas");
-      }
+      if (!res.ok) throw new Error("Erro ao buscar consultas");
 
       const data = await res.json();
       setAppointments(data);
@@ -378,11 +351,7 @@ function AgendaPageContent() {
 
       resetForm();
       await loadAppointments(filterDoctor);
-      alert(
-        editingId
-          ? "Consulta atualizada com sucesso"
-          : "Consulta criada com sucesso"
-      );
+      alert(editingId ? "Consulta atualizada com sucesso" : "Consulta criada com sucesso");
     } catch (error: any) {
       console.error(error);
       alert(error.message || "Erro ao salvar consulta");
@@ -410,9 +379,7 @@ function AgendaPageContent() {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.error || "Erro ao atualizar status");
-      }
+      if (!res.ok) throw new Error(data.error || "Erro ao atualizar status");
 
       await loadAppointments(filterDoctor);
     } catch (error: any) {
@@ -433,9 +400,7 @@ function AgendaPageContent() {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.error || "Erro ao excluir consulta");
-      }
+      if (!res.ok) throw new Error(data.error || "Erro ao excluir consulta");
 
       if (editingId === id) {
         resetForm();
@@ -450,9 +415,7 @@ function AgendaPageContent() {
 
   function handleCellClick(day: Date, time: string) {
     setDate(toDateTimeLocalString(day, time));
-    if (!editingId) {
-      setStatus("SCHEDULED");
-    }
+    if (!editingId) setStatus("SCHEDULED");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -538,9 +501,7 @@ function AgendaPageContent() {
             <label className="label">Tipo de consulta</label>
             <select
               value={appointmentType}
-              onChange={(e) =>
-                setAppointmentType(e.target.value as AppointmentType)
-              }
+              onChange={(e) => setAppointmentType(e.target.value as AppointmentType)}
               className="select"
             >
               <option value="PARTICULAR">Particular</option>
@@ -702,13 +663,7 @@ function AgendaPageContent() {
                       >
                         {formatWeekday(day)}
                         {isToday(day) && (
-                          <div
-                            style={{
-                              fontSize: 12,
-                              color: "#166534",
-                              marginTop: 4,
-                            }}
-                          >
+                          <div style={{ fontSize: 12, color: "#166534", marginTop: 4 }}>
                             Hoje
                           </div>
                         )}
@@ -772,9 +727,7 @@ function AgendaPageContent() {
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 {cellAppointments.map((appointment) => {
-                                  const statusStyle = getStatusStyles(
-                                    appointment.status
-                                  );
+                                  const statusStyle = getStatusStyles(appointment.status);
                                   const isEditing = editingId === appointment.id;
 
                                   return (
@@ -805,15 +758,12 @@ function AgendaPageContent() {
                                       </div>
 
                                       <div>
-                                        <strong>Status:</strong>{" "}
-                                        {getStatusLabel(appointment.status)}
+                                        <strong>Status:</strong> {getStatusLabel(appointment.status)}
                                       </div>
 
                                       <div>
                                         <strong>Tipo:</strong>{" "}
-                                        {getAppointmentTypeLabel(
-                                          appointment.appointmentType
-                                        )}
+                                        {getAppointmentTypeLabel(appointment.appointmentType)}
                                       </div>
 
                                       {appointment.appointmentType === "CONVENIO" && (
@@ -871,9 +821,7 @@ function AgendaPageContent() {
                                         <button
                                           type="button"
                                           className="button button-red"
-                                          onClick={() =>
-                                            deleteAppointment(appointment.id)
-                                          }
+                                          onClick={() => deleteAppointment(appointment.id)}
                                         >
                                           Excluir
                                         </button>

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
 import AppHeader from "../../../components/AppHeader";
 import { useRequireAuth } from "../../../lib/auth";
 
@@ -89,7 +89,7 @@ function openPdf(url: string) {
     });
 }
 
-export default function ProntuarioPage() {
+function ProntuarioPageContent() {
   const { ready } = useRequireAuth();
   const params = useParams();
   const patientId = params?.id as string;
@@ -590,9 +590,7 @@ export default function ProntuarioPage() {
                   {prescriptions.map((prescription) => (
                     <div key={prescription.id} className="item-card">
                       <div className="item-title">
-                        {new Date(prescription.createdAt).toLocaleString(
-                          "pt-BR"
-                        )}
+                        {new Date(prescription.createdAt).toLocaleString("pt-BR")}
                       </div>
 
                       {prescription.items.map((item) => (
@@ -613,8 +611,7 @@ export default function ProntuarioPage() {
                       ))}
 
                       <div className="item-text">
-                        <strong>Observações:</strong>{" "}
-                        {prescription.notes || "—"}
+                        <strong>Observações:</strong> {prescription.notes || "—"}
                       </div>
 
                       <div className="item-text">
@@ -627,9 +624,7 @@ export default function ProntuarioPage() {
                       {prescription.signedAt && (
                         <div className="item-text">
                           <strong>Assinada em:</strong>{" "}
-                          {new Date(prescription.signedAt).toLocaleString(
-                            "pt-BR"
-                          )}
+                          {new Date(prescription.signedAt).toLocaleString("pt-BR")}
                         </div>
                       )}
 
@@ -638,9 +633,7 @@ export default function ProntuarioPage() {
                           type="button"
                           className="button button-blue"
                           onClick={() =>
-                            openPdf(
-                              `${API_URL}/prescriptions/${prescription.id}/pdf`
-                            )
+                            openPdf(`${API_URL}/prescriptions/${prescription.id}/pdf`)
                           }
                         >
                           Gerar PDF
@@ -650,9 +643,7 @@ export default function ProntuarioPage() {
                           <button
                             type="button"
                             className="button button-green"
-                            onClick={() =>
-                              handleSignPrescription(prescription.id)
-                            }
+                            onClick={() => handleSignPrescription(prescription.id)}
                           >
                             Assinar prescrição
                           </button>
@@ -740,9 +731,7 @@ export default function ProntuarioPage() {
                         <button
                           type="button"
                           className="button button-blue"
-                          onClick={() =>
-                            openPdf(`${API_URL}/exams/${exam.id}/pdf`)
-                          }
+                          onClick={() => openPdf(`${API_URL}/exams/${exam.id}/pdf`)}
                         >
                           Gerar PDF
                         </button>
@@ -776,8 +765,7 @@ export default function ProntuarioPage() {
                     </div>
 
                     <div className="item-text">
-                      <strong>HDA:</strong>{" "}
-                      {record.historyPresentIllness || "—"}
+                      <strong>HDA:</strong> {record.historyPresentIllness || "—"}
                     </div>
 
                     <div className="item-text">
@@ -813,7 +801,21 @@ export default function ProntuarioPage() {
             )}
           </section>
         )}
+
+        <div style={{ marginTop: 20 }}>
+          <Link href="/pacientes" className="button button-secondary">
+            Voltar para pacientes
+          </Link>
+        </div>
       </main>
     </>
+  );
+}
+
+export default function ProntuarioPage() {
+  return (
+    <Suspense fallback={<div className="container">Carregando...</div>}>
+      <ProntuarioPageContent />
+    </Suspense>
   );
 }
