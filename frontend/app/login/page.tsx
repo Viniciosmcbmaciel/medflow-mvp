@@ -68,70 +68,100 @@ function LoginPageContent() {
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "#f6fbf8",
-        padding: 24,
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 460,
-          background: "#fff",
-          border: "1px solid #dcfce7",
-          borderRadius: 20,
-          padding: 28,
-          boxShadow: "0 6px 18px rgba(22, 101, 52, 0.08)",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: 36,
-            fontWeight: 700,
-            color: "#166534",
-            marginBottom: 8,
-          }}
-        >
-          MedFlow
-        </h1>
+    <main className="auth-shell">
+      <section className="auth-brand-panel">
+        <div className="auth-brand-content">
+          <div className="auth-badge">Plataforma clínica inteligente</div>
 
-        <p style={{ color: "#4b5563", marginBottom: 24 }}>
-          Faça login para acessar o sistema.
-        </p>
+          <h1 className="auth-title">
+            MedFlow
+          </h1>
 
-        <form onSubmit={handleLogin}>
-          <div className="field">
-            <label className="label">E-mail</label>
-            <input
-              type="email"
-              className="input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+          <p className="auth-description">
+            Gestão moderna de pacientes, agenda, prescrições, exames e prontuários
+            em uma experiência organizada, rápida e profissional.
+          </p>
+
+          <div className="auth-feature-list">
+            <div className="auth-feature-card">
+              <strong>Agenda inteligente</strong>
+              <span>Controle semanal com visual claro e profissional.</span>
+            </div>
+
+            <div className="auth-feature-card">
+              <strong>Prontuário digital</strong>
+              <span>Evolução clínica, prescrição e exames em um só lugar.</span>
+            </div>
+
+            <div className="auth-feature-card">
+              <strong>Operação eficiente</strong>
+              <span>Fluxo ideal para médicos, secretárias e administradores.</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="auth-illustration">
+          <div className="auth-illustration-card auth-illustration-card-1">
+            <span className="illustration-label">Consultas</span>
+            <strong>128 agendadas</strong>
           </div>
 
-          <div className="field">
-            <label className="label">Senha</label>
-            <input
-              type="password"
-              className="input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+          <div className="auth-illustration-card auth-illustration-card-2">
+            <span className="illustration-label">Pacientes</span>
+            <strong>Base organizada</strong>
           </div>
 
-          <button type="submit" className="button button-primary" disabled={loading}>
-            {loading ? "Entrando..." : "Entrar"}
-          </button>
-        </form>
-      </div>
+          <div className="auth-illustration-card auth-illustration-card-3">
+            <span className="illustration-label">Produtividade</span>
+            <strong>Fluxo SaaS</strong>
+          </div>
+        </div>
+      </section>
+
+      <section className="auth-form-panel">
+        <div className="auth-form-card">
+          <div className="auth-form-header">
+            <h2>Acessar sistema</h2>
+            <p>Entre com seu usuário para continuar.</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="auth-form">
+            <div className="field">
+              <label className="label">E-mail</label>
+              <input
+                type="email"
+                className="input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="field">
+              <label className="label">Senha</label>
+              <input
+                type="password"
+                className="input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="button button-primary auth-submit-button"
+              disabled={loading}
+            >
+              {loading ? "Entrando..." : "Entrar"}
+            </button>
+          </form>
+
+          <div className="auth-form-footer">
+            <span>MedFlow • Saúde com organização e tecnologia</span>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

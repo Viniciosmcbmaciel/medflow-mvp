@@ -17,32 +17,57 @@ function HomePageContent() {
       <AppHeader />
 
       <main className="container">
-        <h1 className="page-title">Sistema de Prontuário Eletrônico</h1>
-        <p className="page-subtitle">
-          Bem-vindo, {user?.name}. Gestão de pacientes, agenda e prontuários.
-        </p>
+        <div
+          className="form-card"
+          style={{
+            marginBottom: 24,
+            background:
+              "linear-gradient(135deg, rgba(22,163,74,0.08), rgba(37,99,235,0.06))",
+          }}
+        >
+          <h1 className="page-title" style={{ marginBottom: 8 }}>
+            Olá, {user?.name}
+          </h1>
+          <p className="page-subtitle" style={{ marginBottom: 0 }}>
+            Bem-vindo ao MedFlow. Gerencie pacientes, agenda e prontuários com
+            experiência SaaS profissional.
+          </p>
+        </div>
 
         <div className="grid-cards">
           <Link href="/pacientes" className="card">
             <div className="card-title">Pacientes</div>
-            <div className="card-text">Visualize os pacientes cadastrados.</div>
+            <div className="card-text">
+              Visualize e acompanhe todos os pacientes cadastrados.
+            </div>
           </Link>
 
           <Link href="/novo-paciente" className="card">
             <div className="card-title">Novo Paciente</div>
-            <div className="card-text">Cadastre um novo paciente.</div>
+            <div className="card-text">
+              Realize novos cadastros com rapidez e organização.
+            </div>
           </Link>
 
           <Link href="/agenda" className="card">
             <div className="card-title">Agenda</div>
-            <div className="card-text">Gerencie consultas médicas.</div>
+            <div className="card-text">
+              Controle consultas em uma visualização profissional.
+            </div>
+          </Link>
+
+          <Link href="/configuracoes-agenda" className="card">
+            <div className="card-title">Configurações</div>
+            <div className="card-text">
+              Ajuste horários e parâmetros operacionais da agenda.
+            </div>
           </Link>
 
           {user?.role === "ADMIN" && (
             <Link href="/usuarios" className="card">
               <div className="card-title">Usuários</div>
               <div className="card-text">
-                Cadastre médicos e secretárias.
+                Cadastre médicos e secretárias com controle administrativo.
               </div>
             </Link>
           )}
