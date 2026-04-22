@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { useRequireAuth } from "../../lib/auth";
@@ -8,7 +8,10 @@ import { useRequireAuth } from "../../lib/auth";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 function getAuthHeaders() {
-  const token = localStorage.getItem("medflow_token");
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("medflow_token")
+      : null;
 
   return {
     "Content-Type": "application/json",
@@ -16,7 +19,7 @@ function getAuthHeaders() {
   };
 }
 
-export default function NovoPacientePage() {
+function NovoPacienteContent() {
   const { ready } = useRequireAuth();
   const router = useRouter();
 
@@ -40,19 +43,19 @@ export default function NovoPacientePage() {
         headers: getAuthHeaders(),
         body: JSON.stringify({
           fullName,
-          cpf: cpf || null,
-          birthDate: birthDate || null,
-          phone: phone || null,
-          email: email || null,
-          address: address || null,
-          allergies: allergies || null,
+          cpf: cpf || "",
+          birthDate: birthDate || "",
+          phone: phone || "",
+          email: email || "",
+          address: address || "",
+          allergies: allergies || "",
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Erro ao cadastrar paciente");
+        throw new Error(data.message || data.error || "Erro ao cadastrar paciente");
       }
 
       alert("Paciente cadastrado com sucesso");
@@ -150,11 +153,19 @@ export default function NovoPacientePage() {
             />
           </div>
 
-          <button type="submit" className="button button-primary">
+          <button type="submit" className="button button-primary" disabled={loading}>
             {loading ? "Salvando..." : "Cadastrar Paciente"}
           </button>
         </form>
       </main>
     </>
+  );
+}
+
+export default function NovoPacientePage() {
+  return (
+    <Suspense fallback={<div className="container">Carregando...</div>}>
+      <NovoPacienteContent />
+    </Suspense>
   );
 }
