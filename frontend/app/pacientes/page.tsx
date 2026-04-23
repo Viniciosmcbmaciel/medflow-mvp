@@ -36,19 +36,16 @@ function PacientesContent() {
     try {
       setLoading(true);
 
-      if (!API_URL) {
-        throw new Error("NEXT_PUBLIC_API_URL não configurada");
-      }
-
       const res = await fetch(`${API_URL}/patients`, {
         headers: getAuthHeaders(),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        throw new Error("Erro ao buscar pacientes");
+        throw new Error(data.message || "Erro ao buscar pacientes");
       }
 
-      const data = await res.json();
       setPatients(data);
     } catch (error) {
       console.error(error);
@@ -73,20 +70,71 @@ function PacientesContent() {
       <AppHeader />
 
       <main className="container">
-        <h1 className="page-title">Pacientes</h1>
-        <p className="page-subtitle">
-          Gerencie os pacientes cadastrados no sistema.
-        </p>
+        <div
+          className="form-card"
+          style={{
+            marginBottom: 24,
+            background:
+              "linear-gradient(135deg, rgba(22,163,74,0.07), rgba(37,99,235,0.05))",
+          }}
+        >
+          <h1 className="page-title" style={{ marginBottom: 8 }}>
+            Pacientes
+          </h1>
+          <p className="page-subtitle" style={{ marginBottom: 0 }}>
+            Gerencie os pacientes cadastrados com organização e acesso rápido ao
+            prontuário.
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 12,
+            alignItems: "center",
+            flexWrap: "wrap",
+            marginBottom: 20,
+          }}
+        >
+          <div
+            className="form-card"
+            style={{
+              flex: 1,
+              minWidth: 220,
+              marginBottom: 0,
+              padding: 18,
+            }}
+          >
+            <div style={{ color: "#64748b", fontSize: 14 }}>Total de pacientes</div>
+            <div
+              style={{
+                fontSize: 30,
+                fontWeight: 900,
+                color: "#0f172a",
+                marginTop: 6,
+              }}
+            >
+              {patients.length}
+            </div>
+          </div>
+
+          <Link href="/novo-paciente" className="button button-primary">
+            Novo paciente
+          </Link>
+        </div>
 
         {loading ? (
           <div className="empty-state">Carregando pacientes...</div>
         ) : patients.length === 0 ? (
-          <div className="empty-state">Nenhum paciente cadastrado.</div>
+          <div className="empty-state">
+            Nenhum paciente cadastrado ainda.
+          </div>
         ) : (
-          <div className="list">
+          <div className="grid-cards">
             {patients.map((patient) => (
-              <div key={patient.id} className="item-card">
-                <div className="item-title">{patient.fullName}</div>
+              <div key={patient.id} className="card">
+                <div className="card-title">{patient.fullName}</div>
 
                 <div className="item-text">
                   <strong>CPF:</strong> {patient.cpf || "—"}
@@ -97,10 +145,10 @@ function PacientesContent() {
                 </div>
 
                 <div className="item-text">
-                  <strong>Email:</strong> {patient.email || "—"}
+                  <strong>E-mail:</strong> {patient.email || "—"}
                 </div>
 
-                <div className="actions" style={{ marginTop: 14 }}>
+                <div className="actions" style={{ marginTop: 16 }}>
                   <Link
                     href={`/prontuario/${patient.id}`}
                     className="button button-green"

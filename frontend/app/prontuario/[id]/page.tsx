@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import AppHeader from "../../../components/AppHeader";
@@ -58,7 +57,10 @@ type TabType =
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 function getAuthHeaders() {
-  const token = localStorage.getItem("medflow_token");
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("medflow_token")
+      : null;
 
   return {
     "Content-Type": "application/json",
@@ -89,7 +91,7 @@ function openPdf(url: string) {
     });
 }
 
-function ProntuarioPageContent() {
+function ProntuarioContent() {
   const { ready } = useRequireAuth();
   const params = useParams();
   const patientId = params?.id as string;
@@ -129,11 +131,12 @@ function ProntuarioPageContent() {
         headers: getAuthHeaders(),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        throw new Error("Erro ao carregar prontuários");
+        throw new Error(data.message || "Erro ao carregar prontuários");
       }
 
-      const data = await res.json();
       setRecords(data);
     } catch (error) {
       console.error(error);
@@ -151,11 +154,12 @@ function ProntuarioPageContent() {
         headers: getAuthHeaders(),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        throw new Error("Erro ao carregar prescrições");
+        throw new Error(data.message || "Erro ao carregar prescrições");
       }
 
-      const data = await res.json();
       setPrescriptions(data);
     } catch (error) {
       console.error(error);
@@ -173,11 +177,12 @@ function ProntuarioPageContent() {
         headers: getAuthHeaders(),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        throw new Error("Erro ao carregar exames");
+        throw new Error(data.message || "Erro ao carregar exames");
       }
 
-      const data = await res.json();
       setExamOrders(data);
     } catch (error) {
       console.error(error);
@@ -208,7 +213,7 @@ function ProntuarioPageContent() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Erro ao salvar prontuário");
+        throw new Error(data.message || data.error || "Erro ao salvar prontuário");
       }
 
       setChiefComplaint("");
@@ -249,7 +254,7 @@ function ProntuarioPageContent() {
 
       if (!createRecordRes.ok) {
         throw new Error(
-          medicalRecord.error || "Erro ao criar registro para prescrição"
+          medicalRecord.message || medicalRecord.error || "Erro ao criar registro"
         );
       }
 
@@ -316,7 +321,7 @@ function ProntuarioPageContent() {
 
       if (!createRecordRes.ok) {
         throw new Error(
-          medicalRecord.error || "Erro ao criar registro para exame"
+          medicalRecord.message || medicalRecord.error || "Erro ao criar registro"
         );
       }
 
@@ -393,10 +398,22 @@ function ProntuarioPageContent() {
       <AppHeader />
 
       <main className="container">
-        <h1 className="page-title">Prontuário do Paciente</h1>
-        <p className="page-subtitle">
-          Estrutura clínica organizada em padrão hospitalar.
-        </p>
+        <div
+          className="form-card"
+          style={{
+            marginBottom: 24,
+            background:
+              "linear-gradient(135deg, rgba(22,163,74,0.07), rgba(37,99,235,0.05))",
+          }}
+        >
+          <h1 className="page-title" style={{ marginBottom: 8 }}>
+            Prontuário do Paciente
+          </h1>
+          <p className="page-subtitle" style={{ marginBottom: 0 }}>
+            Evolução clínica, prescrições, exames e histórico em uma experiência
+            visual mais profissional.
+          </p>
+        </div>
 
         <div className="actions" style={{ marginBottom: 20 }}>
           <button
@@ -538,7 +555,6 @@ function ProntuarioPageContent() {
                   className="input"
                   value={dosage}
                   onChange={(e) => setDosage(e.target.value)}
-                  placeholder="Ex.: 500mg"
                   required
                 />
               </div>
@@ -549,7 +565,6 @@ function ProntuarioPageContent() {
                   className="textarea"
                   value={instructions}
                   onChange={(e) => setInstructions(e.target.value)}
-                  placeholder="Ex.: Tomar 1 comprimido de 8 em 8 horas"
                   required
                 />
               </div>
@@ -560,12 +575,11 @@ function ProntuarioPageContent() {
                   className="input"
                   value={duration}
                   onChange={(e) => setDuration(e.target.value)}
-                  placeholder="Ex.: 7 dias"
                 />
               </div>
 
               <div className="field">
-                <label className="label">Observações da prescrição</label>
+                <label className="label">Observações</label>
                 <textarea
                   className="textarea"
                   value={prescriptionNotes}
@@ -678,7 +692,6 @@ function ProntuarioPageContent() {
                   className="textarea"
                   value={examJustification}
                   onChange={(e) => setExamJustification(e.target.value)}
-                  placeholder="Justificativa clínica do exame"
                 />
               </div>
 
@@ -765,7 +778,8 @@ function ProntuarioPageContent() {
                     </div>
 
                     <div className="item-text">
-                      <strong>HDA:</strong> {record.historyPresentIllness || "—"}
+                      <strong>HDA:</strong>{" "}
+                      {record.historyPresentIllness || "—"}
                     </div>
 
                     <div className="item-text">
@@ -801,12 +815,6 @@ function ProntuarioPageContent() {
             )}
           </section>
         )}
-
-        <div style={{ marginTop: 20 }}>
-          <Link href="/pacientes" className="button button-secondary">
-            Voltar para pacientes
-          </Link>
-        </div>
       </main>
     </>
   );
@@ -815,7 +823,7 @@ function ProntuarioPageContent() {
 export default function ProntuarioPage() {
   return (
     <Suspense fallback={<div className="container">Carregando...</div>}>
-      <ProntuarioPageContent />
+      <ProntuarioContent />
     </Suspense>
   );
 }
