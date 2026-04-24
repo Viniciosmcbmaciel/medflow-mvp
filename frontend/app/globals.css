@@ -466,3 +466,125 @@ a {
     padding: 20px;
   }
 }
+
+.auth-shell-simple {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(34, 197, 94, 0.16), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.12), transparent 30%),
+    linear-gradient(135deg, #f8fafc, #eef7f0);
+}
+
+.auth-card-premium {
+  width: 100%;
+  max-width: 470px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 28px;
+  padding: 32px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.14);
+  backdrop-filter: blur(12px);
+}
+
+.auth-logo-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 900;
+  margin-bottom: 22px;
+}
+
+.auth-heading {
+  margin: 0 0 10px;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #0f172a;
+}
+
+.auth-muted {
+  margin: 0 0 24px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.auth-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.auth-full-button {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 4px;
+}
+
+.auth-back-link {
+  display: block;
+  margin-top: 20px;
+  text-align: center;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.auth-success-box {
+  text-align: center;
+}
+
+.auth-success-icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 18px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 30px;
+  font-weight: 900;
+}
+
+.password-strength {
+  display: grid;
+  gap: 8px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.strength-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+  position: relative;
+}
+
+.strength-bar::after {
+  content: "";
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.strength-weak::after {
+  width: 33%;
+  background: #dc2626;
+}
+
+.strength-medium::after {
+  width: 66%;
+  background: #d97706;
+}
+
+.strength-strong::after {
+  width: 100%;
+  background: #16a34a;
+}
