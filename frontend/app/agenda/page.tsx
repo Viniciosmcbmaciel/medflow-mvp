@@ -100,35 +100,15 @@ function getAppointmentTypeLabel(type: AppointmentType) {
 function getStatusStyles(status: Appointment["status"]) {
   switch (status) {
     case "SCHEDULED":
-      return {
-        background: "#eff6ff",
-        border: "#93c5fd",
-        title: "#1d4ed8",
-      };
+      return { background: "#eff6ff", border: "#93c5fd", title: "#1d4ed8" };
     case "CONFIRMED":
-      return {
-        background: "#ecfdf5",
-        border: "#86efac",
-        title: "#166534",
-      };
+      return { background: "#ecfdf5", border: "#86efac", title: "#166534" };
     case "CANCELED":
-      return {
-        background: "#fef2f2",
-        border: "#fca5a5",
-        title: "#b91c1c",
-      };
+      return { background: "#fef2f2", border: "#fca5a5", title: "#b91c1c" };
     case "COMPLETED":
-      return {
-        background: "#f5f3ff",
-        border: "#c4b5fd",
-        title: "#6d28d9",
-      };
+      return { background: "#f5f3ff", border: "#c4b5fd", title: "#6d28d9" };
     default:
-      return {
-        background: "#f8fafc",
-        border: "#cbd5e1",
-        title: "#0f172a",
-      };
+      return { background: "#f8fafc", border: "#cbd5e1", title: "#0f172a" };
   }
 }
 
@@ -288,8 +268,7 @@ function AgendaContent() {
           notes,
           status: "SCHEDULED",
           appointmentType,
-          insuranceName:
-            appointmentType === "CONVENIO" ? insuranceName : null,
+          insuranceName: appointmentType === "CONVENIO" ? insuranceName : null,
         }),
       });
 
@@ -312,6 +291,64 @@ function AgendaContent() {
     } catch (error: any) {
       console.error(error);
       alert(error.message || "Erro ao salvar consulta");
+    }
+  }
+
+  async function updateStatus(id: string, newStatus: Appointment["status"]) {
+    try {
+      const appointment = appointments.find((item) => item.id === id);
+
+      if (!appointment) return;
+
+      const res = await fetch(`${API_URL}/appointments/${id}`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          patientId: appointment.patientId,
+          professionalId: appointment.professionalId,
+          date: appointment.date,
+          notes: appointment.notes,
+          status: newStatus,
+          appointmentType: appointment.appointmentType,
+          insuranceName: appointment.insuranceName,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || data.error || "Erro ao atualizar consulta");
+      }
+
+      await loadAppointments(filterDoctor);
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message || "Erro ao atualizar consulta");
+    }
+  }
+
+  async function deleteAppointment(id: string) {
+    const confirmed = confirm("Deseja excluir esta consulta?");
+
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`${API_URL}/appointments/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || data.error || "Erro ao excluir consulta");
+      }
+
+      await loadAppointments(filterDoctor);
+      alert("Consulta excluída com sucesso");
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message || "Erro ao excluir consulta");
     }
   }
 
@@ -663,6 +700,64 @@ function AgendaContent() {
                                           {appointment.notes}
                                         </div>
                                       )}
+
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          flexWrap: "wrap",
+                                          gap: 6,
+                                          marginTop: 10,
+                                        }}
+                                      >
+                                        <button
+                                          type="button"
+                                          className="button button-green"
+                                          onClick={() =>
+                                            updateStatus(
+                                              appointment.id,
+                                              "CONFIRMED"
+                                            )
+                                          }
+                                        >
+                                          Confirmar
+                                        </button>
+
+                                        <button
+                                          type="button"
+                                          className="button button-blue"
+                                          onClick={() =>
+                                            updateStatus(
+                                              appointment.id,
+                                              "COMPLETED"
+                                            )
+                                          }
+                                        >
+                                          Concluir
+                                        </button>
+
+                                        <button
+                                          type="button"
+                                          className="button button-yellow"
+                                          onClick={() =>
+                                            updateStatus(
+                                              appointment.id,
+                                              "CANCELED"
+                                            )
+                                          }
+                                        >
+                                          Cancelar
+                                        </button>
+
+                                        <button
+                                          type="button"
+                                          className="button button-red"
+                                          onClick={() =>
+                                            deleteAppointment(appointment.id)
+                                          }
+                                        >
+                                          Excluir
+                                        </button>
+                                      </div>
                                     </div>
                                   );
                                 })}
