@@ -41,6 +41,8 @@ model User {
   crm          String?
   specialty    String?
   createdAt    DateTime        @default(now())
+  resetPasswordToken String?
+  resetPasswordExpires DateTime?
 
   records      MedicalRecord[]
   auditLogs    AuditLog[]
