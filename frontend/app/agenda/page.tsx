@@ -44,6 +44,10 @@ function getAuthHeaders() {
   };
 }
 
+function toApiDateTime(dateTimeLocal: string) {
+  return new Date(dateTimeLocal).toISOString();
+}
+
 function formatDateInput(date: Date) {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
@@ -130,17 +134,21 @@ function getStatusStyles(status: Appointment["status"]) {
 
 function getTimeSlots() {
   const slots: string[] = [];
+
   for (let hour = 8; hour <= 18; hour++) {
     slots.push(`${String(hour).padStart(2, "0")}:00`);
+
     if (hour !== 18) {
       slots.push(`${String(hour).padStart(2, "0")}:30`);
     }
   }
+
   return slots;
 }
 
 function getAppointmentTime(dateString: string) {
   const date = new Date(dateString);
+
   return `${String(date.getHours()).padStart(2, "0")}:${String(
     date.getMinutes()
   ).padStart(2, "0")}`;
@@ -148,6 +156,21 @@ function getAppointmentTime(dateString: string) {
 
 function getAppointmentDayKey(dateString: string) {
   return formatDateInput(new Date(dateString));
+}
+
+function toDateTimeLocalString(date: Date, time: string) {
+  const [hours, minutes] = time.split(":").map(Number);
+  const result = new Date(date);
+
+  result.setHours(hours, minutes, 0, 0);
+
+  const year = result.getFullYear();
+  const month = `${result.getMonth() + 1}`.padStart(2, "0");
+  const day = `${result.getDate()}`.padStart(2, "0");
+  const hh = `${result.getHours()}`.padStart(2, "0");
+  const mm = `${result.getMinutes()}`.padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hh}:${mm}`;
 }
 
 function AgendaContent() {
@@ -169,7 +192,9 @@ function AgendaContent() {
   const [weekStart, setWeekStart] = useState<Date>(startOfWeek(new Date()));
 
   const weekDays = useMemo(() => {
-    return Array.from({ length: 7 }).map((_, index) => addDays(weekStart, index));
+    return Array.from({ length: 7 }).map((_, index) =>
+      addDays(weekStart, index)
+    );
   }, [weekStart]);
 
   const timeSlots = useMemo(() => getTimeSlots(), []);
@@ -179,7 +204,7 @@ function AgendaContent() {
       setLoading(true);
 
       const start = formatDateInput(weekDays[0]);
-      const end = formatDateInput(weekDays[6]);
+      const end = formatDateInput(addDays(weekDays[6], 1));
 
       const params = new URLSearchParams();
       params.append("date_from", start);
@@ -196,7 +221,7 @@ function AgendaContent() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Erro ao buscar consultas");
+        throw new Error(data.message || data.error || "Erro ao buscar consultas");
       }
 
       setAppointments(data);
@@ -217,7 +242,7 @@ function AgendaContent() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Erro ao buscar pacientes");
+        throw new Error(data.message || data.error || "Erro ao buscar pacientes");
       }
 
       setPatients(data);
@@ -235,13 +260,18 @@ function AgendaContent() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Erro ao buscar médicos");
+        throw new Error(data.message || data.error || "Erro ao buscar médicos");
       }
 
       setDoctors(data);
     } catch (error) {
       console.error(error);
     }
+  }
+
+  function handleCellClick(day: Date, time: string) {
+    setDate(toDateTimeLocalString(day, time));
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function handleSubmitAppointment(e: React.FormEvent) {
@@ -254,18 +284,19 @@ function AgendaContent() {
         body: JSON.stringify({
           patientId,
           professionalId,
-          date,
+          date: toApiDateTime(date),
           notes,
           status: "SCHEDULED",
           appointmentType,
-          insuranceName,
+          insuranceName:
+            appointmentType === "CONVENIO" ? insuranceName : null,
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Erro ao salvar consulta");
+        throw new Error(data.message || data.error || "Erro ao salvar consulta");
       }
 
       setPatientId("");
@@ -276,6 +307,7 @@ function AgendaContent() {
       setInsuranceName("");
 
       await loadAppointments(filterDoctor);
+
       alert("Consulta criada com sucesso");
     } catch (error: any) {
       console.error(error);
@@ -361,6 +393,7 @@ function AgendaContent() {
                 {doctors.map((doctor) => (
                   <option key={doctor.id} value={doctor.id}>
                     {doctor.name}
+                    {doctor.crm ? ` - CRM ${doctor.crm}` : ""}
                   </option>
                 ))}
               </select>
@@ -399,6 +432,7 @@ function AgendaContent() {
                 className="input"
                 value={insuranceName}
                 onChange={(e) => setInsuranceName(e.target.value)}
+                placeholder="Ex.: Amil, Bradesco, SulAmérica"
               />
             </div>
           )}
@@ -409,6 +443,7 @@ function AgendaContent() {
               className="textarea"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
+              placeholder="Observações sobre a consulta"
             />
           </div>
 
@@ -511,7 +546,8 @@ function AgendaContent() {
                           background: "#eff6ff",
                           color: "#0f172a",
                           textAlign: "left",
-                          borderTopRightRadius: index === weekDays.length - 1 ? 16 : 0,
+                          borderTopRightRadius:
+                            index === weekDays.length - 1 ? 16 : 0,
                         }}
                       >
                         {formatWeekday(day)}
@@ -539,21 +575,27 @@ function AgendaContent() {
                       {weekDays.map((day) => {
                         const dayKey = formatDateInput(day);
 
-                        const cellAppointments = appointments.filter((appointment) => {
-                          return (
-                            getAppointmentDayKey(appointment.date) === dayKey &&
-                            getAppointmentTime(appointment.date) === time
-                          );
-                        });
+                        const cellAppointments = appointments.filter(
+                          (appointment) => {
+                            return (
+                              getAppointmentDayKey(appointment.date) ===
+                                dayKey &&
+                              getAppointmentTime(appointment.date) === time
+                            );
+                          }
+                        );
 
                         return (
                           <td
                             key={`${dayKey}-${time}`}
+                            onClick={() => handleCellClick(day, time)}
                             style={{
                               padding: 10,
                               verticalAlign: "top",
                               borderBottom: "1px solid #e2e8f0",
                               background: "#fff",
+                              cursor: "pointer",
+                              minHeight: 80,
                             }}
                           >
                             {cellAppointments.length === 0 ? (
@@ -576,6 +618,7 @@ function AgendaContent() {
                                   return (
                                     <div
                                       key={appointment.id}
+                                      onClick={(e) => e.stopPropagation()}
                                       style={{
                                         border: `1px solid ${statusStyle.border}`,
                                         background: statusStyle.background,
@@ -606,7 +649,8 @@ function AgendaContent() {
                                         )}
                                       </div>
 
-                                      {appointment.appointmentType === "CONVENIO" && (
+                                      {appointment.appointmentType ===
+                                        "CONVENIO" && (
                                         <div>
                                           <strong>Convênio:</strong>{" "}
                                           {appointment.insuranceName || "—"}
@@ -615,7 +659,8 @@ function AgendaContent() {
 
                                       {appointment.notes && (
                                         <div>
-                                          <strong>Obs:</strong> {appointment.notes}
+                                          <strong>Obs:</strong>{" "}
+                                          {appointment.notes}
                                         </div>
                                       )}
                                     </div>
