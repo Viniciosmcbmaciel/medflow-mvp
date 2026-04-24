@@ -674,10 +674,11 @@ function AgendaContent() {
                                         {appointment.patient.fullName}
                                       </div>
 
-                                      <div>
-                                        <strong>Status:</strong>{" "}
-                                        {getStatusLabel(appointment.status)}
-                                      </div>
+                                      <div
+  className={`status-badge status-${appointment.status.toLowerCase()}`}
+>
+  {getStatusLabel(appointment.status)}
+</div>
 
                                       <div>
                                         <strong>Tipo:</strong>{" "}
