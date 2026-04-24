@@ -1,13 +1,15 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { getStoredUser, getToken } from "../../lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-function LoginPageContent() {
+export default function LoginPage() {
   const router = useRouter();
+
   const [email, setEmail] = useState("admin@medflow.com");
   const [password, setPassword] = useState("123456");
   const [loading, setLoading] = useState(false);
@@ -32,144 +34,87 @@ function LoginPageContent() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || data.error || "Erro ao fazer login");
+        throw new Error(data.message || "Erro ao fazer login");
       }
 
-      const token = data.token || data.accessToken;
-      const user = data.user;
-
-      if (!token) {
-        throw new Error("Token não retornado pelo login");
-      }
-
-      if (!user) {
-        throw new Error("Usuário não retornado pelo login");
-      }
-
-      localStorage.setItem("medflow_token", token);
-      localStorage.setItem("medflow_user", JSON.stringify(user));
+      localStorage.setItem("medflow_token", data.token);
+      localStorage.setItem("medflow_user", JSON.stringify(data.user));
 
       router.push("/");
     } catch (error: any) {
-      console.error(error);
-      alert(error.message || "Erro ao fazer login");
+      alert(error.message);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="auth-shell">
-      <section className="auth-brand-panel">
-        <div className="auth-brand-content">
-          <div className="auth-badge">Plataforma clínica inteligente</div>
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(135deg, #ecfdf5, #eff6ff)",
+        padding: 24,
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 420,
+          background: "#fff",
+          borderRadius: 20,
+          padding: 28,
+          boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+        }}
+      >
+        <h1 style={{ fontSize: 32, fontWeight: 800 }}>MedFlow</h1>
 
-          <h1 className="auth-title">
-            MedFlow
-          </h1>
+        <p style={{ color: "#64748b", marginBottom: 24 }}>
+          Acesse sua conta
+        </p>
 
-          <p className="auth-description">
-            Gestão moderna de pacientes, agenda, prescrições, exames e prontuários
-            em uma experiência organizada, rápida e profissional.
-          </p>
+        <form onSubmit={handleLogin}>
+          <input
+            className="input"
+            placeholder="E-mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-          <div className="auth-feature-list">
-            <div className="auth-feature-card">
-              <strong>Agenda inteligente</strong>
-              <span>Controle semanal com visual claro e profissional.</span>
-            </div>
+          <input
+            type="password"
+            className="input"
+            placeholder="Senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={{ marginTop: 12 }}
+          />
 
-            <div className="auth-feature-card">
-              <strong>Prontuário digital</strong>
-              <span>Evolução clínica, prescrição e exames em um só lugar.</span>
-            </div>
+          <button
+            type="submit"
+            className="button button-primary"
+            style={{ width: "100%", marginTop: 16 }}
+          >
+            {loading ? "Entrando..." : "Entrar"}
+          </button>
+        </form>
 
-            <div className="auth-feature-card">
-              <strong>Operação eficiente</strong>
-              <span>Fluxo ideal para médicos, secretárias e administradores.</span>
-            </div>
-          </div>
+        <div style={{ marginTop: 16, textAlign: "center" }}>
+          <Link href="/esqueci-senha" style={{ color: "#2563eb" }}>
+            Esqueci minha senha
+          </Link>
         </div>
-
-        <div className="auth-illustration">
-          <div className="auth-illustration-card auth-illustration-card-1">
-            <span className="illustration-label">Consultas</span>
-            <strong>128 agendadas</strong>
-          </div>
-
-          <div className="auth-illustration-card auth-illustration-card-2">
-            <span className="illustration-label">Pacientes</span>
-            <strong>Base organizada</strong>
-          </div>
-
-          <div className="auth-illustration-card auth-illustration-card-3">
-            <span className="illustration-label">Produtividade</span>
-            <strong>Fluxo SaaS</strong>
-          </div>
-        </div>
-      </section>
-
-      <section className="auth-form-panel">
-        <div className="auth-form-card">
-          <div className="auth-form-header">
-            <h2>Acessar sistema</h2>
-            <p>Entre com seu usuário para continuar.</p>
-          </div>
-
-          <form onSubmit={handleLogin} className="auth-form">
-            <div className="field">
-              <label className="label">E-mail</label>
-              <input
-                type="email"
-                className="input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="field">
-              <label className="label">Senha</label>
-              <input
-                type="password"
-                className="input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="button button-primary auth-submit-button"
-              disabled={loading}
-            >
-              {loading ? "Entrando..." : "Entrar"}
-            </button>
-          </form>
-
-          <div className="auth-form-footer">
-            <span>MedFlow • Saúde com organização e tecnologia</span>
-          </div>
-        </div>
-      </section>
+      </div>
     </main>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={<div className="container">Carregando...</div>}>
-      <LoginPageContent />
-    </Suspense>
   );
 }
