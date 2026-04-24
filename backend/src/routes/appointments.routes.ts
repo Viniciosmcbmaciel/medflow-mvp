@@ -1,8 +1,12 @@
 import { Router } from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../config/prisma.js";
 
 const router = Router();
-const prisma = new PrismaClient();
+
+function isValidDate(value: string) {
+  const date = new Date(value);
+  return !Number.isNaN(date.getTime());
+}
 
 router.get("/", async (req, res) => {
   try {
@@ -13,6 +17,7 @@ router.get("/", async (req, res) => {
     if (date && typeof date === "string") {
       const start = new Date(date);
       const end = new Date(date);
+      start.setHours(0, 0, 0, 0);
       end.setHours(23, 59, 59, 999);
 
       where.date = {
@@ -21,11 +26,16 @@ router.get("/", async (req, res) => {
       };
     }
 
-    if (date_from && date_to && typeof date_from === "string" && typeof date_to === "string") {
+    if (
+      date_from &&
+      date_to &&
+      typeof date_from === "string" &&
+      typeof date_to === "string"
+    ) {
       const start = new Date(date_from);
-      start.setHours(0, 0, 0, 0);
-
       const end = new Date(date_to);
+
+      start.setHours(0, 0, 0, 0);
       end.setHours(23, 59, 59, 999);
 
       where.date = {
@@ -50,6 +60,7 @@ router.get("/", async (req, res) => {
 
     return res.json(appointments);
   } catch (error) {
+    console.error("Erro ao listar consultas:", error);
     return res.status(500).json({ error: "Erro ao listar consultas" });
   }
 });
@@ -66,12 +77,35 @@ router.post("/", async (req, res) => {
       insuranceName,
     } = req.body;
 
+    if (!patientId) {
+      return res.status(400).json({ error: "Paciente é obrigatório." });
+    }
+
+    if (!professionalId) {
+      return res.status(400).json({ error: "Médico é obrigatório." });
+    }
+
+    if (!date || !isValidDate(date)) {
+      return res.status(400).json({ error: "Data e hora inválidas." });
+    }
+
+    const finalAppointmentType = appointmentType || "PARTICULAR";
+
+    if (
+      finalAppointmentType === "CONVENIO" &&
+      !String(insuranceName || "").trim()
+    ) {
+      return res.status(400).json({
+        error: "Informe o nome do convênio para consultas por convênio.",
+      });
+    }
+
     const appointmentDate = new Date(date);
 
     const existingAppointment = await prisma.appointment.findFirst({
       where: {
         date: appointmentDate,
-        professionalId: professionalId || null,
+        professionalId,
         status: {
           not: "CANCELED",
         },
@@ -84,34 +118,38 @@ router.post("/", async (req, res) => {
       });
     }
 
-    if (appointmentType === "CONVENIO" && !insuranceName?.trim()) {
-      return res.status(400).json({
-        error: "Informe o nome do convênio para consultas por convênio.",
-      });
-    }
-
     const appointment = await prisma.appointment.create({
       data: {
         patientId,
-        professionalId: professionalId || null,
+        professionalId,
         date: appointmentDate,
-        notes,
-        status,
-        appointmentType: appointmentType || "PARTICULAR",
+        notes: notes || null,
+        status: status || "SCHEDULED",
+        appointmentType: finalAppointmentType,
         insuranceName:
-          appointmentType === "CONVENIO" ? insuranceName?.trim() : null,
+          finalAppointmentType === "CONVENIO"
+            ? String(insuranceName || "").trim()
+            : null,
+      },
+      include: {
+        patient: true,
       },
     });
 
     return res.status(201).json(appointment);
-  } catch (error) {
-    return res.status(500).json({ error: "Erro ao criar consulta" });
+  } catch (error: any) {
+    console.error("Erro ao criar consulta:", error);
+
+    return res.status(500).json({
+      error: error?.message || "Erro ao criar consulta",
+    });
   }
 });
 
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
+
     const {
       patientId,
       professionalId,
@@ -122,30 +160,46 @@ router.put("/:id", async (req, res) => {
       insuranceName,
     } = req.body;
 
-    const appointmentDate = date ? new Date(date) : undefined;
-
-    if (appointmentDate) {
-      const existingAppointment = await prisma.appointment.findFirst({
-        where: {
-          id: { not: id },
-          date: appointmentDate,
-          professionalId: professionalId || null,
-          status: {
-            not: "CANCELED",
-          },
-        },
-      });
-
-      if (existingAppointment) {
-        return res.status(400).json({
-          error: "Já existe outra consulta agendada para este médico neste horário.",
-        });
-      }
+    if (!patientId) {
+      return res.status(400).json({ error: "Paciente é obrigatório." });
     }
 
-    if (appointmentType === "CONVENIO" && !insuranceName?.trim()) {
+    if (!professionalId) {
+      return res.status(400).json({ error: "Médico é obrigatório." });
+    }
+
+    if (!date || !isValidDate(date)) {
+      return res.status(400).json({ error: "Data e hora inválidas." });
+    }
+
+    const finalAppointmentType = appointmentType || "PARTICULAR";
+
+    if (
+      finalAppointmentType === "CONVENIO" &&
+      !String(insuranceName || "").trim()
+    ) {
       return res.status(400).json({
         error: "Informe o nome do convênio para consultas por convênio.",
+      });
+    }
+
+    const appointmentDate = new Date(date);
+
+    const existingAppointment = await prisma.appointment.findFirst({
+      where: {
+        id: { not: id },
+        date: appointmentDate,
+        professionalId,
+        status: {
+          not: "CANCELED",
+        },
+      },
+    });
+
+    if (existingAppointment) {
+      return res.status(400).json({
+        error:
+          "Já existe outra consulta agendada para este médico neste horário.",
       });
     }
 
@@ -153,19 +207,28 @@ router.put("/:id", async (req, res) => {
       where: { id },
       data: {
         patientId,
-        professionalId: professionalId || null,
+        professionalId,
         date: appointmentDate,
-        notes,
-        status,
-        appointmentType: appointmentType || "PARTICULAR",
+        notes: notes || null,
+        status: status || "SCHEDULED",
+        appointmentType: finalAppointmentType,
         insuranceName:
-          appointmentType === "CONVENIO" ? insuranceName?.trim() : null,
+          finalAppointmentType === "CONVENIO"
+            ? String(insuranceName || "").trim()
+            : null,
+      },
+      include: {
+        patient: true,
       },
     });
 
     return res.json(appointment);
-  } catch (error) {
-    return res.status(500).json({ error: "Erro ao atualizar consulta" });
+  } catch (error: any) {
+    console.error("Erro ao atualizar consulta:", error);
+
+    return res.status(500).json({
+      error: error?.message || "Erro ao atualizar consulta",
+    });
   }
 });
 
@@ -178,8 +241,12 @@ router.delete("/:id", async (req, res) => {
     });
 
     return res.json({ message: "Consulta removida com sucesso" });
-  } catch (error) {
-    return res.status(500).json({ error: "Erro ao excluir consulta" });
+  } catch (error: any) {
+    console.error("Erro ao excluir consulta:", error);
+
+    return res.status(500).json({
+      error: error?.message || "Erro ao excluir consulta",
+    });
   }
 });
 
