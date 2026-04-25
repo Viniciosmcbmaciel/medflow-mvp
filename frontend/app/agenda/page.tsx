@@ -170,6 +170,7 @@ function AgendaContent() {
   const [filterDoctor, setFilterDoctor] = useState("");
   const [loading, setLoading] = useState(false);
   const [weekStart, setWeekStart] = useState<Date>(startOfWeek(new Date()));
+  const [selectedSlot, setSelectedSlot] = useState("");
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }).map((_, index) =>
@@ -250,7 +251,11 @@ function AgendaContent() {
   }
 
   function handleCellClick(day: Date, time: string) {
+    const dayKey = formatDateInput(day);
+
+    setSelectedSlot(`${dayKey}-${time}`);
     setDate(toDateTimeLocalString(day, time));
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -284,6 +289,7 @@ function AgendaContent() {
       setNotes("");
       setAppointmentType("PARTICULAR");
       setInsuranceName("");
+      setSelectedSlot("");
 
       await loadAppointments(filterDoctor);
 
@@ -611,6 +617,7 @@ function AgendaContent() {
 
                       {weekDays.map((day) => {
                         const dayKey = formatDateInput(day);
+                        const slotKey = `${dayKey}-${time}`;
 
                         const cellAppointments = appointments.filter(
                           (appointment) => {
@@ -624,15 +631,21 @@ function AgendaContent() {
 
                         return (
                           <td
-                            key={`${dayKey}-${time}`}
+                            key={slotKey}
                             onClick={() => handleCellClick(day, time)}
                             style={{
                               padding: 10,
                               verticalAlign: "top",
                               borderBottom: "1px solid #e2e8f0",
-                              background: "#fff",
+                              background:
+                                selectedSlot === slotKey ? "#ecfdf5" : "#fff",
                               cursor: "pointer",
                               minHeight: 80,
+                              boxShadow:
+                                selectedSlot === slotKey
+                                  ? "inset 0 0 0 2px #22c55e"
+                                  : "none",
+                              transition: "0.2s ease",
                             }}
                           >
                             {cellAppointments.length === 0 ? (
@@ -675,10 +688,10 @@ function AgendaContent() {
                                       </div>
 
                                       <div
-  className={`status-badge status-${appointment.status.toLowerCase()}`}
->
-  {getStatusLabel(appointment.status)}
-</div>
+                                        className={`status-badge status-${appointment.status.toLowerCase()}`}
+                                      >
+                                        {getStatusLabel(appointment.status)}
+                                      </div>
 
                                       <div>
                                         <strong>Tipo:</strong>{" "}
