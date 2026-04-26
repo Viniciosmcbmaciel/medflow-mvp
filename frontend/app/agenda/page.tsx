@@ -250,6 +250,40 @@ function AgendaContent() {
     }
   }
 
+  function openAgendaPdf() {
+    const token = localStorage.getItem("medflow_token");
+
+    const start = formatDateInput(weekDays[0]);
+    const end = formatDateInput(addDays(weekDays[6], 1));
+
+    const params = new URLSearchParams();
+    params.append("date_from", start);
+    params.append("date_to", end);
+
+    if (filterDoctor) {
+      params.append("professionalId", filterDoctor);
+    }
+
+    fetch(`${API_URL}/appointments/pdf?${params.toString()}`, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error("Erro ao gerar PDF da agenda");
+        }
+
+        const blob = await res.blob();
+        const fileUrl = window.URL.createObjectURL(blob);
+        window.open(fileUrl, "_blank");
+      })
+      .catch((error) => {
+        console.error(error);
+        alert("Erro ao gerar PDF da agenda");
+      });
+  }
+
   function handleCellClick(day: Date, time: string) {
     const dayKey = formatDateInput(day);
 
@@ -533,6 +567,14 @@ function AgendaContent() {
                 onClick={() => setWeekStart(addDays(weekStart, 7))}
               >
                 Próxima semana
+              </button>
+
+              <button
+                type="button"
+                className="button button-blue"
+                onClick={openAgendaPdf}
+              >
+                Baixar PDF
               </button>
             </div>
           </div>
