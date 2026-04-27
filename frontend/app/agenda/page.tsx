@@ -1,8 +1,9 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AppHeader from "../../components/AppHeader";
 import { useRequireAuth } from "../../lib/auth";
+import AppointmentModal from "../../components/AppointmentModal";
 
 type Patient = {
   id: string;
@@ -14,17 +15,12 @@ type Doctor = {
   name: string;
 };
 
-type AppointmentType = "PARTICULAR" | "CONVENIO";
-
 type Appointment = {
   id: string;
   patientId: string;
   professionalId?: string | null;
   date: string;
   status: "SCHEDULED" | "CONFIRMED" | "CANCELED" | "COMPLETED";
-  appointmentType: AppointmentType;
-  insuranceName?: string | null;
-  notes?: string | null;
   patient: Patient;
 };
 
@@ -101,6 +97,11 @@ export default function AgendaPage() {
   const [selectedSlot, setSelectedSlot] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
 
+  // 🔥 MODAL STATES
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState("");
+
   const weekDays = useMemo(
     () => Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i)),
     [weekStart]
@@ -108,7 +109,7 @@ export default function AgendaPage() {
 
   const slots = getTimeSlots();
 
-  // 🔥 carregar tudo
+  // 🔥 LOAD DATA
   useEffect(() => {
     async function loadData() {
       const start = formatDateInput(weekDays[0]);
@@ -145,35 +146,21 @@ export default function AgendaPage() {
     setAppointments(await res.json());
   }
 
-  async function createAppointment(day: Date, time: string) {
-    const name = prompt("Digite o nome do paciente:");
-    if (!name) return;
+  // 🔥 CREATE FROM MODAL
+  async function handleCreate({ patientId, doctorId }: any) {
+    if (!selectedDate) return;
 
-    const patient = patients.find((p) =>
-      p.fullName.toLowerCase().includes(name.toLowerCase())
-    );
+    const [h, m] = selectedTime.split(":");
 
-    if (!patient) {
-      alert("Paciente não encontrado");
-      return;
-    }
-
-    const doctor = doctors[0];
-    if (!doctor) {
-      alert("Nenhum médico cadastrado");
-      return;
-    }
-
-    const [h, m] = time.split(":");
-    const date = new Date(day);
+    const date = new Date(selectedDate);
     date.setHours(Number(h), Number(m), 0, 0);
 
     await fetch(`${API_URL}/appointments`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify({
-        patientId: patient.id,
-        professionalId: doctor.id,
+        patientId,
+        professionalId: doctorId,
         date: date.toISOString(),
         status: "SCHEDULED",
         appointmentType: "PARTICULAR",
@@ -267,8 +254,11 @@ export default function AgendaPage() {
                       key={key}
                       onClick={() => {
                         setSelectedSlot(key);
+
                         if (items.length === 0) {
-                          createAppointment(day, time);
+                          setSelectedDate(day);
+                          setSelectedTime(time);
+                          setModalOpen(true);
                         }
                       }}
                       style={{
@@ -330,6 +320,18 @@ export default function AgendaPage() {
           </tbody>
         </table>
       </main>
+
+      {/* 🔥 MODAL */}
+      <AppointmentModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleCreate}
+        patients={patients}
+        doctors={doctors}
+        dateLabel={`${selectedTime} - ${
+          selectedDate?.toLocaleDateString("pt-BR") || ""
+        }`}
+      />
     </>
   );
 }
