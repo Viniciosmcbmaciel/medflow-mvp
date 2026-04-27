@@ -108,6 +108,31 @@ export default function AgendaPage() {
 
   const slots = getTimeSlots();
 
+  // 🔥 carregar tudo
+  useEffect(() => {
+    async function loadData() {
+      const start = formatDateInput(weekDays[0]);
+      const end = formatDateInput(addDays(weekDays[6], 1));
+
+      const [apptRes, pRes, dRes] = await Promise.all([
+        fetch(
+          `${API_URL}/appointments?date_from=${start}&date_to=${end}`,
+          { headers: getAuthHeaders() }
+        ),
+        fetch(`${API_URL}/patients`, { headers: getAuthHeaders() }),
+        fetch(`${API_URL}/users/medicos`, {
+          headers: getAuthHeaders(),
+        }),
+      ]);
+
+      setAppointments(await apptRes.json());
+      setPatients(await pRes.json());
+      setDoctors(await dRes.json());
+    }
+
+    if (ready) loadData();
+  }, [ready, weekStart]);
+
   async function loadAppointments() {
     const start = formatDateInput(weekDays[0]);
     const end = formatDateInput(addDays(weekDays[6], 1));
@@ -120,9 +145,43 @@ export default function AgendaPage() {
     setAppointments(await res.json());
   }
 
-  useEffect(() => {
-    if (ready) loadAppointments();
-  }, [ready, weekStart]);
+  async function createAppointment(day: Date, time: string) {
+    const name = prompt("Digite o nome do paciente:");
+    if (!name) return;
+
+    const patient = patients.find((p) =>
+      p.fullName.toLowerCase().includes(name.toLowerCase())
+    );
+
+    if (!patient) {
+      alert("Paciente não encontrado");
+      return;
+    }
+
+    const doctor = doctors[0];
+    if (!doctor) {
+      alert("Nenhum médico cadastrado");
+      return;
+    }
+
+    const [h, m] = time.split(":");
+    const date = new Date(day);
+    date.setHours(Number(h), Number(m), 0, 0);
+
+    await fetch(`${API_URL}/appointments`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        patientId: patient.id,
+        professionalId: doctor.id,
+        date: date.toISOString(),
+        status: "SCHEDULED",
+        appointmentType: "PARTICULAR",
+      }),
+    });
+
+    loadAppointments();
+  }
 
   async function updateStatus(id: string, status: string) {
     const appt = appointments.find((a) => a.id === id);
@@ -206,13 +265,22 @@ export default function AgendaPage() {
                   return (
                     <td
                       key={key}
-                      onClick={() => setSelectedSlot(key)}
+                      onClick={() => {
+                        setSelectedSlot(key);
+                        if (items.length === 0) {
+                          createAppointment(day, time);
+                        }
+                      }}
                       style={{
                         background:
                           selectedSlot === key ? "#ecfdf5" : "#fff",
                         cursor: "pointer",
                       }}
                     >
+                      {items.length === 0 && (
+                        <div style={{ color: "#94a3b8" }}>Livre</div>
+                      )}
+
                       {items.map((a) => (
                         <div
                           key={a.id}
@@ -234,39 +302,19 @@ export default function AgendaPage() {
                               <div>{getStatusLabel(a.status)}</div>
 
                               <div style={{ marginTop: 6 }}>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    updateStatus(a.id, "CONFIRMED");
-                                  }}
-                                >
+                                <button onClick={() => updateStatus(a.id, "CONFIRMED")}>
                                   ✔ Confirmar
                                 </button>
 
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    updateStatus(a.id, "COMPLETED");
-                                  }}
-                                >
+                                <button onClick={() => updateStatus(a.id, "COMPLETED")}>
                                   ✔ Concluir
                                 </button>
 
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    updateStatus(a.id, "CANCELED");
-                                  }}
-                                >
+                                <button onClick={() => updateStatus(a.id, "CANCELED")}>
                                   ✖ Cancelar
                                 </button>
 
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteAppointment(a.id);
-                                  }}
-                                >
+                                <button onClick={() => deleteAppointment(a.id)}>
                                   🗑 Excluir
                                 </button>
                               </div>
