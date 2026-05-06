@@ -632,3 +632,156 @@ a {
     transform: rotate(360deg);
   }
 }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(6px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 9999;
+}
+
+.medical-modal {
+  width: 95%;
+  max-width: 760px;
+
+  background: white;
+
+  border-radius: 24px;
+
+  padding: 24px;
+
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.2);
+
+  animation: modalFade .2s ease;
+}
+
+.medical-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 20px;
+}
+
+.medical-header h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.medical-header p {
+  margin-top: 4px;
+  color: #64748b;
+}
+
+.close-button {
+  border: none;
+  background: #f1f5f9;
+
+  width: 40px;
+  height: 40px;
+
+  border-radius: 999px;
+
+  cursor: pointer;
+
+  font-size: 16px;
+}
+
+.medical-records {
+  max-height: 320px;
+  overflow-y: auto;
+
+  margin-bottom: 20px;
+}
+
+.medical-record-card {
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 16px;
+
+  padding: 14px;
+
+  margin-bottom: 12px;
+}
+
+.medical-record-date {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.medical-record-text {
+  color: #0f172a;
+  line-height: 1.6;
+}
+
+.medical-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+@keyframes modalFade {
+  from {
+    opacity: 0;
+    transform: scale(.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.medical-evolution-modal{
+  width:95%;
+  max-width:1100px;
+  max-height:90vh;
+  overflow:auto;
+
+  background:white;
+
+  border-radius:24px;
+
+  padding:24px;
+}
+
+.medical-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+
+  margin-bottom:16px;
+}
+
+.timeline{
+  margin-top:24px;
+}
+
+.timeline-card{
+  border-left:4px solid #2563eb;
+
+  background:#f8fafc;
+
+  padding:16px;
+
+  border-radius:12px;
+
+  margin-bottom:14px;
+}
+
+.timeline-date{
+  font-size:12px;
+  color:#64748b;
+
+  margin-bottom:8px;
+}
