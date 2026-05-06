@@ -33,38 +33,39 @@ enum AppointmentType {
 }
 
 model User {
-  id           String          @id @default(cuid())
-  name         String
-  email        String          @unique
-  passwordHash String
-  role         UserRole        @default(MEDICO)
-  crm          String?
-  specialty    String?
-  createdAt    DateTime        @default(now())
-  resetPasswordToken String?
+  id                   String    @id @default(cuid())
+  name                 String
+  email                String    @unique
+  passwordHash         String
+  role                 UserRole  @default(MEDICO)
+  crm                  String?
+  specialty            String?
+  createdAt            DateTime  @default(now())
+  resetPasswordToken   String?
   resetPasswordExpires DateTime?
 
-  records      MedicalRecord[]
-  auditLogs    AuditLog[]
+  records   MedicalRecord[]
+  auditLogs AuditLog[]
 }
 
 model Patient {
-  id             String          @id @default(cuid())
-  fullName       String
-  cpf            String?         @unique
-  birthDate      DateTime?
-  phone          String?
-  email          String?
-  address        String?
-  allergies      String?
-  createdAt      DateTime        @default(now())
+  id        String    @id @default(cuid())
+  fullName  String
+  cpf       String?   @unique
+  birthDate DateTime?
+  phone     String?
+  email     String?
+  address   String?
+  allergies String?
+  createdAt DateTime  @default(now())
 
-  medicalRecords MedicalRecord[]
-  appointments   Appointment[]
+  medicalRecords    MedicalRecord[]
+  appointments      Appointment[]
+  medicalEvolutions MedicalEvolution[]
 }
 
 model MedicalRecord {
-  id                    String        @id @default(cuid())
+  id                    String   @id @default(cuid())
   patientId             String
   userId                String?
   chiefComplaint        String
@@ -73,159 +74,149 @@ model MedicalRecord {
   physicalExam          String?
   conduct               String?
   notes                 String?
-  createdAt             DateTime      @default(now())
+  createdAt             DateTime @default(now())
 
-  patient               Patient       @relation(fields: [patientId], references: [id])
-  user                  User?         @relation(fields: [userId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id])
 
-  anamnesis             Anamnesis?
-  prescriptions         Prescription[]
-  examOrders            ExamOrder[]
-  documents             Document[]
+  anamnesis     Anamnesis?
+  prescriptions Prescription[]
+  examOrders    ExamOrder[]
+  documents     Document[]
 
   @@map("medical_records")
 }
 
 model Anamnesis {
-  id               String        @id @default(cuid())
-  medicalRecordId  String        @unique
+  id               String   @id @default(cuid())
+  medicalRecordId  String   @unique
   currentIllness   String?
   medicalHistory   String?
   familyHistory    String?
   habits           String?
   medicationsInUse String?
   physicalExam     String?
-  createdAt        DateTime      @default(now())
+  createdAt        DateTime @default(now())
 
-  medicalRecord    MedicalRecord @relation(fields: [medicalRecordId], references: [id])
+  medicalRecord MedicalRecord @relation(fields: [medicalRecordId], references: [id])
 }
 
 model Prescription {
-  id              String             @id @default(cuid())
+  id              String    @id @default(cuid())
   medicalRecordId String
   notes           String?
-  signed          Boolean            @default(false)
+  signed          Boolean   @default(false)
   signedAt        DateTime?
-  createdAt       DateTime           @default(now())
+  createdAt       DateTime  @default(now())
 
-  medicalRecord   MedicalRecord      @relation(fields: [medicalRecordId], references: [id])
-  items           PrescriptionItem[]
-  document        Document?
+  medicalRecord MedicalRecord      @relation(fields: [medicalRecordId], references: [id])
+  items         PrescriptionItem[]
+  document      Document?
 }
 
 model PrescriptionItem {
-  id             String        @id @default(cuid())
+  id             String  @id @default(cuid())
   prescriptionId String
   medication     String
   dosage         String
   instructions   String
   duration       String?
 
-  prescription   Prescription  @relation(fields: [prescriptionId], references: [id])
+  prescription Prescription @relation(fields: [prescriptionId], references: [id])
 }
 
 model ExamOrder {
-  id              String         @id @default(cuid())
+  id              String    @id @default(cuid())
   medicalRecordId String
   notes           String?
-  signed          Boolean        @default(false)
+  signed          Boolean   @default(false)
   signedAt        DateTime?
-  createdAt       DateTime       @default(now())
+  createdAt       DateTime  @default(now())
 
-  medicalRecord   MedicalRecord  @relation(fields: [medicalRecordId], references: [id])
-  items           ExamOrderItem[]
-  document        Document?
+  medicalRecord MedicalRecord   @relation(fields: [medicalRecordId], references: [id])
+  items         ExamOrderItem[]
+  document      Document?
 }
 
 model ExamOrderItem {
-  id            String     @id @default(cuid())
+  id            String  @id @default(cuid())
   examOrderId   String
   examName      String
   justification String?
 
-  examOrder     ExamOrder  @relation(fields: [examOrderId], references: [id])
+  examOrder ExamOrder @relation(fields: [examOrderId], references: [id])
 }
 
 model Document {
-  id              String         @id @default(cuid())
+  id              String       @id @default(cuid())
   medicalRecordId String
   type            DocumentType
   content         String
-  createdAt       DateTime       @default(now())
-  prescriptionId  String?        @unique
-  examOrderId     String?        @unique
+  createdAt       DateTime     @default(now())
+  prescriptionId  String?      @unique
+  examOrderId     String?      @unique
 
-  medicalRecord   MedicalRecord  @relation(fields: [medicalRecordId], references: [id])
-  signature       Signature?
-  prescription    Prescription?  @relation(fields: [prescriptionId], references: [id])
-  examOrder       ExamOrder?     @relation(fields: [examOrderId], references: [id])
+  medicalRecord MedicalRecord @relation(fields: [medicalRecordId], references: [id])
+  signature     Signature?
+  prescription  Prescription? @relation(fields: [prescriptionId], references: [id])
+  examOrder     ExamOrder?    @relation(fields: [examOrderId], references: [id])
 }
 
 model Signature {
-  id         String    @id @default(cuid())
-  documentId String    @unique
+  id         String   @id @default(cuid())
+  documentId String   @unique
   hash       String
   signedBy   String
-  signedAt   DateTime  @default(now())
+  signedAt   DateTime @default(now())
 
-  document   Document  @relation(fields: [documentId], references: [id])
+  document Document @relation(fields: [documentId], references: [id])
 }
 
 model AuditLog {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String?
   action    String
   entity    String
   entityId  String?
   details   String?
   ipAddress String?
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
 
-  user      User?     @relation(fields: [userId], references: [id])
+  user User? @relation(fields: [userId], references: [id])
 }
 
 model Appointment {
-  id              String             @id @default(cuid())
+  id              String            @id @default(cuid())
   patientId       String
   professionalId  String?
   date            DateTime
-  status          AppointmentStatus  @default(SCHEDULED)
+  status          AppointmentStatus @default(SCHEDULED)
   notes           String?
-  appointmentType AppointmentType    @default(PARTICULAR)
+  appointmentType AppointmentType   @default(PARTICULAR)
   insuranceName   String?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
-  patient         Patient            @relation(fields: [patientId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id])
 
   @@map("appointments")
 }
 
-model MedicalRecord {
-  id        String   @id @default(uuid())
+model MedicalEvolution {
+  id        String @id @default(cuid())
   patientId String
   doctorId  String
-  notes     String
-  createdAt DateTime @default(now())
-
-  patient   Patient  @relation(fields: [patientId], references: [id])
-}
-
-model MedicalEvolution {
-  id          String   @id @default(cuid())
-  patientId   String
-  doctorId    String
 
   chiefComplaint String?
   diagnosis      String?
-  conduct         String?
-  observations    String?
-  cid             String?
+  conduct        String?
+  observations   String?
+  cid            String?
 
   bloodPressure String?
-  weight         String?
-  height         String?
-  temperature    String?
+  weight        String?
+  height        String?
+  temperature   String?
 
   createdAt DateTime @default(now())
 
