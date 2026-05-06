@@ -144,10 +144,9 @@ export default function AgendaPage() {
           headers: getAuthHeaders(),
 
           body: JSON.stringify({
-            patientId,
-
-            professionalId: doctorId,
-
-            date: selectedDate,
-
-            status: "S
+  patientId,
+  professionalId: doctorId,
+  date: selectedDate,
+  status: "SCHEDULED",
+  appointmentType: "PARTICULAR",
+}),
