@@ -8,69 +8,157 @@ import prescriptionsRoutes from "./routes/prescriptions.routes.js";
 import examsRoutes from "./routes/exams.routes.js";
 import usersRoutes from "./routes/users.routes.js";
 
+/* ✅ NOVA ROTA */
+import medicalEvolutionRoutes from "./routes/medical-evolution.routes.js";
+
 import { authMiddleware } from "./middleware/auth.js";
 
 const app = express();
 
-function applyCors(req: express.Request, res: express.Response) {
+/* ========================================
+   CORS PROFISSIONAL
+======================================== */
+function applyCors(
+  req: express.Request,
+  res: express.Response
+) {
   const origin = req.headers.origin;
 
-  if (origin && (origin === "http://localhost:3000" || origin.endsWith(".vercel.app"))) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
+  if (
+    origin &&
+    (
+      origin === "http://localhost:3000" ||
+      origin.endsWith(".vercel.app")
+    )
+  ) {
+    res.setHeader(
+      "Access-Control-Allow-Origin",
+      origin
+    );
   } else {
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader(
+      "Access-Control-Allow-Origin",
+      "*"
+    );
   }
 
   res.setHeader("Vary", "Origin");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,DELETE,OPTIONS"
+  );
+
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
 }
 
-// aplica CORS em tudo
+/* ========================================
+   MIDDLEWARE GLOBAL CORS
+======================================== */
 app.use((req, res, next) => {
   applyCors(req, res);
 
   if (req.method === "OPTIONS") {
-    return res.status(204).end();
+    return res.sendStatus(204);
   }
 
   next();
 });
 
-// preflight explícito do login
+/* ========================================
+   PREFLIGHT LOGIN
+======================================== */
 app.options("/auth/login", (req, res) => {
   applyCors(req, res);
-  return res.status(204).end();
+
+  return res.sendStatus(204);
 });
 
+/* ========================================
+   JSON BODY
+======================================== */
 app.use(express.json());
 
+/* ========================================
+   HEALTH CHECK
+======================================== */
 app.get("/", (_req, res) => {
   res.send("API online");
 });
 
 app.get("/health", (_req, res) => {
-  res.json({ ok: true, cors: "login-preflight-v1" });
+  res.json({
+    ok: true,
+    version: "v2-medflow",
+  });
 });
 
+/* ========================================
+   ROTAS PÚBLICAS
+======================================== */
 app.use("/auth", authRoutes);
 
+/* ========================================
+   JWT AUTH
+======================================== */
 app.use(authMiddleware);
 
+/* ========================================
+   ROTAS PROTEGIDAS
+======================================== */
+
+// 👤 Pacientes
 app.use("/patients", patientsRoutes);
+
+// 📅 Agenda
 app.use("/appointments", appointmentsRoutes);
+
+// 🩺 Prontuário
 app.use("/medical-records", medicalRecordsRoutes);
+
+/* ✅ EVOLUÇÃO CLÍNICA PREMIUM */
+app.use(
+  "/medical-evolutions",
+  medicalEvolutionRoutes
+);
+
+// 💊 Prescrições
 app.use("/prescriptions", prescriptionsRoutes);
+
+// 🧪 Exames
 app.use("/exams", examsRoutes);
+
+// 👨‍⚕️ Usuários
 app.use("/users", usersRoutes);
 
+/* ========================================
+   404
+======================================== */
 app.use((_req, res) => {
-  res.status(404).json({ error: "Rota não encontrada" });
+  res.status(404).json({
+    error: "Rota não encontrada",
+  });
 });
 
-app.use((err: any, _req: any, res: any, _next: any) => {
-  console.error("Erro interno:", err);
-  res.status(500).json({ error: "Erro interno do servidor" });
-});
+/* ========================================
+   ERRO GLOBAL
+======================================== */
+app.use(
+  (
+    err: any,
+    _req: any,
+    res: any,
+    _next: any
+  ) => {
+    console.error("Erro interno:", err);
+
+    res.status(500).json({
+      error: "Erro interno do servidor",
+    });
+  }
+);
 
 export default app;
