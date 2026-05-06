@@ -132,21 +132,39 @@ export default function AgendaPage() {
   }
 
   async function handleCreate({
-    patientId,
-    doctorId,
-  }: any) {
-    try {
-      const res = await fetch(
-        `${API_URL}/appointments`,
-        {
-          method: "POST",
-
-          headers: getAuthHeaders(),
-
-          body: JSON.stringify({
   patientId,
-  professionalId: doctorId,
-  date: selectedDate,
-  status: "SCHEDULED",
-  appointmentType: "PARTICULAR",
-}),
+  doctorId,
+}: any) {
+  try {
+    const res = await fetch(
+      `${API_URL}/appointments`,
+      {
+        method: "POST",
+
+        headers: getAuthHeaders(),
+
+        body: JSON.stringify({
+          patientId,
+          professionalId: doctorId,
+          date: selectedDate,
+          status: "SCHEDULED",
+          appointmentType: "PARTICULAR",
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error(
+        "Erro ao criar consulta"
+      );
+    }
+
+    setModalOpen(false);
+
+    loadAll();
+  } catch (error) {
+    console.error(error);
+
+    alert("Erro ao criar consulta");
+  }
+}
