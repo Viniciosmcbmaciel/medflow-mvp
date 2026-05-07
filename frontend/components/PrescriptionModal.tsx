@@ -23,6 +23,17 @@ function getAuthHeaders() {
   };
 }
 
+type MedicationField =
+  | "name"
+  | "dosage"
+  | "duration";
+
+type Medication = {
+  name: string;
+  dosage: string;
+  duration: string;
+};
+
 export default function PrescriptionModal({
   patient,
   onClose,
@@ -33,7 +44,7 @@ export default function PrescriptionModal({
   const [crm, setCrm] = useState("");
 
   const [medications, setMedications] =
-    useState([
+    useState<Medication[]>([
       {
         name: "",
         dosage: "",
@@ -56,153 +67,225 @@ export default function PrescriptionModal({
   }
 
   function updateMedication(
-  index: number,
-  field: "name" | "dosage" | "duration",
-  value: string
-) {
+    index: number,
+    field: MedicationField,
+    value: string
+  ) {
     const updated = [...medications];
 
-updated[index] = {
-  ...updated[index],
-  [field]: value,
-};
+    updated[index] = {
+      ...updated[index],
+      [field]: value,
+    };
 
-setMedications(updated);
+    setMedications(updated);
+  }
 
   async function generatePDF() {
-    const res = await fetch(
-      `${API_URL}/prescription-pdf`,
-      {
-        method: "POST",
+    try {
+      const res = await fetch(
+        `${API_URL}/prescription-pdf`,
+        {
+          method: "POST",
 
-        headers: getAuthHeaders(),
+          headers: getAuthHeaders(),
 
-        body: JSON.stringify({
-          patientName:
-            patient.fullName,
+          body: JSON.stringify({
+            patientName:
+              patient.fullName,
 
-          doctorName,
+            doctorName,
 
-          crm,
+            crm,
 
-          medications,
+            medications,
 
-          instructions,
-        }),
+            instructions,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(
+          "Erro ao gerar PDF"
+        );
       }
-    );
 
-    const blob =
-      await res.blob();
+      const blob = await res.blob();
 
-    const url =
-      window.URL.createObjectURL(blob);
+      const url =
+        window.URL.createObjectURL(blob);
 
-    window.open(url);
+      window.open(url);
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Erro ao gerar prescrição"
+      );
+    }
   }
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>
-          Prescrição Eletrônica
-        </h2>
+      <div className="medical-modal">
+        <div className="medical-header">
+          <div>
+            <h2>
+              Prescrição Eletrônica
+            </h2>
 
-        <input
-          placeholder="Nome do médico"
-          value={doctorName}
-          onChange={(e) =>
-            setDoctorName(
-              e.target.value
-            )
-          }
-        />
+            <p>
+              Paciente:{" "}
+              {patient.fullName}
+            </p>
+          </div>
 
-        <input
-          placeholder="CRM"
-          value={crm}
-          onChange={(e) =>
-            setCrm(e.target.value)
-          }
-        />
+          <button
+            className="close-button"
+            onClick={onClose}
+          >
+            ✕
+          </button>
+        </div>
 
-        {medications.map(
-          (med, index) => (
-            <div
-              key={index}
-              style={{
-                marginTop: 20,
-              }}
-            >
-              <input
-                placeholder="Medicamento"
-                value={med.name}
-                onChange={(e) =>
-                  updateMedication(
-                    index,
-                    "name",
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                placeholder="Posologia"
-                value={med.dosage}
-                onChange={(e) =>
-                  updateMedication(
-                    index,
-                    "dosage",
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                placeholder="Duração"
-                value={med.duration}
-                onChange={(e) =>
-                  updateMedication(
-                    index,
-                    "duration",
-                    e.target.value
-                  )
-                }
-              />
-            </div>
-          )
-        )}
-
-        <button
-          onClick={addMedication}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "1fr 220px",
+            gap: 12,
+            marginBottom: 20,
+          }}
         >
-          + Medicamento
-        </button>
+          <input
+            className="input"
+            placeholder="Nome do médico"
+            value={doctorName}
+            onChange={(e) =>
+              setDoctorName(
+                e.target.value
+              )
+            }
+          />
 
-        <textarea
-          placeholder="Orientações"
-          value={instructions}
-          onChange={(e) =>
-            setInstructions(
-              e.target.value
-            )
-          }
-        />
+          <input
+            className="input"
+            placeholder="CRM"
+            value={crm}
+            onChange={(e) =>
+              setCrm(e.target.value)
+            }
+          />
+        </div>
 
         <div
           style={{
             display: "flex",
-            gap: 10,
+            flexDirection: "column",
+            gap: 16,
+          }}
+        >
+          {medications.map(
+            (med, index) => (
+              <div
+                key={index}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    "1.4fr 1fr 1fr",
+                  gap: 12,
+                }}
+              >
+                <input
+                  className="input"
+                  placeholder="Medicamento"
+                  value={med.name}
+                  onChange={(e) =>
+                    updateMedication(
+                      index,
+                      "name",
+                      e.target.value
+                    )
+                  }
+                />
+
+                <input
+                  className="input"
+                  placeholder="Posologia"
+                  value={med.dosage}
+                  onChange={(e) =>
+                    updateMedication(
+                      index,
+                      "dosage",
+                      e.target.value
+                    )
+                  }
+                />
+
+                <input
+                  className="input"
+                  placeholder="Duração"
+                  value={med.duration}
+                  onChange={(e) =>
+                    updateMedication(
+                      index,
+                      "duration",
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+            )
+          )}
+        </div>
+
+        <button
+          className="button button-secondary"
+          style={{
+            marginTop: 18,
+          }}
+          onClick={addMedication}
+        >
+          + Adicionar medicamento
+        </button>
+
+        <div
+          style={{
             marginTop: 20,
           }}
         >
+          <textarea
+            className="textarea"
+            placeholder="Orientações médicas"
+            value={instructions}
+            onChange={(e) =>
+              setInstructions(
+                e.target.value
+              )
+            }
+          />
+        </div>
+
+        <div
+          className="medical-actions"
+          style={{
+            marginTop: 24,
+            display: "flex",
+            gap: 12,
+          }}
+        >
           <button
+            className="button button-primary"
             onClick={generatePDF}
           >
             📄 Gerar PDF
           </button>
 
-          <button onClick={onClose}>
+          <button
+            className="button button-secondary"
+            onClick={onClose}
+          >
             Fechar
           </button>
         </div>
