@@ -128,164 +128,106 @@ export default function PrescriptionModal({
 
   return (
     <div className="modal-overlay">
-      <div className="medical-modal">
-        <div className="medical-header">
-          <div>
-            <h2>
-              Prescrição Eletrônica
-            </h2>
+      <div className="modal-content">
+        <h2>
+          Prescrição Eletrônica
+        </h2>
 
-            <p>
-              Paciente:{" "}
-              {patient.fullName}
-            </p>
-          </div>
+        <input
+          placeholder="Nome do médico"
+          value={doctorName}
+          onChange={(e) =>
+            setDoctorName(
+              e.target.value
+            )
+          }
+        />
 
-          <button
-            className="close-button"
-            onClick={onClose}
-          >
-            ✕
-          </button>
-        </div>
+        <input
+          placeholder="CRM"
+          value={crm}
+          onChange={(e) =>
+            setCrm(e.target.value)
+          }
+        />
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "1fr 220px",
-            gap: 12,
-            marginBottom: 20,
-          }}
+        {medications.map(
+          (med, index) => (
+            <div
+              key={index}
+              style={{
+                marginTop: 20,
+              }}
+            >
+              <input
+                placeholder="Medicamento"
+                value={med.name}
+                onChange={(e) =>
+                  updateMedication(
+                    index,
+                    "name",
+                    e.target.value
+                  )
+                }
+              />
+
+              <input
+                placeholder="Posologia"
+                value={med.dosage}
+                onChange={(e) =>
+                  updateMedication(
+                    index,
+                    "dosage",
+                    e.target.value
+                  )
+                }
+              />
+
+              <input
+                placeholder="Duração"
+                value={med.duration}
+                onChange={(e) =>
+                  updateMedication(
+                    index,
+                    "duration",
+                    e.target.value
+                  )
+                }
+              />
+            </div>
+          )
+        )}
+
+        <button
+          onClick={addMedication}
         >
-          <input
-            className="input"
-            placeholder="Nome do médico"
-            value={doctorName}
-            onChange={(e) =>
-              setDoctorName(
-                e.target.value
-              )
-            }
-          />
+          + Medicamento
+        </button>
 
-          <input
-            className="input"
-            placeholder="CRM"
-            value={crm}
-            onChange={(e) =>
-              setCrm(e.target.value)
-            }
-          />
-        </div>
+        <textarea
+          placeholder="Orientações"
+          value={instructions}
+          onChange={(e) =>
+            setInstructions(
+              e.target.value
+            )
+          }
+        />
 
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
-            gap: 16,
-          }}
-        >
-          {medications.map(
-            (med, index) => (
-              <div
-                key={index}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    "1.4fr 1fr 1fr",
-                  gap: 12,
-                }}
-              >
-                <input
-                  className="input"
-                  placeholder="Medicamento"
-                  value={med.name}
-                  onChange={(e) =>
-                    updateMedication(
-                      index,
-                      "name",
-                      e.target.value
-                    )
-                  }
-                />
-
-                <input
-                  className="input"
-                  placeholder="Posologia"
-                  value={med.dosage}
-                  onChange={(e) =>
-                    updateMedication(
-                      index,
-                      "dosage",
-                      e.target.value
-                    )
-                  }
-                />
-
-                <input
-                  className="input"
-                  placeholder="Duração"
-                  value={med.duration}
-                  onChange={(e) =>
-                    updateMedication(
-                      index,
-                      "duration",
-                      e.target.value
-                    )
-                  }
-                />
-              </div>
-            )
-          )}
-        </div>
-
-        <button
-          className="button button-secondary"
-          style={{
-            marginTop: 18,
-          }}
-          onClick={addMedication}
-        >
-          + Adicionar medicamento
-        </button>
-
-        <div
-          style={{
+            gap: 10,
             marginTop: 20,
           }}
         >
-          <textarea
-            className="textarea"
-            placeholder="Orientações médicas"
-            value={instructions}
-            onChange={(e) =>
-              setInstructions(
-                e.target.value
-              )
-            }
-          />
-        </div>
-
-        <div
-          className="medical-actions"
-          style={{
-            marginTop: 24,
-            display: "flex",
-            gap: 12,
-          }}
-        >
           <button
-            className="button button-primary"
             onClick={generatePDF}
           >
             📄 Gerar PDF
           </button>
 
-          <button
-            className="button button-secondary"
-            onClick={onClose}
-          >
+          <button onClick={onClose}>
             Fechar
           </button>
         </div>
