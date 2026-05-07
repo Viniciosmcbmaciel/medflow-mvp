@@ -6,6 +6,9 @@ import AppHeader from "../../components/AppHeader";
 import AppointmentModal from "../../components/AppointmentModal";
 import MedicalEvolutionModal from "../../components/MedicalEvolutionModal";
 
+/* ✅ NOVO */
+import PrescriptionModal from "../../components/PrescriptionModal";
+
 import { useRequireAuth } from "../../lib/auth";
 
 import FullCalendar from "@fullcalendar/react";
@@ -42,10 +45,14 @@ export default function AgendaPage() {
   const { ready } = useRequireAuth();
 
   const [events, setEvents] = useState<any[]>([]);
-  const [appointments, setAppointments] = useState<any[]>([]);
+  const [appointments, setAppointments] =
+    useState<any[]>([]);
 
-  const [patients, setPatients] = useState<any[]>([]);
-  const [doctors, setDoctors] = useState<any[]>([]);
+  const [patients, setPatients] =
+    useState<any[]>([]);
+
+  const [doctors, setDoctors] =
+    useState<any[]>([]);
 
   const [modalOpen, setModalOpen] =
     useState(false);
@@ -56,8 +63,15 @@ export default function AgendaPage() {
   const [selectedDoctor, setSelectedDoctor] =
     useState("");
 
+  /* ✅ EVOLUÇÃO */
   const [selectedPatient, setSelectedPatient] =
     useState<any>(null);
+
+  /* ✅ PRESCRIÇÃO */
+  const [
+    prescriptionPatient,
+    setPrescriptionPatient,
+  ] = useState<any>(null);
 
   async function loadAll() {
     try {
@@ -106,6 +120,8 @@ export default function AgendaPage() {
 
           borderColor:
             statusColor[a.status],
+
+          textColor: "#ffffff",
 
           extendedProps: {
             patient: a.patient,
@@ -324,7 +340,8 @@ export default function AgendaPage() {
 2 - Concluir
 3 - Cancelar
 4 - Excluir
-5 - Abrir prontuário`
+5 - Evolução clínica
+6 - Prescrição médica`
     );
 
     if (!action) return;
@@ -356,8 +373,16 @@ export default function AgendaPage() {
       );
     }
 
+    /* ✅ EVOLUÇÃO */
     if (action === "5") {
       setSelectedPatient(
+        appointment.patient
+      );
+    }
+
+    /* ✅ PRESCRIÇÃO */
+    if (action === "6") {
+      setPrescriptionPatient(
         appointment.patient
       );
     }
@@ -580,6 +605,20 @@ export default function AgendaPage() {
           patient={selectedPatient}
           onClose={() =>
             setSelectedPatient(
+              null
+            )
+          }
+        />
+      )}
+
+      {/* MODAL PRESCRIÇÃO */}
+      {prescriptionPatient && (
+        <PrescriptionModal
+          patient={
+            prescriptionPatient
+          }
+          onClose={() =>
+            setPrescriptionPatient(
               null
             )
           }

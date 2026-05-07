@@ -5,10 +5,11 @@ import patientsRoutes from "./routes/patients.routes.js";
 import appointmentsRoutes from "./routes/appointments.routes.js";
 import medicalRecordsRoutes from "./routes/medical-records.routes.js";
 import prescriptionsRoutes from "./routes/prescriptions.routes.js";
+import prescriptionPdfRoutes from "./routes/prescription-pdf.routes.js"; // ✅ NOVA ROTA PDF
 import examsRoutes from "./routes/exams.routes.js";
 import usersRoutes from "./routes/users.routes.js";
 
-/* ✅ NOVA ROTA */
+/* ✅ EVOLUÇÃO CLÍNICA */
 import medicalEvolutionRoutes from "./routes/medical-evolution.routes.js";
 
 import { authMiddleware } from "./middleware/auth.js";
@@ -92,7 +93,7 @@ app.get("/", (_req, res) => {
 app.get("/health", (_req, res) => {
   res.json({
     ok: true,
-    version: "v2-medflow",
+    version: "v3-medflow",
   });
 });
 
@@ -116,22 +117,34 @@ app.use("/patients", patientsRoutes);
 // 📅 Agenda
 app.use("/appointments", appointmentsRoutes);
 
-// 🩺 Prontuário
-app.use("/medical-records", medicalRecordsRoutes);
+// 🩺 Prontuário eletrônico
+app.use(
+  "/medical-records",
+  medicalRecordsRoutes
+);
 
-/* ✅ EVOLUÇÃO CLÍNICA PREMIUM */
+// 📈 Evolução clínica premium
 app.use(
   "/medical-evolutions",
   medicalEvolutionRoutes
 );
 
 // 💊 Prescrições
-app.use("/prescriptions", prescriptionsRoutes);
+app.use(
+  "/prescriptions",
+  prescriptionsRoutes
+);
+
+// 📄 Prescrição PDF premium
+app.use(
+  "/prescription-pdf",
+  prescriptionPdfRoutes
+);
 
 // 🧪 Exames
 app.use("/exams", examsRoutes);
 
-// 👨‍⚕️ Usuários
+// 👨‍⚕️ Usuários/Médicos
 app.use("/users", usersRoutes);
 
 /* ========================================
@@ -153,10 +166,14 @@ app.use(
     res: any,
     _next: any
   ) => {
-    console.error("Erro interno:", err);
+    console.error(
+      "Erro interno:",
+      err
+    );
 
     res.status(500).json({
-      error: "Erro interno do servidor",
+      error:
+        "Erro interno do servidor",
     });
   }
 );
