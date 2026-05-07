@@ -56,16 +56,18 @@ export default function PrescriptionModal({
   }
 
   function updateMedication(
-    index: number,
-    field: string,
-    value: string
-  ) {
+  index: number,
+  field: "name" | "dosage" | "duration",
+  value: string
+) {
     const updated = [...medications];
 
-    updated[index][field] = value;
+updated[index] = {
+  ...updated[index],
+  [field]: value,
+};
 
-    setMedications(updated);
-  }
+setMedications(updated);
 
   async function generatePDF() {
     const res = await fetch(
