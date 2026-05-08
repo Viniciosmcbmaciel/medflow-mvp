@@ -128,8 +128,23 @@ export default function PrescriptionModal({
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>
+      <div
+        className="modal-content"
+        style={{
+          background: "#ffffff",
+          width: "90%",
+          maxWidth: 700,
+          padding: 24,
+          borderRadius: 20,
+          boxShadow:
+            "0 20px 40px rgba(0,0,0,0.2)",
+        }}
+      >
+        <h2
+          style={{
+            marginBottom: 20,
+          }}
+        >
           Prescrição Eletrônica
         </h2>
 
@@ -141,6 +156,14 @@ export default function PrescriptionModal({
               e.target.value
             )
           }
+          style={{
+            width: "100%",
+            padding: 12,
+            marginBottom: 12,
+            borderRadius: 10,
+            border:
+              "1px solid #d1d5db",
+          }}
         />
 
         <input
@@ -149,6 +172,14 @@ export default function PrescriptionModal({
           onChange={(e) =>
             setCrm(e.target.value)
           }
+          style={{
+            width: "100%",
+            padding: 12,
+            marginBottom: 20,
+            borderRadius: 10,
+            border:
+              "1px solid #d1d5db",
+          }}
         />
 
         {medications.map(
@@ -156,7 +187,9 @@ export default function PrescriptionModal({
             <div
               key={index}
               style={{
-                marginTop: 20,
+                marginBottom: 20,
+                display: "grid",
+                gap: 10,
               }}
             >
               <input
@@ -169,6 +202,13 @@ export default function PrescriptionModal({
                     e.target.value
                   )
                 }
+                style={{
+                  width: "100%",
+                  padding: 12,
+                  borderRadius: 10,
+                  border:
+                    "1px solid #d1d5db",
+                }}
               />
 
               <input
@@ -181,6 +221,13 @@ export default function PrescriptionModal({
                     e.target.value
                   )
                 }
+                style={{
+                  width: "100%",
+                  padding: 12,
+                  borderRadius: 10,
+                  border:
+                    "1px solid #d1d5db",
+                }}
               />
 
               <input
@@ -193,6 +240,13 @@ export default function PrescriptionModal({
                     e.target.value
                   )
                 }
+                style={{
+                  width: "100%",
+                  padding: 12,
+                  borderRadius: 10,
+                  border:
+                    "1px solid #d1d5db",
+                }}
               />
             </div>
           )
@@ -200,6 +254,14 @@ export default function PrescriptionModal({
 
         <button
           onClick={addMedication}
+          style={{
+            padding:
+              "10px 16px",
+            borderRadius: 10,
+            border: "none",
+            cursor: "pointer",
+            marginBottom: 20,
+          }}
         >
           + Medicamento
         </button>
@@ -212,6 +274,14 @@ export default function PrescriptionModal({
               e.target.value
             )
           }
+          style={{
+            width: "100%",
+            minHeight: 120,
+            padding: 12,
+            borderRadius: 10,
+            border:
+              "1px solid #d1d5db",
+          }}
         />
 
         <div
@@ -223,11 +293,30 @@ export default function PrescriptionModal({
         >
           <button
             onClick={generatePDF}
+            style={{
+              padding:
+                "12px 18px",
+              borderRadius: 10,
+              border: "none",
+              cursor: "pointer",
+              background:
+                "#2563eb",
+              color: "#fff",
+            }}
           >
             📄 Gerar PDF
           </button>
 
-          <button onClick={onClose}>
+          <button
+            onClick={onClose}
+            style={{
+              padding:
+                "12px 18px",
+              borderRadius: 10,
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
             Fechar
           </button>
         </div>
