@@ -128,196 +128,174 @@ export default function PrescriptionModal({
 
   return (
     <div className="modal-overlay">
-      <div
-        className="modal-content"
-        style={{
-          background: "#ffffff",
-          width: "90%",
-          maxWidth: 700,
-          padding: 24,
-          borderRadius: 20,
-          boxShadow:
-            "0 20px 40px rgba(0,0,0,0.2)",
-        }}
-      >
-        <h2
-          style={{
-            marginBottom: 20,
-          }}
-        >
-          Prescrição Eletrônica
-        </h2>
+      <div className="medical-modal">
+        {/* HEADER */}
+        <div className="medical-header">
+          <div>
+            <h2>
+              Prescrição Eletrônica
+            </h2>
 
-        <input
-          placeholder="Nome do médico"
-          value={doctorName}
-          onChange={(e) =>
-            setDoctorName(
-              e.target.value
-            )
-          }
-          style={{
-            width: "100%",
-            padding: 12,
-            marginBottom: 12,
-            borderRadius: 10,
-            border:
-              "1px solid #d1d5db",
-          }}
-        />
+            <p>
+              Paciente:{" "}
+              {patient.fullName}
+            </p>
+          </div>
 
-        <input
-          placeholder="CRM"
-          value={crm}
-          onChange={(e) =>
-            setCrm(e.target.value)
-          }
-          style={{
-            width: "100%",
-            padding: 12,
-            marginBottom: 20,
-            borderRadius: 10,
-            border:
-              "1px solid #d1d5db",
-          }}
-        />
+          <button
+            className="close-button"
+            onClick={onClose}
+          >
+            ✕
+          </button>
+        </div>
 
-        {medications.map(
-          (med, index) => (
-            <div
-              key={index}
-              style={{
-                marginBottom: 20,
-                display: "grid",
-                gap: 10,
-              }}
-            >
-              <input
-                placeholder="Medicamento"
-                value={med.name}
-                onChange={(e) =>
-                  updateMedication(
-                    index,
-                    "name",
-                    e.target.value
-                  )
-                }
-                style={{
-                  width: "100%",
-                  padding: 12,
-                  borderRadius: 10,
-                  border:
-                    "1px solid #d1d5db",
-                }}
-              />
+        {/* MÉDICO */}
+        <div className="medical-grid">
+          <div>
+            <label className="label">
+              Médico
+            </label>
 
-              <input
-                placeholder="Posologia"
-                value={med.dosage}
-                onChange={(e) =>
-                  updateMedication(
-                    index,
-                    "dosage",
-                    e.target.value
-                  )
-                }
-                style={{
-                  width: "100%",
-                  padding: 12,
-                  borderRadius: 10,
-                  border:
-                    "1px solid #d1d5db",
-                }}
-              />
+            <input
+              className="input"
+              placeholder="Nome do médico"
+              value={doctorName}
+              onChange={(e) =>
+                setDoctorName(
+                  e.target.value
+                )
+              }
+            />
+          </div>
 
-              <input
-                placeholder="Duração"
-                value={med.duration}
-                onChange={(e) =>
-                  updateMedication(
-                    index,
-                    "duration",
-                    e.target.value
-                  )
-                }
-                style={{
-                  width: "100%",
-                  padding: 12,
-                  borderRadius: 10,
-                  border:
-                    "1px solid #d1d5db",
-                }}
-              />
-            </div>
-          )
-        )}
+          <div>
+            <label className="label">
+              CRM
+            </label>
 
-        <button
-          onClick={addMedication}
-          style={{
-            padding:
-              "10px 16px",
-            borderRadius: 10,
-            border: "none",
-            cursor: "pointer",
-            marginBottom: 20,
-          }}
-        >
-          + Medicamento
-        </button>
+            <input
+              className="input"
+              placeholder="CRM"
+              value={crm}
+              onChange={(e) =>
+                setCrm(
+                  e.target.value
+                )
+              }
+            />
+          </div>
+        </div>
 
-        <textarea
-          placeholder="Orientações"
-          value={instructions}
-          onChange={(e) =>
-            setInstructions(
-              e.target.value
-            )
-          }
-          style={{
-            width: "100%",
-            minHeight: 120,
-            padding: 12,
-            borderRadius: 10,
-            border:
-              "1px solid #d1d5db",
-          }}
-        />
-
+        {/* MEDICAMENTOS */}
         <div
           style={{
-            display: "flex",
-            gap: 10,
-            marginTop: 20,
+            marginTop: 24,
           }}
         >
-          <button
-            onClick={generatePDF}
+          <h3
             style={{
-              padding:
-                "12px 18px",
-              borderRadius: 10,
-              border: "none",
-              cursor: "pointer",
-              background:
-                "#2563eb",
-              color: "#fff",
+              marginBottom: 16,
             }}
           >
-            📄 Gerar PDF
+            Medicamentos
+          </h3>
+
+          {medications.map(
+            (med, index) => (
+              <div
+                key={index}
+                className="medical-grid"
+                style={{
+                  marginBottom: 14,
+                }}
+              >
+                <input
+                  className="input"
+                  placeholder="Medicamento"
+                  value={med.name}
+                  onChange={(e) =>
+                    updateMedication(
+                      index,
+                      "name",
+                      e.target.value
+                    )
+                  }
+                />
+
+                <input
+                  className="input"
+                  placeholder="Posologia"
+                  value={med.dosage}
+                  onChange={(e) =>
+                    updateMedication(
+                      index,
+                      "dosage",
+                      e.target.value
+                    )
+                  }
+                />
+
+                <input
+                  className="input"
+                  placeholder="Duração"
+                  value={med.duration}
+                  onChange={(e) =>
+                    updateMedication(
+                      index,
+                      "duration",
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+            )
+          )}
+
+          <button
+            className="button button-secondary"
+            onClick={addMedication}
+          >
+            + Adicionar medicamento
+          </button>
+        </div>
+
+        {/* ORIENTAÇÕES */}
+        <div
+          style={{
+            marginTop: 24,
+          }}
+        >
+          <label className="label">
+            Orientações
+          </label>
+
+          <textarea
+            className="textarea"
+            placeholder="Digite as orientações médicas..."
+            value={instructions}
+            onChange={(e) =>
+              setInstructions(
+                e.target.value
+              )
+            }
+          />
+        </div>
+
+        {/* BOTÕES */}
+        <div className="medical-actions">
+          <button
+            className="button button-secondary"
+            onClick={onClose}
+          >
+            Fechar
           </button>
 
           <button
-            onClick={onClose}
-            style={{
-              padding:
-                "12px 18px",
-              borderRadius: 10,
-              border: "none",
-              cursor: "pointer",
-            }}
+            className="button button-green"
+            onClick={generatePDF}
           >
-            Fechar
+            📄 Gerar PDF
           </button>
         </div>
       </div>
