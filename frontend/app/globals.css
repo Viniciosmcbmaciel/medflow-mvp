@@ -1,134 +1,224 @@
 /* =========================================
-   FULLCALENDAR PREMIUM MEDFLOW
+   RESET
 ========================================= */
 
-.fc {
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
   font-family: Inter, Arial, Helvetica, sans-serif;
-}
-
-.fc .fc-toolbar {
-  margin-bottom: 18px !important;
-}
-
-.fc .fc-toolbar-title {
-  font-size: 26px !important;
-  font-weight: 800 !important;
+  background: #f4f7fb;
   color: #0f172a;
-  letter-spacing: -0.03em;
 }
 
-.fc .fc-button {
-  background: #ffffff !important;
-  border: 1px solid #dbeafe !important;
-  color: #0f172a !important;
-  border-radius: 14px !important;
-  padding: 10px 16px !important;
-  font-weight: 700 !important;
-  transition: 0.2s ease !important;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+body {
+  min-height: 100vh;
 }
 
-.fc .fc-button:hover {
-  background: #eff6ff !important;
-  transform: translateY(-1px);
-}
-
-.fc .fc-button-primary:not(:disabled).fc-button-active {
-  background: linear-gradient(
-    135deg,
-    #16a34a,
-    #22c55e
-  ) !important;
-
-  border: none !important;
-
-  color: white !important;
-}
-
-.fc-theme-standard th {
-  background: #f8fafc;
-  border-color: #e2e8f0;
-  padding: 12px 0;
-  color: #334155;
-  font-weight: 700;
-}
-
-.fc-theme-standard td {
-  border-color: #f1f5f9;
-}
-
-.fc-timegrid-slot {
-  height: 64px !important;
-}
-
-.fc-timegrid-slot-label {
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.fc-timegrid-now-indicator-line {
-  border-color: #ef4444 !important;
-}
-
-.fc-timegrid-now-indicator-arrow {
-  border-color: #ef4444 !important;
-}
-
-.fc-event {
-  border: none !important;
-  border-radius: 16px !important;
-  padding: 6px !important;
-  box-shadow:
-    0 8px 20px rgba(15,23,42,0.12);
-
-  transition: .2s ease !important;
-
-  cursor: pointer !important;
-}
-
-.fc-event:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 12px 24px rgba(15,23,42,0.18);
-}
-
-.fc-event-title {
-  font-weight: 800;
-  font-size: 13px;
-}
-
-.fc-event-time {
-  font-size: 11px;
-  opacity: .9;
-}
-
-.fc-daygrid-day-number,
-.fc-col-header-cell-cushion {
-  color: #0f172a !important;
-  font-weight: 700;
-  text-decoration: none !important;
-}
-
-.fc .fc-highlight {
-  background: rgba(34,197,94,.14) !important;
-}
-
-.fc-day-today {
-  background: rgba(37,99,235,.04) !important;
-}
-
-.fc-scrollgrid {
-  border-radius: 22px !important;
-  overflow: hidden !important;
-  border: 1px solid #e2e8f0 !important;
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
 /* =========================================
-   MODAL PREMIUM
+   ROOT COLORS
 ========================================= */
 
-.premium-modal-overlay {
+:root {
+  --bg: #f4f7fb;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --primary: #16a34a;
+  --primary-dark: #15803d;
+  --primary-soft: #dcfce7;
+  --text: #0f172a;
+  --muted: #64748b;
+  --shadow:
+    0 10px 30px rgba(15,23,42,.08);
+}
+
+/* =========================================
+   CONTAINER
+========================================= */
+
+.container {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+/* =========================================
+   TOPBAR
+========================================= */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  background: rgba(255,255,255,.92);
+
+  backdrop-filter: blur(10px);
+
+  border-bottom:
+    1px solid var(--border);
+}
+
+.topbar-inner {
+  width: min(1180px, calc(100% - 32px));
+
+  margin: 0 auto;
+
+  min-height: 72px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  font-size: 28px;
+  font-weight: 900;
+  color: #166534;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-link {
+  padding: 10px 14px;
+
+  border-radius: 12px;
+
+  font-weight: 700;
+
+  transition: .2s ease;
+}
+
+.nav-link:hover {
+  background: #ecfdf5;
+  color: #166534;
+}
+
+/* =========================================
+   TITLES
+========================================= */
+
+.page-title {
+  font-size: 40px;
+  font-weight: 900;
+  margin-bottom: 8px;
+  letter-spacing: -.03em;
+}
+
+.page-subtitle {
+  color: #64748b;
+  margin-bottom: 28px;
+}
+
+/* =========================================
+   CARDS
+========================================= */
+
+.card {
+  background: white;
+
+  border-radius: 24px;
+
+  padding: 24px;
+
+  border: 1px solid #e2e8f0;
+
+  box-shadow:
+    0 10px 30px rgba(15,23,42,.06);
+}
+
+/* =========================================
+   INPUTS
+========================================= */
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+
+  border: 1px solid #cbd5e1;
+
+  border-radius: 14px;
+
+  padding: 14px 16px;
+
+  outline: none;
+
+  font-size: 15px;
+
+  transition: .2s ease;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: #22c55e;
+
+  box-shadow:
+    0 0 0 4px rgba(34,197,94,.12);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.button {
+  border: none;
+
+  border-radius: 14px;
+
+  padding: 12px 18px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition: .2s ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.button-green {
+  background:
+    linear-gradient(
+      135deg,
+      #16a34a,
+      #22c55e
+    );
+
+  color: white;
+}
+
+.button-secondary {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* =========================================
+   MODAL BASE
+========================================= */
+
+.modal-overlay {
   position: fixed;
   inset: 0;
 
@@ -145,58 +235,56 @@
   padding: 20px;
 }
 
-.premium-modal {
-  width: 100%;
-  max-width: 1200px;
+.medical-modal {
+  width: 95%;
+  max-width: 1100px;
 
   max-height: 92vh;
   overflow-y: auto;
 
-  background: rgba(255,255,255,.98);
+  background: white;
 
   border-radius: 28px;
+
+  padding: 24px;
 
   box-shadow:
     0 30px 80px rgba(15,23,42,.22);
 
-  animation: premiumModal .22s ease;
+  animation: modalFade .2s ease;
 }
 
-@keyframes premiumModal {
+@keyframes modalFade {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(.96);
+    transform: scale(.96);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: scale(1);
   }
 }
 
-.premium-modal-header {
+.medical-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  padding: 24px 28px;
-
-  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 24px;
 }
 
-.premium-modal-title {
-  font-size: 28px;
-  font-weight: 900;
-  letter-spacing: -0.03em;
-  color: #0f172a;
+.medical-header h2 {
+  margin: 0;
+  font-size: 30px;
 }
 
-.premium-modal-subtitle {
-  margin-top: 6px;
+.medical-header p {
+  margin-top: 4px;
   color: #64748b;
 }
 
-.premium-close {
+.close-button {
   width: 44px;
   height: 44px;
 
@@ -210,71 +298,110 @@
 
   font-size: 18px;
   font-weight: 700;
-
-  transition: .2s ease;
-}
-
-.premium-close:hover {
-  background: #e2e8f0;
-  transform: rotate(90deg);
 }
 
 /* =========================================
-   MEDICAL EVOLUTION PREMIUM
+   GRID
 ========================================= */
 
-.evolution-layout {
+.medical-grid {
   display: grid;
-  grid-template-columns: 1.1fr .9fr;
-  gap: 20px;
-
-  padding: 24px;
-}
-
-.evolution-card {
-  background: #ffffff;
-
-  border: 1px solid #e2e8f0;
-
-  border-radius: 22px;
-
-  padding: 20px;
-
-  box-shadow:
-    0 10px 24px rgba(15,23,42,.05);
-}
-
-.evolution-section-title {
-  font-size: 18px;
-  font-weight: 800;
-  margin-bottom: 18px;
-  color: #0f172a;
-}
-
-.evolution-history {
-  display: grid;
+  grid-template-columns: repeat(2,1fr);
   gap: 14px;
 }
 
-.evolution-history-card {
-  border-left: 4px solid #2563eb;
+/* =========================================
+   LABELS
+========================================= */
 
-  background: #f8fafc;
+.label {
+  display: block;
 
-  border-radius: 14px;
-
-  padding: 16px;
-}
-
-.evolution-history-date {
-  font-size: 12px;
-  color: #64748b;
   margin-bottom: 8px;
+
+  font-size: 14px;
+  font-weight: 700;
 }
 
-.evolution-history-text {
+/* =========================================
+   ACTIONS
+========================================= */
+
+.medical-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  margin-top: 24px;
+}
+
+/* =========================================
+   FULLCALENDAR PREMIUM
+========================================= */
+
+.fc {
+  font-family: Inter, Arial, Helvetica, sans-serif;
+}
+
+.fc .fc-toolbar {
+  margin-bottom: 18px !important;
+}
+
+.fc .fc-toolbar-title {
+  font-size: 26px !important;
+  font-weight: 800 !important;
   color: #0f172a;
-  line-height: 1.7;
+}
+
+.fc .fc-button {
+  background: #ffffff !important;
+
+  border: 1px solid #dbeafe !important;
+
+  color: #0f172a !important;
+
+  border-radius: 14px !important;
+
+  padding: 10px 16px !important;
+
+  font-weight: 700 !important;
+}
+
+.fc-button-active {
+  background:
+    linear-gradient(
+      135deg,
+      #16a34a,
+      #22c55e
+    ) !important;
+
+  border: none !important;
+
+  color: white !important;
+}
+
+.fc-theme-standard th {
+  background: #f8fafc;
+}
+
+.fc-timegrid-slot {
+  height: 64px !important;
+}
+
+.fc-event {
+  border: none !important;
+
+  border-radius: 16px !important;
+
+  padding: 6px !important;
+
+  box-shadow:
+    0 8px 20px rgba(15,23,42,.12);
+}
+
+.fc-day-today {
+  background:
+    rgba(37,99,235,.04) !important;
 }
 
 /* =========================================
@@ -282,24 +409,23 @@
 ========================================= */
 
 @media (max-width: 980px) {
-  .evolution-layout {
+
+  .medical-grid {
     grid-template-columns: 1fr;
   }
 
-  .premium-modal {
+  .medical-modal {
+    width: 100%;
+    height: 100vh;
     max-height: 100vh;
+
     border-radius: 0;
   }
 
   .fc .fc-toolbar {
+    display: flex;
     flex-direction: column;
     gap: 12px;
   }
 
-  .fc-toolbar-chunk {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
 }
