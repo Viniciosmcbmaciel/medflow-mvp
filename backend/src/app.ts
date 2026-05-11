@@ -77,40 +77,53 @@ app.get("/", (_req, res) => {
 app.get("/health", (_req, res) => {
   res.json({
     ok: true,
-    version: "v3-medflow",
+    version: "v4-medflow",
   });
 });
 
+
+/* LOGIN */
 app.use("/auth", authRoutes);
 
-app.use(authMiddleware);
-
-app.use("/patients", patientsRoutes);
-
-app.use("/appointments", appointmentsRoutes);
-
-app.use(
-  "/medical-records",
-  medicalRecordsRoutes
-);
-
-app.use(
-  "/medical-evolutions",
-  medicalEvolutionRoutes
-);
-
-app.use(
-  "/prescriptions",
-  prescriptionsRoutes
-);
-
+/* PDF PRESCRIÇÃO */
 app.use(
   "/prescription-pdf",
   prescriptionPdfRoutes
 );
 
+app.use(authMiddleware);
+
+/* PACIENTES */
+app.use("/patients", patientsRoutes);
+
+/* AGENDA */
+app.use(
+  "/appointments",
+  appointmentsRoutes
+);
+
+/* PRONTUÁRIO */
+app.use(
+  "/medical-records",
+  medicalRecordsRoutes
+);
+
+/* EVOLUÇÃO */
+app.use(
+  "/medical-evolutions",
+  medicalEvolutionRoutes
+);
+
+/* PRESCRIÇÕES */
+app.use(
+  "/prescriptions",
+  prescriptionsRoutes
+);
+
+/* EXAMES */
 app.use("/exams", examsRoutes);
 
+/* USUÁRIOS */
 app.use("/users", usersRoutes);
 
 app.use((_req, res) => {
