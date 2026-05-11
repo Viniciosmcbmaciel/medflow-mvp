@@ -5,7 +5,6 @@ import patientsRoutes from "./routes/patients.routes.js";
 import appointmentsRoutes from "./routes/appointments.routes.js";
 import medicalRecordsRoutes from "./routes/medical-records.routes.js";
 import prescriptionsRoutes from "./routes/prescriptions.routes.js";
-import prescriptionPdfRoutes from "./routes/prescription-pdf.routes.js";
 import examsRoutes from "./routes/exams.routes.js";
 import usersRoutes from "./routes/users.routes.js";
 
@@ -15,6 +14,9 @@ import { authMiddleware } from "./middleware/auth.js";
 
 const app = express();
 
+/* =========================================
+   CORS
+========================================= */
 function applyCors(
   req: express.Request,
   res: express.Response
@@ -52,6 +54,9 @@ function applyCors(
   );
 }
 
+/* =========================================
+   GLOBAL CORS
+========================================= */
 app.use((req, res, next) => {
   applyCors(req, res);
 
@@ -62,14 +67,23 @@ app.use((req, res, next) => {
   next();
 });
 
+/* =========================================
+   LOGIN PREFLIGHT
+========================================= */
 app.options("/auth/login", (req, res) => {
   applyCors(req, res);
 
   return res.sendStatus(204);
 });
 
+/* =========================================
+   JSON
+========================================= */
 app.use(express.json());
 
+/* =========================================
+   HEALTH
+========================================= */
 app.get("/", (_req, res) => {
   res.send("API online");
 });
@@ -77,60 +91,65 @@ app.get("/", (_req, res) => {
 app.get("/health", (_req, res) => {
   res.json({
     ok: true,
-    version: "v4-medflow",
+    version: "v5-medflow",
   });
 });
 
+/* =========================================
+   ROTAS PÚBLICAS
+========================================= */
 
-/* LOGIN */
 app.use("/auth", authRoutes);
 
-/* PDF PRESCRIÇÃO */
-app.use(
-  "/prescription-pdf",
-  prescriptionPdfRoutes
-);
+/* =========================================
+   JWT AUTH
+========================================= */
 
 app.use(authMiddleware);
 
-/* PACIENTES */
+/* =========================================
+   ROTAS PRIVADAS
+========================================= */
+
 app.use("/patients", patientsRoutes);
 
-/* AGENDA */
 app.use(
   "/appointments",
   appointmentsRoutes
 );
 
-/* PRONTUÁRIO */
 app.use(
   "/medical-records",
   medicalRecordsRoutes
 );
 
-/* EVOLUÇÃO */
 app.use(
   "/medical-evolutions",
   medicalEvolutionRoutes
 );
 
-/* PRESCRIÇÕES */
 app.use(
   "/prescriptions",
   prescriptionsRoutes
 );
 
-/* EXAMES */
 app.use("/exams", examsRoutes);
 
-/* USUÁRIOS */
 app.use("/users", usersRoutes);
+
+/* =========================================
+   404
+========================================= */
 
 app.use((_req, res) => {
   res.status(404).json({
     error: "Rota não encontrada",
   });
 });
+
+/* =========================================
+   ERRO GLOBAL
+========================================= */
 
 app.use(
   (
