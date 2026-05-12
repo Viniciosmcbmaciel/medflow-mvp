@@ -5,9 +5,9 @@ import patientsRoutes from "./routes/patients.routes.js";
 import appointmentsRoutes from "./routes/appointments.routes.js";
 import medicalRecordsRoutes from "./routes/medical-records.routes.js";
 import prescriptionsRoutes from "./routes/prescriptions.routes.js";
+import prescriptionPdfRoutes from "./routes/prescription-pdf.routes.js";
 import examsRoutes from "./routes/exams.routes.js";
 import usersRoutes from "./routes/users.routes.js";
-
 import medicalEvolutionRoutes from "./routes/medical-evolution.routes.js";
 
 import { authMiddleware } from "./middleware/auth.js";
@@ -131,6 +131,11 @@ app.use(
 app.use(
   "/prescriptions",
   prescriptionsRoutes
+);
+
+app.use(
+  "/prescription-pdf",
+  prescriptionPdfRoutes
 );
 
 app.use("/exams", examsRoutes);

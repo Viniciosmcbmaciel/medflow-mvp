@@ -9,28 +9,22 @@ async function main() {
     10
   );
 
-  const user =
-    await prisma.user.upsert({
-      where: {
-        email: "admin@medflow.com",
-      },
+  const user = await prisma.user.upsert({
+    where: {
+      email: "admin@medflow.com",
+    },
 
-      update: {
-        password,
-      },
+    update: {},
 
-      create: {
-        name: "Administrador",
-        email: "admin@medflow.com",
-        password,
-        role: "ADMIN",
-      },
-    });
+    create: {
+      name: "Administrador",
+      email: "admin@medflow.com",
+      password,
+      role: "ADMIN",
+    },
+  });
 
-  console.log(
-    "Usuário criado:",
-    user.email
-  );
+  console.log(user);
 }
 
 main()
