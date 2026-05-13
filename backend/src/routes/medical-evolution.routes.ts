@@ -1,84 +1,76 @@
-git add .import { Router } from "express";
+import { Router } from "express";
+
 import { prisma } from "../config/prisma.js";
 
 const router = Router();
 
-/* =========================
+/* =========================================
    LISTAR EVOLUÇÕES
-========================= */
-router.get("/:patientId", async (req, res) => {
-  try {
-    const { patientId } = req.params;
+========================================= */
+router.get(
+  "/:patientId",
+  async (req, res) => {
+    try {
+      const evolutions =
+        await prisma.medicalEvolution.findMany({
+          where: {
+            patientId:
+              req.params.patientId,
+          },
 
-    const evolutions =
-      await prisma.medicalEvolution.findMany({
-        where: {
-          patientId,
-        },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
 
-        orderBy: {
-          createdAt: "desc",
-        },
+      return res.json(evolutions);
+    } catch (error) {
+      console.error(error);
+
+      return res.status(500).json({
+        error:
+          "Erro ao buscar evoluções.",
       });
-
-    return res.json(evolutions);
-  } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      error: "Erro ao listar evoluções",
-    });
+    }
   }
-});
+);
 
-/* =========================
+/* =========================================
    CRIAR EVOLUÇÃO
-========================= */
-router.post("/", async (req, res) => {
-  try {
-    const {
-      patientId,
-      doctorId,
+========================================= */
+router.post(
+  "/",
+  async (req, res) => {
+    try {
+      const {
+        patientId,
+        chiefComplaint,
+        assessment,
+        plan,
+        notes,
+      } = req.body;
 
-      chiefComplaint,
-      diagnosis,
-      conduct,
-      observations,
-      cid,
+      const evolution =
+        await prisma.medicalEvolution.create({
+          data: {
+            patientId,
+            chiefComplaint,
+            assessment,
+            plan,
+            notes,
+          },
+        });
 
-      bloodPressure,
-      weight,
-      height,
-      temperature,
-    } = req.body;
+      return res.json(evolution);
+    } catch (error) {
+      console.error(error);
 
-    const evolution =
-      await prisma.medicalEvolution.create({
-        data: {
-          patientId,
-          doctorId,
-
-          chiefComplaint,
-          diagnosis,
-          conduct,
-          observations,
-          cid,
-
-          bloodPressure,
-          weight,
-          height,
-          temperature,
-        },
+      return res.status(500).json({
+        error:
+          "Erro ao criar evolução.",
       });
-
-    return res.status(201).json(evolution);
-  } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      error: "Erro ao salvar evolução",
-    });
+    }
   }
-});
+);
 
 export default router;
