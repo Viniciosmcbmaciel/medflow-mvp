@@ -50,9 +50,6 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    /* =========================================
-       SENHA
-    ========================================= */
     const validPassword =
       await bcrypt.compare(
         parsed.data.password,
@@ -65,18 +62,12 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    /* =========================================
-       TOKEN
-    ========================================= */
     const token = signToken({
       sub: user.id,
       email: user.email,
       role: user.role,
     });
 
-    /* =========================================
-       AUDITORIA
-    ========================================= */
     try {
       await createAuditLog({
         userId: user.id,
@@ -142,11 +133,6 @@ router.post(
           },
         });
 
-      return res.json({
-        message:
-          "Se o e-mail existir enviaremos o link.",
-      });
-
       if (!user) {
         return res.json({
           message:
@@ -188,6 +174,11 @@ router.post(
         user.email,
         resetLink
       );
+
+      return res.json({
+        message:
+          "Link enviado com sucesso.",
+      });
     } catch (error) {
       console.error(error);
 
