@@ -44,20 +44,14 @@ router.post(
     try {
       const {
         patientId,
-        chiefComplaint,
-        assessment,
-        plan,
-        notes,
+        content,
       } = req.body;
 
       const evolution =
         await prisma.medicalEvolution.create({
           data: {
             patientId,
-            chiefComplaint,
-            assessment,
-            plan,
-            notes,
+            content,
           },
         });
 
