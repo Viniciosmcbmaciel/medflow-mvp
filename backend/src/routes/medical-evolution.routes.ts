@@ -28,7 +28,7 @@ router.get(
       console.error(error);
 
       return res.status(500).json({
-        error:
+        message:
           "Erro ao buscar evoluções.",
       });
     }
@@ -38,33 +38,37 @@ router.get(
 /* =========================================
    CRIAR EVOLUÇÃO
 ========================================= */
-router.post(
-  "/",
-  async (req, res) => {
-    try {
-      const {
-        patientId,
-        content,
-      } = req.body;
+router.post("/", async (req, res) => {
+  try {
+    const {
+      patientId,
+      description,
+    } = req.body;
 
-      const evolution =
-        await prisma.medicalEvolution.create({
-          data: {
-            patientId,
-            content,
-          },
-        });
-
-      return res.json(evolution);
-    } catch (error) {
-      console.error(error);
-
-      return res.status(500).json({
-        error:
-          "Erro ao criar evolução.",
+    if (!patientId || !description) {
+      return res.status(400).json({
+        message:
+          "Dados obrigatórios.",
       });
     }
+
+    const evolution =
+      await prisma.medicalEvolution.create({
+        data: {
+          patientId,
+          description,
+        },
+      });
+
+    return res.json(evolution);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message:
+        "Erro ao criar evolução.",
+    });
   }
-);
+});
 
 export default router;
