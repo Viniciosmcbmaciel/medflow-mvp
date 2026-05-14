@@ -26,7 +26,7 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
-      const res = await fetch(
+      const response = await fetch(
         `${API_URL}/auth/login`,
         {
           method: "POST",
@@ -43,172 +43,82 @@ export default function LoginPage() {
         }
       );
 
-      if (!res.ok) {
-        throw new Error(
-          "Login inválido"
-        );
-      }
+      const data =
+        await response.json();
 
-      const data = await res.json();
+      if (!response.ok) {
+        alert(
+          data.message ||
+            "Erro ao fazer login"
+        );
+
+        return;
+      }
 
       localStorage.setItem(
         "medflow_token",
         data.token
       );
 
-      router.push("/");
+      localStorage.setItem(
+        "medflow_user",
+        JSON.stringify(data.user)
+      );
+
+      router.push("/agenda");
     } catch (error) {
       console.error(error);
 
-      alert("Erro ao realizar login");
+      alert(
+        "Erro ao conectar com servidor"
+      );
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="auth-shell">
-      {/* LADO VERDE */}
-      <div className="auth-brand-panel">
-        <div>
-          <div className="auth-badge">
-            Plataforma clínica inteligente
-          </div>
+    <div className="login-page">
+      <form
+        onSubmit={handleLogin}
+        className="login-card"
+      >
+        <h1>Entrar no sistema</h1>
 
-          <h1 className="auth-title">
-            MedFlow
-          </h1>
+        <p>
+          Faça login para acessar
+          o painel médico.
+        </p>
 
-          <p className="auth-description">
-            Gestão moderna de pacientes,
-            agenda, prescrições,
-            exames e prontuários em uma
-            experiência organizada,
-            rápida e profissional.
-          </p>
+        <input
+          type="email"
+          placeholder="E-mail"
+          value={email}
+          onChange={(e) =>
+            setEmail(e.target.value)
+          }
+        />
 
-          <div className="auth-feature-list">
-            <div className="auth-feature-card">
-              <strong>
-                Agenda inteligente
-              </strong>
+        <input
+          type="password"
+          placeholder="Senha"
+          value={password}
+          onChange={(e) =>
+            setPassword(
+              e.target.value
+            )
+          }
+        />
 
-              <span>
-                Controle semanal com
-                visual moderno e
-                profissional.
-              </span>
-            </div>
-
-            <div className="auth-feature-card">
-              <strong>
-                Prontuário digital
-              </strong>
-
-              <span>
-                Evolução clínica,
-                exames e prescrições.
-              </span>
-            </div>
-
-            <div className="auth-feature-card">
-              <strong>
-                Fluxo SaaS médico
-              </strong>
-
-              <span>
-                Estrutura moderna para
-                clínicas e consultórios.
-              </span>
-            </div>
-          </div>
-
-          <div className="auth-illustration">
-            <div className="auth-illustration-card auth-illustration-card-1">
-              <span>
-                Consultas
-              </span>
-
-              <strong>
-                128 agendadas
-              </strong>
-            </div>
-
-            <div className="auth-illustration-card auth-illustration-card-2">
-              <span>
-                Pacientes
-              </span>
-
-              <strong>
-                Base organizada
-              </strong>
-            </div>
-
-            <div className="auth-illustration-card auth-illustration-card-3">
-              <span>
-                Produtividade
-              </span>
-
-              <strong>
-                Fluxo premium
-              </strong>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* LOGIN */}
-      <div className="auth-form-panel">
-        <div className="auth-form-card">
-          <div className="auth-form-header">
-            <h2>
-              Entrar no sistema
-            </h2>
-
-            <p>
-              Faça login para acessar
-              o painel médico.
-            </p>
-          </div>
-
-          <form
-            onSubmit={handleLogin}
-          >
-            <input
-              className="input"
-              placeholder="E-mail"
-              type="email"
-              value={email}
-              onChange={(e) =>
-                setEmail(
-                  e.target.value
-                )
-              }
-            />
-
-            <input
-              className="input"
-              placeholder="Senha"
-              type="password"
-              value={password}
-              onChange={(e) =>
-                setPassword(
-                  e.target.value
-                )
-              }
-            />
-
-            <button
-              className="button-green"
-              disabled={loading}
-            >
-              {loading
-                ? "Entrando..."
-                : "Entrar"}
-            </button>
-          </form>
-        </div>
-      </div>
+        <button
+          type="submit"
+          disabled={loading}
+        >
+          {loading
+            ? "Entrando..."
+            : "Entrar"}
+        </button>
+      </form>
     </div>
   );
 }
