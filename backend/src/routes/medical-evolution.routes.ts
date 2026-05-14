@@ -42,10 +42,10 @@ router.post("/", async (req, res) => {
   try {
     const {
       patientId,
-      description,
+      notes,
     } = req.body;
 
-    if (!patientId || !description) {
+    if (!patientId || !notes) {
       return res.status(400).json({
         message:
           "Dados obrigatórios.",
@@ -56,8 +56,8 @@ router.post("/", async (req, res) => {
       await prisma.medicalEvolution.create({
         data: {
           patientId,
-          description,
-        },
+          notes,
+        } as any,
       });
 
     return res.json(evolution);
