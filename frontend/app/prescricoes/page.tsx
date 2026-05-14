@@ -1,6 +1,6 @@
 "use client";
 
-export default function ProntuariosPage() {
+export default function PrescricoesPage() {
   return (
     <div className="dashboard-layout">
       <aside className="sidebar">
@@ -40,25 +40,12 @@ export default function ProntuariosPage() {
               marginBottom: 20,
             }}
           >
-            Prontuários
+            Prescrições
           </h1>
-
-          <input
-            placeholder="Buscar paciente..."
-            style={{
-              width: "100%",
-              height: 52,
-              borderRadius: 14,
-              border:
-                "1px solid #dbeafe",
-              padding: "0 16px",
-              marginBottom: 20,
-            }}
-          />
 
           <div className="card">
             <strong>
-              João Silva
+              Prescrição ativa
             </strong>
 
             <p
@@ -66,8 +53,8 @@ export default function ProntuariosPage() {
                 marginTop: 10,
               }}
             >
-              Histórico médico,
-              prescrições e exames.
+              Dipirona 500mg
+              8/8h por 5 dias.
             </p>
           </div>
         </div>
