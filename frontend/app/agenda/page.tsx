@@ -11,9 +11,12 @@ import ptBrLocale from "@fullcalendar/core/locales/pt-br";
 import { useState } from "react";
 
 type Appointment = {
-  id: number;
+  id: string;
+
   title: string;
+
   start: string;
+
   end: string;
 
   status:
@@ -27,7 +30,7 @@ export default function AgendaPage() {
   const [events, setEvents] =
     useState<Appointment[]>([
       {
-        id: 1,
+        id: "1",
 
         title:
           "Consulta • João Silva",
@@ -70,8 +73,10 @@ export default function AgendaPage() {
   const [source, setSource] =
     useState("");
 
-  const [appointmentType, setAppointmentType] =
-    useState("Consulta");
+  const [
+    appointmentType,
+    setAppointmentType,
+  ] = useState("Consulta");
 
   function handleDateClick(
     info: any
@@ -105,7 +110,7 @@ export default function AgendaPage() {
       ...events,
 
       {
-        id: Date.now(),
+        id: Date.now().toString(),
 
         title: `${appointmentType} • ${patientName}`,
 
@@ -300,7 +305,6 @@ export default function AgendaPage() {
               padding: 36,
             }}
           >
-            {/* HEADER */}
             <div
               style={{
                 display: "flex",
@@ -346,7 +350,6 @@ export default function AgendaPage() {
               </button>
             </div>
 
-            {/* FORM */}
             <div
               style={{
                 display: "grid",
@@ -389,10 +392,12 @@ export default function AgendaPage() {
                   type="datetime-local"
                   className="modal-input"
                   value={
-                    selectedDate.slice(
-                      0,
-                      16
-                    )
+                    selectedDate
+                      ? selectedDate.slice(
+                          0,
+                          16
+                        )
+                      : ""
                   }
                   onChange={(e) =>
                     setSelectedDate(
@@ -538,7 +543,6 @@ export default function AgendaPage() {
               </div>
             </div>
 
-            {/* FOOTER */}
             <div
               style={{
                 display: "flex",
@@ -635,18 +639,12 @@ export default function AgendaPage() {
                 style={{
                   background:
                     "#ef4444",
-
                   color: "white",
-
                   border: "none",
-
                   padding:
                     "14px 20px",
-
                   borderRadius: 14,
-
                   fontWeight: 700,
-
                   cursor:
                     "pointer",
                 }}
@@ -663,18 +661,12 @@ export default function AgendaPage() {
                 style={{
                   background:
                     "#0f172a",
-
                   color: "white",
-
                   border: "none",
-
                   padding:
                     "14px 20px",
-
                   borderRadius: 14,
-
                   fontWeight: 700,
-
                   cursor:
                     "pointer",
                 }}
