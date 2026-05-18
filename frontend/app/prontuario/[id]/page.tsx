@@ -1,8 +1,15 @@
 "use client";
 
-export default function ProntuariosPage() {
+import { useParams } from "next/navigation";
+
+export default function ProntuarioPacientePage() {
+  const params = useParams();
+
+  const patientId = params.id;
+
   return (
     <div className="dashboard-layout">
+      {/* SIDEBAR */}
       <aside className="sidebar">
         <h1 className="sidebar-title">
           MedFlow
@@ -31,6 +38,7 @@ export default function ProntuariosPage() {
         </nav>
       </aside>
 
+      {/* CONTEÚDO */}
       <main className="main-content">
         <div className="card">
           <h1
@@ -40,35 +48,71 @@ export default function ProntuariosPage() {
               marginBottom: 20,
             }}
           >
-            Prontuários
+            Prontuário do Paciente
           </h1>
 
-          <input
-            placeholder="Buscar paciente..."
+          <div
             style={{
-              width: "100%",
-              height: 52,
-              borderRadius: 14,
-              border:
-                "1px solid #dbeafe",
-              padding: "0 16px",
               marginBottom: 20,
             }}
-          />
-
-          <div className="card">
+          >
             <strong>
-              João Silva
-            </strong>
+              ID do paciente:
+            </strong>{" "}
+            {patientId}
+          </div>
 
-            <p
-              style={{
-                marginTop: 10,
-              }}
-            >
-              Histórico médico,
-              prescrições e exames.
-            </p>
+          <div
+            style={{
+              display: "grid",
+              gap: 16,
+            }}
+          >
+            <div className="card">
+              <strong>
+                Histórico Clínico
+              </strong>
+
+              <p
+                style={{
+                  marginTop: 10,
+                }}
+              >
+                Paciente com
+                acompanhamento
+                médico.
+              </p>
+            </div>
+
+            <div className="card">
+              <strong>
+                Prescrições
+              </strong>
+
+              <p
+                style={{
+                  marginTop: 10,
+                }}
+              >
+                Dipirona 500mg
+                prescrita.
+              </p>
+            </div>
+
+            <div className="card">
+              <strong>
+                Exames
+              </strong>
+
+              <p
+                style={{
+                  marginTop: 10,
+                }}
+              >
+                Hemograma e raio-x
+                anexados.
+              </p>
+            </div>
           </div>
         </div>
       </main>
