@@ -1,20 +1,85 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-const patients = [
-  {
-    id: 1,
-    name: "João Silva",
-  },
-  {
-    id: 2,
-    name: "Maria Souza",
-  },
-];
+type Patient = {
+  id: number;
+  name: string;
+  birthDate: string;
+  cpf: string;
+  phone: string;
+  email: string;
+  insurance: string;
+};
 
 export default function PacientesPage() {
-  const router = useRouter();
+  const [openModal, setOpenModal] =
+    useState(false);
+
+  const [patients, setPatients] =
+    useState<Patient[]>([
+      {
+        id: 1,
+        name: "João Silva",
+        birthDate: "1990-05-10",
+        cpf: "000.000.000-00",
+        phone: "(61) 99999-9999",
+        email: "joao@email.com",
+        insurance: "Unimed",
+      },
+    ]);
+
+  const [name, setName] =
+    useState("");
+
+  const [birthDate, setBirthDate] =
+    useState("");
+
+  const [cpf, setCpf] =
+    useState("");
+
+  const [phone, setPhone] =
+    useState("");
+
+  const [email, setEmail] =
+    useState("");
+
+  const [insurance, setInsurance] =
+    useState("");
+
+  function createPatient() {
+    if (!name) {
+      alert(
+        "Informe o nome do paciente"
+      );
+
+      return;
+    }
+
+    const newPatient = {
+      id: Date.now(),
+      name,
+      birthDate,
+      cpf,
+      phone,
+      email,
+      insurance,
+    };
+
+    setPatients([
+      ...patients,
+      newPatient,
+    ]);
+
+    setOpenModal(false);
+
+    setName("");
+    setBirthDate("");
+    setCpf("");
+    setPhone("");
+    setEmail("");
+    setInsurance("");
+  }
 
   return (
     <div className="dashboard-layout">
@@ -50,15 +115,45 @@ export default function PacientesPage() {
       {/* CONTEÚDO */}
       <main className="main-content">
         <div className="card">
-          <h1
+          <div
             style={{
-              fontSize: 32,
-              fontWeight: 800,
-              marginBottom: 20,
+              display: "flex",
+              justifyContent:
+                "space-between",
+              alignItems: "center",
+              marginBottom: 24,
             }}
           >
-            Pacientes
-          </h1>
+            <div>
+              <h1
+                style={{
+                  fontSize: 32,
+                  fontWeight: 800,
+                }}
+              >
+                Pacientes
+              </h1>
+
+              <p
+                style={{
+                  color: "#64748b",
+                  marginTop: 6,
+                }}
+              >
+                Gerencie os pacientes
+                cadastrados.
+              </p>
+            </div>
+
+            <button
+              className="primary-button"
+              onClick={() =>
+                setOpenModal(true)
+              }
+            >
+              + Novo Paciente
+            </button>
+          </div>
 
           <div
             style={{
@@ -71,50 +166,62 @@ export default function PacientesPage() {
                 <div
                   key={patient.id}
                   style={{
+                    border:
+                      "1px solid #e2e8f0",
+                    borderRadius: 18,
+                    padding: 20,
+                    background:
+                      "#ffffff",
                     display: "flex",
                     justifyContent:
                       "space-between",
                     alignItems:
                       "center",
-                    padding: 20,
-                    border:
-                      "1px solid #e2e8f0",
-                    borderRadius: 18,
-                    background:
-                      "white",
                   }}
                 >
-                  <strong>
-                    {patient.name}
-                  </strong>
+                  <div>
+                    <h2
+                      style={{
+                        fontSize: 20,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {patient.name}
+                    </h2>
+
+                    <p>
+                      CPF:{" "}
+                      {patient.cpf}
+                    </p>
+
+                    <p>
+                      Convênio:{" "}
+                      {
+                        patient.insurance
+                      }
+                    </p>
+                  </div>
 
                   <div
                     style={{
                       display: "flex",
-                      gap: 12,
+                      gap: 10,
                     }}
                   >
-                    <button
+                    <a
+                      href={`/prontuario/${patient.id}`}
                       className="primary-button"
-                      onClick={() =>
-                        router.push(
-                          "/prontuarios"
-                        )
-                      }
                     >
-                      Abrir prontuário
-                    </button>
+                      Abrir
+                      Prontuário
+                    </a>
 
-                    <button
+                    <a
+                      href="/agenda"
                       className="primary-button"
-                      onClick={() =>
-                        router.push(
-                          "/agenda"
-                        )
-                      }
                     >
                       Agendar
-                    </button>
+                    </a>
                   </div>
                 </div>
               )
@@ -122,6 +229,131 @@ export default function PacientesPage() {
           </div>
         </div>
       </main>
+
+      {/* MODAL */}
+      {openModal && (
+        <div className="premium-modal-overlay">
+          <div
+            className="premium-modal"
+            style={{
+              maxWidth: 650,
+              padding: 30,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent:
+                  "space-between",
+                alignItems: "center",
+                marginBottom: 24,
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: 28,
+                  fontWeight: 800,
+                }}
+              >
+                Novo Paciente
+              </h2>
+
+              <button
+                className="primary-button"
+                onClick={() =>
+                  setOpenModal(
+                    false
+                  )
+                }
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gap: 16,
+              }}
+            >
+              <input
+                className="modal-input"
+                placeholder="Nome completo"
+                value={name}
+                onChange={(e) =>
+                  setName(
+                    e.target.value
+                  )
+                }
+              />
+
+              <input
+                type="date"
+                className="modal-input"
+                value={birthDate}
+                onChange={(e) =>
+                  setBirthDate(
+                    e.target.value
+                  )
+                }
+              />
+
+              <input
+                className="modal-input"
+                placeholder="CPF"
+                value={cpf}
+                onChange={(e) =>
+                  setCpf(
+                    e.target.value
+                  )
+                }
+              />
+
+              <input
+                className="modal-input"
+                placeholder="Telefone"
+                value={phone}
+                onChange={(e) =>
+                  setPhone(
+                    e.target.value
+                  )
+                }
+              />
+
+              <input
+                className="modal-input"
+                placeholder="E-mail"
+                value={email}
+                onChange={(e) =>
+                  setEmail(
+                    e.target.value
+                  )
+                }
+              />
+
+              <input
+                className="modal-input"
+                placeholder="Convênio"
+                value={insurance}
+                onChange={(e) =>
+                  setInsurance(
+                    e.target.value
+                  )
+                }
+              />
+
+              <button
+                className="primary-button"
+                onClick={
+                  createPatient
+                }
+              >
+                Salvar Paciente
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
