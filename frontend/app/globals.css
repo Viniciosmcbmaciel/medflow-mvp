@@ -384,3 +384,28 @@ body {
 .secondary-button:hover {
   background: #e2e8f0;
 }
+
+/* =========================================
+   PDF PRINT
+========================================= */
+
+@media print {
+  .sidebar,
+  .primary-button,
+  .secondary-button {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .main-content {
+    padding: 0 !important;
+  }
+}

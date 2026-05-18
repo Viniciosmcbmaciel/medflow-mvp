@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useRef,
+  useState,
+} from "react";
 
 type Medication = {
   id: string;
@@ -10,6 +13,9 @@ type Medication = {
 };
 
 export default function PrescricoesPage() {
+  const prescriptionRef =
+    useRef<HTMLDivElement>(null);
+
   const [patientName, setPatientName] =
     useState("João Silva");
 
@@ -44,7 +50,9 @@ export default function PrescricoesPage() {
     ]);
   }
 
-  function removeMedication(id: string) {
+  function removeMedication(
+    id: string
+  ) {
     setMedications((prev) =>
       prev.filter(
         (med) => med.id !== id
@@ -72,7 +80,13 @@ export default function PrescricoesPage() {
     );
   }
 
-  function printPrescription() {
+  function savePrescription() {
+    alert(
+      "Prescrição salva com sucesso!"
+    );
+  }
+
+  function generatePDF() {
     window.print();
   }
 
@@ -141,14 +155,30 @@ export default function PrescricoesPage() {
               </p>
             </div>
 
-            <button
-              className="primary-button"
-              onClick={
-                printPrescription
-              }
+            <div
+              style={{
+                display: "flex",
+                gap: 12,
+              }}
             >
-              📄 Imprimir / PDF
-            </button>
+              <button
+                className="secondary-button"
+                onClick={
+                  savePrescription
+                }
+              >
+                💾 Salvar
+              </button>
+
+              <button
+                className="primary-button"
+                onClick={
+                  generatePDF
+                }
+              >
+                📄 Gerar PDF
+              </button>
+            </div>
           </div>
 
           {/* PACIENTE */}
@@ -212,11 +242,15 @@ export default function PrescricoesPage() {
 
           {/* RECEITUARIO */}
           <div
+            ref={prescriptionRef}
             style={{
               border:
                 "2px solid #dcfce7",
+
               borderRadius: 24,
+
               padding: 28,
+
               background: "#f0fdf4",
             }}
           >
@@ -225,7 +259,9 @@ export default function PrescricoesPage() {
                 display: "flex",
                 justifyContent:
                   "space-between",
+
                 alignItems: "center",
+
                 marginBottom: 24,
               }}
             >
@@ -240,7 +276,9 @@ export default function PrescricoesPage() {
 
               <button
                 className="primary-button"
-                onClick={addMedication}
+                onClick={
+                  addMedication
+                }
               >
                 + Medicamento
               </button>
@@ -262,8 +300,11 @@ export default function PrescricoesPage() {
                     style={{
                       background:
                         "white",
+
                       borderRadius: 18,
+
                       padding: 20,
+
                       border:
                         "1px solid #dcfce7",
                     }}
@@ -272,9 +313,12 @@ export default function PrescricoesPage() {
                       style={{
                         display:
                           "grid",
+
                         gridTemplateColumns:
                           "2fr 2fr 1fr auto",
+
                         gap: 14,
+
                         alignItems:
                           "end",
                       }}
@@ -360,14 +404,20 @@ export default function PrescricoesPage() {
                         style={{
                           background:
                             "#ef4444",
+
                           color: "white",
+
                           border:
                             "none",
+
                           padding:
                             "14px 16px",
+
                           borderRadius: 14,
+
                           cursor:
                             "pointer",
+
                           fontWeight: 700,
                         }}
                       >
@@ -409,7 +459,9 @@ export default function PrescricoesPage() {
             <div
               style={{
                 marginTop: 40,
+
                 paddingTop: 24,
+
                 borderTop:
                   "1px solid #bbf7d0",
               }}
@@ -423,6 +475,7 @@ export default function PrescricoesPage() {
                   style={{
                     borderTop:
                       "1px solid #0f172a",
+
                     marginBottom: 8,
                   }}
                 />
