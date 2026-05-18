@@ -231,129 +231,205 @@ export default function PacientesPage() {
       </main>
 
       {/* MODAL */}
-      {openModal && (
-        <div className="premium-modal-overlay">
-          <div
-            className="premium-modal"
+{openModal && (
+  <div className="premium-modal-overlay">
+    <div
+      className="premium-modal"
+      style={{
+        maxWidth: 820,
+        padding: 36,
+      }}
+    >
+      {/* HEADER */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent:
+            "space-between",
+          alignItems: "center",
+          marginBottom: 30,
+        }}
+      >
+        <div>
+          <h2
             style={{
-              maxWidth: 650,
-              padding: 30,
+              fontSize: 32,
+              fontWeight: 800,
+              color: "#0f172a",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent:
-                  "space-between",
-                alignItems: "center",
-                marginBottom: 24,
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: 28,
-                  fontWeight: 800,
-                }}
-              >
-                Novo Paciente
-              </h2>
+            Novo Paciente
+          </h2>
 
-              <button
-                className="primary-button"
-                onClick={() =>
-                  setOpenModal(
-                    false
-                  )
-                }
-              >
-                Fechar
-              </button>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gap: 16,
-              }}
-            >
-              <input
-                className="modal-input"
-                placeholder="Nome completo"
-                value={name}
-                onChange={(e) =>
-                  setName(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                type="date"
-                className="modal-input"
-                value={birthDate}
-                onChange={(e) =>
-                  setBirthDate(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                className="modal-input"
-                placeholder="CPF"
-                value={cpf}
-                onChange={(e) =>
-                  setCpf(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                className="modal-input"
-                placeholder="Telefone"
-                value={phone}
-                onChange={(e) =>
-                  setPhone(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                className="modal-input"
-                placeholder="E-mail"
-                value={email}
-                onChange={(e) =>
-                  setEmail(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                className="modal-input"
-                placeholder="Convênio"
-                value={insurance}
-                onChange={(e) =>
-                  setInsurance(
-                    e.target.value
-                  )
-                }
-              />
-
-              <button
-                className="primary-button"
-                onClick={
-                  createPatient
-                }
-              >
-                Salvar Paciente
-              </button>
-            </div>
-          </div>
+          <p
+            style={{
+              color: "#64748b",
+              marginTop: 8,
+            }}
+          >
+            Cadastre um novo
+            paciente no sistema.
+          </p>
         </div>
-      )}
+
+        <button
+          className="secondary-button"
+          onClick={() =>
+            setOpenModal(false)
+          }
+        >
+          Fechar
+        </button>
+      </div>
+
+      {/* FORM */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns:
+            "1fr 1fr",
+          gap: 18,
+        }}
+      >
+        <div
+          style={{
+            gridColumn:
+              "1 / span 2",
+          }}
+        >
+          <label className="form-label">
+            Nome completo
+          </label>
+
+          <input
+            className="modal-input"
+            placeholder="Digite o nome completo"
+            value={name}
+            onChange={(e) =>
+              setName(
+                e.target.value
+              )
+            }
+          />
+        </div>
+
+        <div>
+          <label className="form-label">
+            Data de nascimento
+          </label>
+
+          <input
+            type="date"
+            className="modal-input"
+            value={birthDate}
+            onChange={(e) =>
+              setBirthDate(
+                e.target.value
+              )
+            }
+          />
+        </div>
+
+        <div>
+          <label className="form-label">
+            CPF
+          </label>
+
+          <input
+            className="modal-input"
+            placeholder="000.000.000-00"
+            value={cpf}
+            onChange={(e) =>
+              setCpf(
+                e.target.value
+              )
+            }
+          />
+        </div>
+
+        <div>
+          <label className="form-label">
+            Telefone
+          </label>
+
+          <input
+            className="modal-input"
+            placeholder="(61) 99999-9999"
+            value={phone}
+            onChange={(e) =>
+              setPhone(
+                e.target.value
+              )
+            }
+          />
+        </div>
+
+        <div>
+          <label className="form-label">
+            E-mail
+          </label>
+
+          <input
+            className="modal-input"
+            placeholder="email@paciente.com"
+            value={email}
+            onChange={(e) =>
+              setEmail(
+                e.target.value
+              )
+            }
+          />
+        </div>
+
+        <div
+          style={{
+            gridColumn:
+              "1 / span 2",
+          }}
+        >
+          <label className="form-label">
+            Convênio
+          </label>
+
+          <input
+            className="modal-input"
+            placeholder="Ex: Unimed, Bradesco Saúde..."
+            value={insurance}
+            onChange={(e) =>
+              setInsurance(
+                e.target.value
+              )
+            }
+          />
+        </div>
+      </div>
+
+      {/* FOOTER */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent:
+            "flex-end",
+          gap: 12,
+          marginTop: 32,
+        }}
+      >
+        <button
+          className="secondary-button"
+          onClick={() =>
+            setOpenModal(false)
+          }
+        >
+          Cancelar
+        </button>
+
+        <button
+          className="primary-button"
+          onClick={createPatient}
+        >
+          Salvar Paciente
+        </button>
+      </div>
     </div>
-  );
-}
+  </div>
+)}
