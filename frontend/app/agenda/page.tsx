@@ -1,25 +1,31 @@
 "use client";
 
-import { useState } from "react";
-
 import FullCalendar from "@fullcalendar/react";
 
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
+import ptBrLocale from "@fullcalendar/core/locales/pt-br";
+
+import { useState } from "react";
+
 type Appointment = {
   title: string;
   start: string;
+  end: string;
 };
 
 export default function AgendaPage() {
   const [events, setEvents] =
     useState<Appointment[]>([
       {
-        title: "João Silva",
+        title:
+          "Consulta • João Silva",
         start:
-          "2026-05-14T09:00:00",
+          "2026-05-18T09:00:00",
+        end:
+          "2026-05-18T10:00:00",
       },
     ]);
 
@@ -44,12 +50,13 @@ export default function AgendaPage() {
   const [source, setSource] =
     useState("");
 
+  const [appointmentType, setAppointmentType] =
+    useState("Consulta");
+
   function handleDateClick(
     info: any
   ) {
-    setSelectedDate(
-      info.dateStr.slice(0, 16)
-    );
+    setSelectedDate(info.dateStr);
 
     setOpenModal(true);
   }
@@ -63,14 +70,27 @@ export default function AgendaPage() {
       return;
     }
 
-    const newEvent = {
-      title: patientName,
-      start: selectedDate,
-    };
+    const startDate =
+      selectedDate;
+
+    const endDate = new Date(
+      startDate
+    );
+
+    endDate.setMinutes(
+      endDate.getMinutes() + 60
+    );
 
     setEvents([
       ...events,
-      newEvent,
+      {
+        title: `${appointmentType} • ${patientName}`,
+
+        start: startDate,
+
+        end:
+          endDate.toISOString(),
+      },
     ]);
 
     setOpenModal(false);
@@ -113,39 +133,34 @@ export default function AgendaPage() {
         </nav>
       </aside>
 
-      {/* CONTEÚDO */}
+      {/* MAIN */}
       <main className="main-content">
         <div className="card">
           <div
             style={{
-              display: "flex",
-              justifyContent:
-                "space-between",
-              alignItems: "center",
-              marginBottom: 20,
+              marginBottom: 24,
             }}
           >
-            <div>
-              <h1
-                style={{
-                  fontSize: 32,
-                  fontWeight: 800,
-                }}
-              >
-                Agenda Médica
-              </h1>
+            <h1
+              style={{
+                fontSize: 34,
+                fontWeight: 800,
+              }}
+            >
+              Agenda Médica
+            </h1>
 
-              <p
-                style={{
-                  color: "#64748b",
-                  marginTop: 6,
-                }}
-              >
-                Clique em um horário
-                para criar um
-                agendamento.
-              </p>
-            </div>
+            <p
+              style={{
+                color: "#64748b",
+                marginTop: 8,
+              }}
+            >
+              Clique em qualquer
+              horário da agenda para
+              criar um novo
+              agendamento.
+            </p>
           </div>
 
           <FullCalendar
@@ -156,16 +171,16 @@ export default function AgendaPage() {
             ]}
             initialView="timeGridWeek"
             selectable={true}
+            locale={ptBrLocale}
             dateClick={
               handleDateClick
             }
-            locale="pt-br"
-            height="80vh"
+            allDaySlot={false}
             slotMinTime="07:00:00"
             slotMaxTime="22:00:00"
-            allDaySlot={false}
+            height="80vh"
+            events={events}
             nowIndicator={true}
-            expandRows={true}
             weekends={true}
             headerToolbar={{
               left:
@@ -174,14 +189,6 @@ export default function AgendaPage() {
               right:
                 "dayGridMonth,timeGridWeek,timeGridDay",
             }}
-            buttonText={{
-              today: "Hoje",
-              month: "Mês",
-              week: "Semana",
-              day: "Dia",
-            }}
-            events={events}
-            eventColor="#16a34a"
           />
         </div>
       </main>
@@ -192,117 +199,274 @@ export default function AgendaPage() {
           <div
             className="premium-modal"
             style={{
-              maxWidth: 600,
-              padding: 30,
+              maxWidth: 850,
+              padding: 36,
             }}
           >
+            {/* HEADER */}
             <div
               style={{
                 display: "flex",
                 justifyContent:
                   "space-between",
-                alignItems: "center",
-                marginBottom: 20,
+                alignItems:
+                  "center",
+                marginBottom: 28,
               }}
             >
-              <h2
-                style={{
-                  fontSize: 28,
-                  fontWeight: 800,
-                }}
-              >
-                Novo Agendamento
-              </h2>
+              <div>
+                <h2
+                  style={{
+                    fontSize: 32,
+                    fontWeight: 800,
+                  }}
+                >
+                  Novo Agendamento
+                </h2>
+
+                <p
+                  style={{
+                    color:
+                      "#64748b",
+                    marginTop: 8,
+                  }}
+                >
+                  Configure o
+                  atendimento do
+                  paciente.
+                </p>
+              </div>
 
               <button
+                className="secondary-button"
                 onClick={() =>
                   setOpenModal(
                     false
                   )
                 }
-                className="primary-button"
               >
                 Fechar
               </button>
             </div>
 
+            {/* FORM */}
             <div
               style={{
                 display: "grid",
-                gap: 16,
+                gridTemplateColumns:
+                  "1fr 1fr",
+                gap: 18,
               }}
             >
-              <input
-                type="datetime-local"
-                value={selectedDate}
-                onChange={(e) =>
-                  setSelectedDate(
-                    e.target.value
-                  )
-                }
-                className="modal-input"
-              />
+              <div
+                style={{
+                  gridColumn:
+                    "1 / span 2",
+                }}
+              >
+                <label className="form-label">
+                  Nome do paciente
+                </label>
 
-              <input
-                placeholder="Nome do paciente"
-                value={patientName}
-                onChange={(e) =>
-                  setPatientName(
-                    e.target.value
-                  )
-                }
-                className="modal-input"
-              />
+                <input
+                  className="modal-input"
+                  placeholder="Pesquisar ou digitar nome"
+                  value={
+                    patientName
+                  }
+                  onChange={(e) =>
+                    setPatientName(
+                      e.target
+                        .value
+                    )
+                  }
+                />
+              </div>
 
-              <input
-                type="date"
-                value={birthDate}
-                onChange={(e) =>
-                  setBirthDate(
-                    e.target.value
-                  )
-                }
-                className="modal-input"
-              />
+              <div>
+                <label className="form-label">
+                  Data e horário
+                </label>
 
-              <input
-                placeholder="CPF"
-                value={cpf}
-                onChange={(e) =>
-                  setCpf(
-                    e.target.value
-                  )
-                }
-                className="modal-input"
-              />
+                <input
+                  type="datetime-local"
+                  className="modal-input"
+                  value={
+                    selectedDate.slice(
+                      0,
+                      16
+                    )
+                  }
+                  onChange={(e) =>
+                    setSelectedDate(
+                      e.target
+                        .value
+                    )
+                  }
+                />
+              </div>
 
-              <input
-                placeholder="Convênio ou Particular"
-                value={insurance}
-                onChange={(e) =>
-                  setInsurance(
-                    e.target.value
-                  )
-                }
-                className="modal-input"
-              />
+              <div>
+                <label className="form-label">
+                  Tipo de consulta
+                </label>
 
-              <input
-                placeholder="Como conheceu?"
-                value={source}
-                onChange={(e) =>
-                  setSource(
-                    e.target.value
+                <select
+                  className="modal-input"
+                  value={
+                    appointmentType
+                  }
+                  onChange={(e) =>
+                    setAppointmentType(
+                      e.target
+                        .value
+                    )
+                  }
+                >
+                  <option>
+                    Consulta
+                  </option>
+
+                  <option>
+                    Retorno
+                  </option>
+
+                  <option>
+                    Avaliação
+                  </option>
+
+                  <option>
+                    Teleconsulta
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label className="form-label">
+                  Data de nascimento
+                </label>
+
+                <input
+                  type="date"
+                  className="modal-input"
+                  value={
+                    birthDate
+                  }
+                  onChange={(e) =>
+                    setBirthDate(
+                      e.target
+                        .value
+                    )
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="form-label">
+                  CPF
+                </label>
+
+                <input
+                  className="modal-input"
+                  placeholder="000.000.000-00"
+                  value={cpf}
+                  onChange={(e) =>
+                    setCpf(
+                      e.target
+                        .value
+                    )
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="form-label">
+                  Convênio
+                </label>
+
+                <input
+                  className="modal-input"
+                  placeholder="Particular ou convênio"
+                  value={
+                    insurance
+                  }
+                  onChange={(e) =>
+                    setInsurance(
+                      e.target
+                        .value
+                    )
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="form-label">
+                  Como conheceu
+                </label>
+
+                <select
+                  className="modal-input"
+                  value={source}
+                  onChange={(e) =>
+                    setSource(
+                      e.target
+                        .value
+                    )
+                  }
+                >
+                  <option value="">
+                    Selecionar
+                  </option>
+
+                  <option>
+                    Instagram
+                  </option>
+
+                  <option>
+                    Google
+                  </option>
+
+                  <option>
+                    Indicação
+                  </option>
+
+                  <option>
+                    Convênio
+                  </option>
+
+                  <option>
+                    Outro
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            {/* FOOTER */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent:
+                  "flex-end",
+                gap: 12,
+                marginTop: 30,
+              }}
+            >
+              <button
+                className="secondary-button"
+                onClick={() =>
+                  setOpenModal(
+                    false
                   )
                 }
-                className="modal-input"
-              />
+              >
+                Cancelar
+              </button>
 
               <button
+                className="primary-button"
                 onClick={
                   createAppointment
                 }
-                className="primary-button"
               >
                 Salvar Agendamento
               </button>
