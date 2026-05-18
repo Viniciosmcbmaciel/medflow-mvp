@@ -11,26 +11,46 @@ import ptBrLocale from "@fullcalendar/core/locales/pt-br";
 import { useState } from "react";
 
 type Appointment = {
+  id: number;
   title: string;
   start: string;
   end: string;
+
+  status:
+    | "confirmado"
+    | "pendente"
+    | "cancelado"
+    | "concluido";
 };
 
 export default function AgendaPage() {
   const [events, setEvents] =
     useState<Appointment[]>([
       {
+        id: 1,
+
         title:
           "Consulta • João Silva",
+
         start:
           "2026-05-18T09:00:00",
+
         end:
           "2026-05-18T10:00:00",
+
+        status: "confirmado",
       },
     ]);
 
   const [openModal, setOpenModal] =
     useState(false);
+
+  const [
+    selectedAppointment,
+    setSelectedAppointment,
+  ] = useState<Appointment | null>(
+    null
+  );
 
   const [selectedDate, setSelectedDate] =
     useState("");
@@ -83,13 +103,18 @@ export default function AgendaPage() {
 
     setEvents([
       ...events,
+
       {
+        id: Date.now(),
+
         title: `${appointmentType} • ${patientName}`,
 
         start: startDate,
 
         end:
           endDate.toISOString(),
+
+        status: "pendente",
       },
     ]);
 
@@ -100,6 +125,45 @@ export default function AgendaPage() {
     setCpf("");
     setInsurance("");
     setSource("");
+  }
+
+  function updateStatus(
+    status:
+      | "confirmado"
+      | "cancelado"
+      | "concluido"
+  ) {
+    if (!selectedAppointment)
+      return;
+
+    setEvents((prev) =>
+      prev.map((event) =>
+        event.id ===
+        selectedAppointment.id
+          ? {
+              ...event,
+              status,
+            }
+          : event
+      )
+    );
+
+    setSelectedAppointment(null);
+  }
+
+  function deleteAppointment() {
+    if (!selectedAppointment)
+      return;
+
+    setEvents((prev) =>
+      prev.filter(
+        (event) =>
+          event.id !==
+          selectedAppointment.id
+      )
+    );
+
+    setSelectedAppointment(null);
   }
 
   return (
@@ -179,13 +243,46 @@ export default function AgendaPage() {
             slotMinTime="07:00:00"
             slotMaxTime="22:00:00"
             height="80vh"
-            events={events}
             nowIndicator={true}
             weekends={true}
+            eventClick={(info) => {
+              const appointment =
+                info.event
+                  .extendedProps
+                  .appointment;
+
+              setSelectedAppointment(
+                appointment
+              );
+            }}
+            events={events.map(
+              (event) => ({
+                ...event,
+
+                backgroundColor:
+                  event.status ===
+                  "confirmado"
+                    ? "#22c55e"
+                    : event.status ===
+                      "cancelado"
+                    ? "#ef4444"
+                    : event.status ===
+                      "concluido"
+                    ? "#2563eb"
+                    : "#f59e0b",
+
+                borderColor:
+                  "transparent",
+
+                appointment: event,
+              })
+            )}
             headerToolbar={{
               left:
                 "prev,next today",
+
               center: "title",
+
               right:
                 "dayGridMonth,timeGridWeek,timeGridDay",
             }}
@@ -193,7 +290,7 @@ export default function AgendaPage() {
         </div>
       </main>
 
-      {/* MODAL */}
+      {/* MODAL NOVO */}
       {openModal && (
         <div className="premium-modal-overlay">
           <div
@@ -469,6 +566,134 @@ export default function AgendaPage() {
                 }
               >
                 Salvar Agendamento
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL STATUS */}
+      {selectedAppointment && (
+        <div className="premium-modal-overlay">
+          <div
+            className="premium-modal"
+            style={{
+              maxWidth: 520,
+              padding: 30,
+            }}
+          >
+            <h2
+              style={{
+                fontSize: 28,
+                fontWeight: 800,
+                marginBottom: 12,
+              }}
+            >
+              Gerenciar Consulta
+            </h2>
+
+            <p
+              style={{
+                color: "#64748b",
+                marginBottom: 24,
+              }}
+            >
+              {
+                selectedAppointment.title
+              }
+            </p>
+
+            <div
+              style={{
+                display: "grid",
+                gap: 12,
+              }}
+            >
+              <button
+                className="primary-button"
+                onClick={() =>
+                  updateStatus(
+                    "confirmado"
+                  )
+                }
+              >
+                ✅ Confirmar
+              </button>
+
+              <button
+                className="secondary-button"
+                onClick={() =>
+                  updateStatus(
+                    "concluido"
+                  )
+                }
+              >
+                ✔️ Concluir
+              </button>
+
+              <button
+                style={{
+                  background:
+                    "#ef4444",
+
+                  color: "white",
+
+                  border: "none",
+
+                  padding:
+                    "14px 20px",
+
+                  borderRadius: 14,
+
+                  fontWeight: 700,
+
+                  cursor:
+                    "pointer",
+                }}
+                onClick={() =>
+                  updateStatus(
+                    "cancelado"
+                  )
+                }
+              >
+                ❌ Cancelar
+              </button>
+
+              <button
+                style={{
+                  background:
+                    "#0f172a",
+
+                  color: "white",
+
+                  border: "none",
+
+                  padding:
+                    "14px 20px",
+
+                  borderRadius: 14,
+
+                  fontWeight: 700,
+
+                  cursor:
+                    "pointer",
+                }}
+                onClick={
+                  deleteAppointment
+                }
+              >
+                🗑 Excluir
+              </button>
+
+              <button
+                className="secondary-button"
+                onClick={() =>
+                  setSelectedAppointment(
+                    null
+                  )
+                }
+              >
+                Fechar
               </button>
             </div>
           </div>
