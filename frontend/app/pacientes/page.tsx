@@ -404,7 +404,7 @@ export default function PacientesPage() {
         </div>
       </div>
 
-      {/* FOOTER */}
+            {/* FOOTER */}
       <div
         style={{
           display: "flex",
@@ -433,3 +433,7 @@ export default function PacientesPage() {
     </div>
   </div>
 )}
+
+    </div>
+  );
+}
