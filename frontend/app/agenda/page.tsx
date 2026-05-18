@@ -17,31 +17,69 @@ export default function AgendaPage() {
   const [events, setEvents] =
     useState<Appointment[]>([
       {
-        title: "Consulta",
+        title: "João Silva",
         start:
           "2026-05-14T09:00:00",
       },
     ]);
 
+  const [openModal, setOpenModal] =
+    useState(false);
+
+  const [selectedDate, setSelectedDate] =
+    useState("");
+
+  const [patientName, setPatientName] =
+    useState("");
+
+  const [birthDate, setBirthDate] =
+    useState("");
+
+  const [cpf, setCpf] =
+    useState("");
+
+  const [insurance, setInsurance] =
+    useState("");
+
+  const [source, setSource] =
+    useState("");
+
   function handleDateClick(
     info: any
   ) {
-    const patientName =
-      prompt(
-        "Nome do paciente:"
+    setSelectedDate(
+      info.dateStr.slice(0, 16)
+    );
+
+    setOpenModal(true);
+  }
+
+  function createAppointment() {
+    if (!patientName) {
+      alert(
+        "Informe o nome do paciente"
       );
 
-    if (!patientName) return;
+      return;
+    }
 
     const newEvent = {
       title: patientName,
-      start: info.dateStr,
+      start: selectedDate,
     };
 
     setEvents([
       ...events,
       newEvent,
     ]);
+
+    setOpenModal(false);
+
+    setPatientName("");
+    setBirthDate("");
+    setCpf("");
+    setInsurance("");
+    setSource("");
   }
 
   return (
@@ -104,14 +142,10 @@ export default function AgendaPage() {
                 }}
               >
                 Clique em um horário
-                para realizar um novo
+                para criar um
                 agendamento.
               </p>
             </div>
-
-            <button className="primary-button">
-              + Nova Consulta
-            </button>
           </div>
 
           <FullCalendar
@@ -148,14 +182,134 @@ export default function AgendaPage() {
             }}
             events={events}
             eventColor="#16a34a"
-            slotLabelFormat={{
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            }}
           />
         </div>
       </main>
+
+      {/* MODAL */}
+      {openModal && (
+        <div className="premium-modal-overlay">
+          <div
+            className="premium-modal"
+            style={{
+              maxWidth: 600,
+              padding: 30,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent:
+                  "space-between",
+                alignItems: "center",
+                marginBottom: 20,
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: 28,
+                  fontWeight: 800,
+                }}
+              >
+                Novo Agendamento
+              </h2>
+
+              <button
+                onClick={() =>
+                  setOpenModal(
+                    false
+                  )
+                }
+                className="primary-button"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gap: 16,
+              }}
+            >
+              <input
+                type="datetime-local"
+                value={selectedDate}
+                onChange={(e) =>
+                  setSelectedDate(
+                    e.target.value
+                  )
+                }
+                className="modal-input"
+              />
+
+              <input
+                placeholder="Nome do paciente"
+                value={patientName}
+                onChange={(e) =>
+                  setPatientName(
+                    e.target.value
+                  )
+                }
+                className="modal-input"
+              />
+
+              <input
+                type="date"
+                value={birthDate}
+                onChange={(e) =>
+                  setBirthDate(
+                    e.target.value
+                  )
+                }
+                className="modal-input"
+              />
+
+              <input
+                placeholder="CPF"
+                value={cpf}
+                onChange={(e) =>
+                  setCpf(
+                    e.target.value
+                  )
+                }
+                className="modal-input"
+              />
+
+              <input
+                placeholder="Convênio ou Particular"
+                value={insurance}
+                onChange={(e) =>
+                  setInsurance(
+                    e.target.value
+                  )
+                }
+                className="modal-input"
+              />
+
+              <input
+                placeholder="Como conheceu?"
+                value={source}
+                onChange={(e) =>
+                  setSource(
+                    e.target.value
+                  )
+                }
+                className="modal-input"
+              />
+
+              <button
+                onClick={
+                  createAppointment
+                }
+                className="primary-button"
+              >
+                Salvar Agendamento
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
