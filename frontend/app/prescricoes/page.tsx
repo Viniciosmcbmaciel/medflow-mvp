@@ -25,6 +25,15 @@ export default function PrescricoesPage() {
   const [doctorName, setDoctorName] =
     useState("Dr. MedFlow");
 
+  const [cid, setCid] =
+    useState("");
+
+  const [weight, setWeight] =
+    useState("");
+
+  const [allergies, setAllergies] =
+    useState("");
+
   const [notes, setNotes] =
     useState("");
 
@@ -115,8 +124,8 @@ export default function PrescricoesPage() {
             Prescrições
           </a>
 
-          <a href="/historico">
-            Histórico
+          <a href="/exames">
+            Exames
           </a>
         </nav>
       </aside>
@@ -150,8 +159,8 @@ export default function PrescricoesPage() {
                   marginTop: 8,
                 }}
               >
-                Prescrição digital
-                editável do paciente.
+                Prescrição médica
+                profissional.
               </p>
             </div>
 
@@ -181,65 +190,6 @@ export default function PrescricoesPage() {
             </div>
           </div>
 
-          {/* PACIENTE */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "1fr 1fr 1fr",
-              gap: 18,
-              marginBottom: 28,
-            }}
-          >
-            <div>
-              <label className="form-label">
-                Paciente
-              </label>
-
-              <input
-                className="modal-input"
-                value={patientName}
-                onChange={(e) =>
-                  setPatientName(
-                    e.target.value
-                  )
-                }
-              />
-            </div>
-
-            <div>
-              <label className="form-label">
-                Médico
-              </label>
-
-              <input
-                className="modal-input"
-                value={doctorName}
-                onChange={(e) =>
-                  setDoctorName(
-                    e.target.value
-                  )
-                }
-              />
-            </div>
-
-            <div>
-              <label className="form-label">
-                CRM
-              </label>
-
-              <input
-                className="modal-input"
-                value={crm}
-                onChange={(e) =>
-                  setCrm(
-                    e.target.value
-                  )
-                }
-              />
-            </div>
-          </div>
-
           {/* RECEITUARIO */}
           <div
             ref={prescriptionRef}
@@ -249,11 +199,135 @@ export default function PrescricoesPage() {
 
               borderRadius: 24,
 
-              padding: 28,
+              padding: 32,
 
               background: "#f0fdf4",
             }}
           >
+            {/* DADOS */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "1fr 1fr 1fr",
+                gap: 18,
+                marginBottom: 24,
+              }}
+            >
+              <div>
+                <label className="form-label">
+                  Paciente
+                </label>
+
+                <input
+                  className="modal-input"
+                  value={patientName}
+                  onChange={(e) =>
+                    setPatientName(
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="form-label">
+                  Médico
+                </label>
+
+                <input
+                  className="modal-input"
+                  value={doctorName}
+                  onChange={(e) =>
+                    setDoctorName(
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="form-label">
+                  CRM
+                </label>
+
+                <input
+                  className="modal-input"
+                  value={crm}
+                  onChange={(e) =>
+                    setCrm(
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+            </div>
+
+            {/* INFO CLINICA */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "1fr 1fr 1fr",
+                gap: 18,
+                marginBottom: 30,
+              }}
+            >
+              <div>
+                <label className="form-label">
+                  CID
+                </label>
+
+                <input
+                  className="modal-input"
+                  placeholder="Ex: J11"
+                  value={cid}
+                  onChange={(e) =>
+                    setCid(
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="form-label">
+                  Peso
+                </label>
+
+                <input
+                  className="modal-input"
+                  placeholder="Kg"
+                  value={weight}
+                  onChange={(e) =>
+                    setWeight(
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="form-label">
+                  Alergias
+                </label>
+
+                <input
+                  className="modal-input"
+                  placeholder="Ex: Penicilina"
+                  value={
+                    allergies
+                  }
+                  onChange={(e) =>
+                    setAllergies(
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+            </div>
+
+            {/* HEADER MED */}
             <div
               style={{
                 display: "flex",
@@ -301,12 +375,15 @@ export default function PrescricoesPage() {
                       background:
                         "white",
 
-                      borderRadius: 18,
+                      borderRadius: 20,
 
-                      padding: 20,
+                      padding: 22,
 
                       border:
                         "1px solid #dcfce7",
+
+                      boxShadow:
+                        "0 4px 14px rgba(15,23,42,.04)",
                     }}
                   >
                     <div
@@ -432,7 +509,7 @@ export default function PrescricoesPage() {
             {/* OBSERVACOES */}
             <div
               style={{
-                marginTop: 28,
+                marginTop: 30,
               }}
             >
               <label className="form-label">
@@ -449,7 +526,7 @@ export default function PrescricoesPage() {
                   )
                 }
                 style={{
-                  minHeight: 140,
+                  minHeight: 150,
                   resize: "vertical",
                 }}
               />
@@ -458,9 +535,9 @@ export default function PrescricoesPage() {
             {/* ASSINATURA */}
             <div
               style={{
-                marginTop: 40,
+                marginTop: 50,
 
-                paddingTop: 24,
+                paddingTop: 28,
 
                 borderTop:
                   "1px solid #bbf7d0",
@@ -468,7 +545,7 @@ export default function PrescricoesPage() {
             >
               <div
                 style={{
-                  width: 280,
+                  width: 320,
                 }}
               >
                 <div
@@ -476,20 +553,36 @@ export default function PrescricoesPage() {
                     borderTop:
                       "1px solid #0f172a",
 
-                    marginBottom: 8,
+                    marginBottom: 10,
                   }}
                 />
 
-                <strong>
+                <strong
+                  style={{
+                    fontSize: 18,
+                  }}
+                >
                   {doctorName}
                 </strong>
 
                 <p
                   style={{
                     color: "#64748b",
+                    marginTop: 4,
                   }}
                 >
                   {crm}
+                </p>
+
+                <p
+                  style={{
+                    color: "#64748b",
+                    marginTop: 6,
+                    fontSize: 13,
+                  }}
+                >
+                  Assinatura médica
+                  digital
                 </p>
               </div>
             </div>
