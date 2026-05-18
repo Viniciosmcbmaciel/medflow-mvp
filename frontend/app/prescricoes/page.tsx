@@ -16,17 +16,37 @@ export default function PrescricoesPage() {
   const prescriptionRef =
     useRef<HTMLDivElement>(null);
 
+  /* =========================================
+     CLINICA
+  ========================================= */
+
+  const [clinicName, setClinicName] =
+    useState("MedFlow Clinic");
+
+  const [
+    clinicAddress,
+    setClinicAddress,
+  ] = useState(
+    "Brasília - DF"
+  );
+
+  const [clinicPhone, setClinicPhone] =
+    useState("(61) 99999-9999");
+
+  /* =========================================
+     PACIENTE
+  ========================================= */
+
   const [patientName, setPatientName] =
     useState("João Silva");
 
-  const [crm, setCrm] =
-    useState("CRM 123456");
-
-  const [doctorName, setDoctorName] =
-    useState("Dr. MedFlow");
-
-  const [cid, setCid] =
+  const [patientCpf, setPatientCpf] =
     useState("");
+
+  const [
+    patientBirthDate,
+    setPatientBirthDate,
+  ] = useState("");
 
   const [weight, setWeight] =
     useState("");
@@ -34,8 +54,29 @@ export default function PrescricoesPage() {
   const [allergies, setAllergies] =
     useState("");
 
+  const [cid, setCid] =
+    useState("");
+
+  /* =========================================
+     MEDICO
+  ========================================= */
+
+  const [crm, setCrm] =
+    useState("CRM 123456");
+
+  const [doctorName, setDoctorName] =
+    useState("Dr. MedFlow");
+
+  /* =========================================
+     OBSERVACOES
+  ========================================= */
+
   const [notes, setNotes] =
     useState("");
+
+  /* =========================================
+     MEDICAMENTOS
+  ========================================= */
 
   const [medications, setMedications] =
     useState<Medication[]>([
@@ -159,8 +200,8 @@ export default function PrescricoesPage() {
                   marginTop: 8,
                 }}
               >
-                Prescrição médica
-                profissional.
+                Receita médica
+                profissional da clínica.
               </p>
             </div>
 
@@ -196,146 +237,221 @@ export default function PrescricoesPage() {
             style={{
               border:
                 "2px solid #dcfce7",
-
               borderRadius: 24,
-
               padding: 32,
-
               background: "#f0fdf4",
             }}
           >
-            {/* DADOS */}
+            {/* CABECALHO */}
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "1fr 1fr 1fr",
-                gap: 18,
-                marginBottom: 24,
+                background: "white",
+                borderRadius: 22,
+                padding: 24,
+                marginBottom: 28,
+                border:
+                  "1px solid #dcfce7",
               }}
             >
-              <div>
-                <label className="form-label">
-                  Paciente
-                </label>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent:
+                    "space-between",
+                  alignItems: "center",
+                  marginBottom: 18,
+                }}
+              >
+                <div>
+                  <h1
+                    style={{
+                      fontSize: 30,
+                      fontWeight: 900,
+                      color: "#166534",
+                    }}
+                  >
+                    {clinicName}
+                  </h1>
 
-                <input
-                  className="modal-input"
-                  value={patientName}
-                  onChange={(e) =>
-                    setPatientName(
-                      e.target.value
-                    )
-                  }
-                />
+                  <p
+                    style={{
+                      color:
+                        "#64748b",
+                      marginTop: 6,
+                    }}
+                  >
+                    {
+                      clinicAddress
+                    }
+                  </p>
+
+                  <p
+                    style={{
+                      color:
+                        "#64748b",
+                    }}
+                  >
+                    {clinicPhone}
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    width: 82,
+                    height: 82,
+                    borderRadius: 20,
+                    background:
+                      "linear-gradient(135deg,#16a34a,#22c55e)",
+                    display: "flex",
+                    alignItems:
+                      "center",
+                    justifyContent:
+                      "center",
+                    color: "white",
+                    fontSize: 28,
+                    fontWeight: 900,
+                  }}
+                >
+                  M
+                </div>
               </div>
 
-              <div>
-                <label className="form-label">
-                  Médico
-                </label>
+              {/* DADOS */}
+              <div
+                style={{
+                  borderTop:
+                    "1px solid #dcfce7",
+                  paddingTop: 20,
+                  display: "grid",
+                  gridTemplateColumns:
+                    "1fr 1fr 1fr",
+                  gap: 18,
+                }}
+              >
+                <div>
+                  <label className="form-label">
+                    Paciente
+                  </label>
 
-                <input
-                  className="modal-input"
-                  value={doctorName}
-                  onChange={(e) =>
-                    setDoctorName(
-                      e.target.value
-                    )
-                  }
-                />
-              </div>
+                  <input
+                    className="modal-input"
+                    value={
+                      patientName
+                    }
+                    onChange={(e) =>
+                      setPatientName(
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </div>
 
-              <div>
-                <label className="form-label">
-                  CRM
-                </label>
+                <div>
+                  <label className="form-label">
+                    CPF
+                  </label>
 
-                <input
-                  className="modal-input"
-                  value={crm}
-                  onChange={(e) =>
-                    setCrm(
-                      e.target.value
-                    )
-                  }
-                />
+                  <input
+                    className="modal-input"
+                    placeholder="000.000.000-00"
+                    value={
+                      patientCpf
+                    }
+                    onChange={(e) =>
+                      setPatientCpf(
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label">
+                    Nascimento
+                  </label>
+
+                  <input
+                    type="date"
+                    className="modal-input"
+                    value={
+                      patientBirthDate
+                    }
+                    onChange={(e) =>
+                      setPatientBirthDate(
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label">
+                    CID
+                  </label>
+
+                  <input
+                    className="modal-input"
+                    placeholder="Ex: J11"
+                    value={cid}
+                    onChange={(e) =>
+                      setCid(
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label">
+                    Peso
+                  </label>
+
+                  <input
+                    className="modal-input"
+                    placeholder="Kg"
+                    value={weight}
+                    onChange={(e) =>
+                      setWeight(
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label">
+                    Alergias
+                  </label>
+
+                  <input
+                    className="modal-input"
+                    placeholder="Ex: Penicilina"
+                    value={
+                      allergies
+                    }
+                    onChange={(e) =>
+                      setAllergies(
+                        e.target
+                          .value
+                      )
+                    }
+                  />
+                </div>
               </div>
             </div>
 
-            {/* INFO CLINICA */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "1fr 1fr 1fr",
-                gap: 18,
-                marginBottom: 30,
-              }}
-            >
-              <div>
-                <label className="form-label">
-                  CID
-                </label>
-
-                <input
-                  className="modal-input"
-                  placeholder="Ex: J11"
-                  value={cid}
-                  onChange={(e) =>
-                    setCid(
-                      e.target.value
-                    )
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="form-label">
-                  Peso
-                </label>
-
-                <input
-                  className="modal-input"
-                  placeholder="Kg"
-                  value={weight}
-                  onChange={(e) =>
-                    setWeight(
-                      e.target.value
-                    )
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="form-label">
-                  Alergias
-                </label>
-
-                <input
-                  className="modal-input"
-                  placeholder="Ex: Penicilina"
-                  value={
-                    allergies
-                  }
-                  onChange={(e) =>
-                    setAllergies(
-                      e.target.value
-                    )
-                  }
-                />
-              </div>
-            </div>
-
-            {/* HEADER MED */}
+            {/* HEADER MEDICAMENTOS */}
             <div
               style={{
                 display: "flex",
                 justifyContent:
                   "space-between",
-
                 alignItems: "center",
-
                 marginBottom: 24,
               }}
             >
@@ -358,7 +474,7 @@ export default function PrescricoesPage() {
               </button>
             </div>
 
-            {/* MEDICAMENTOS */}
+            {/* LISTA */}
             <div
               style={{
                 display: "grid",
@@ -374,28 +490,19 @@ export default function PrescricoesPage() {
                     style={{
                       background:
                         "white",
-
                       borderRadius: 20,
-
                       padding: 22,
-
                       border:
                         "1px solid #dcfce7",
-
-                      boxShadow:
-                        "0 4px 14px rgba(15,23,42,.04)",
                     }}
                   >
                     <div
                       style={{
                         display:
                           "grid",
-
                         gridTemplateColumns:
                           "2fr 2fr 1fr auto",
-
                         gap: 14,
-
                         alignItems:
                           "end",
                       }}
@@ -481,20 +588,14 @@ export default function PrescricoesPage() {
                         style={{
                           background:
                             "#ef4444",
-
                           color: "white",
-
                           border:
                             "none",
-
                           padding:
                             "14px 16px",
-
                           borderRadius: 14,
-
                           cursor:
                             "pointer",
-
                           fontWeight: 700,
                         }}
                       >
@@ -518,7 +619,7 @@ export default function PrescricoesPage() {
 
               <textarea
                 className="modal-input"
-                placeholder="Orientações adicionais ao paciente..."
+                placeholder="Orientações adicionais..."
                 value={notes}
                 onChange={(e) =>
                   setNotes(
@@ -536,9 +637,7 @@ export default function PrescricoesPage() {
             <div
               style={{
                 marginTop: 50,
-
                 paddingTop: 28,
-
                 borderTop:
                   "1px solid #bbf7d0",
               }}
@@ -552,7 +651,6 @@ export default function PrescricoesPage() {
                   style={{
                     borderTop:
                       "1px solid #0f172a",
-
                     marginBottom: 10,
                   }}
                 />

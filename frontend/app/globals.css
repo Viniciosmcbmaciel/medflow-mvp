@@ -409,3 +409,40 @@ body {
     padding: 0 !important;
   }
 }
+
+/* =========================================
+   PDF CLINICA
+========================================= */
+
+@media print {
+  .sidebar,
+  .primary-button,
+  .secondary-button {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  .main-content {
+    padding: 0 !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  input,
+  textarea,
+  select {
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .modal-input {
+    padding: 0 !important;
+  }
+}
