@@ -135,67 +135,59 @@ export default function PrescricoesPage() {
   ========================================= */
 
   async function savePrescription() {
-    try {
-      const token =
-        localStorage.getItem(
-          "medflow_token"
-        );
+  try {
+    const response = await fetch(
+      "https://medflow-mvp-production.up.railway.app/api/prescriptions",
+      {
+        method: "POST",
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/prescriptions`,
-        {
-          method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
 
-          headers: {
-            "Content-Type":
-              "application/json",
+        body: JSON.stringify({
+          medicalRecordId:
+            "cmoaotg830004l84e1urej5nv",
 
-            Authorization: `Bearer ${token}`,
-          },
+          notes,
 
-          body: JSON.stringify({
-            clinicName,
-            clinicAddress,
-            clinicPhone,
+          items: medications.map(
+            (med) => ({
+              medication:
+                med.name,
 
-            patientName,
-            patientCpf,
-            patientBirthDate,
+              dosage:
+                med.dosage,
 
-            doctorName,
-            crm,
+              instructions:
+                med.dosage,
 
-            cid,
-            weight,
-            allergies,
-
-            medications,
-
-            notes,
-
-            createdAt:
-              new Date(),
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          "Erro ao salvar"
-        );
+              duration:
+                med.duration,
+            })
+          ),
+        }),
       }
+    );
 
-      alert(
-        "Prescrição salva no histórico!"
-      );
-    } catch (error) {
-      console.error(error);
-
-      alert(
-        "Erro ao salvar prescrição"
+    if (!response.ok) {
+      throw new Error(
+        "Erro ao salvar"
       );
     }
+
+    alert(
+      "Prescrição salva com sucesso!"
+    );
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      "Erro ao salvar prescrição"
+    );
   }
+}
 
   /* =========================================
      PDF
