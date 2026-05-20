@@ -19,63 +19,82 @@ export default function LoginPage() {
     useState(false);
 
   async function handleLogin(
-    e: React.FormEvent
-  ) {
-    e.preventDefault();
+  e: React.FormEvent
+) {
+  e.preventDefault();
+
+  try {
+    setLoading(true);
+
+    const response = await fetch(
+      `${API_URL}/api/auth/login`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      }
+    );
+
+    /* =========================================
+       EVITA ERRO DE JSON INVALIDO
+    ========================================= */
+
+    const text =
+      await response.text();
+
+    let data: any = {};
 
     try {
-      setLoading(true);
-
-      const response = await fetch(
-        `${API_URL}/auth/login`,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-
-          body: JSON.stringify({
-            email,
-            password,
-          }),
-        }
+      data = JSON.parse(text);
+    } catch {
+      console.error(
+        "Resposta inválida:",
+        text
       );
 
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-        alert(
-          data.message ||
-            "Erro ao fazer login"
-        );
-
-        return;
-      }
-
-      localStorage.setItem(
-        "medflow_token",
-        data.token
+      throw new Error(
+        "Servidor retornou resposta inválida"
       );
-
-      localStorage.setItem(
-        "medflow_user",
-        JSON.stringify(data.user)
-      );
-
-      router.push("/agenda");
-    } catch (error) {
-      console.error(error);
-
-      alert(
-        "Erro ao conectar com servidor"
-      );
-    } finally {
-      setLoading(false);
     }
+
+    if (!response.ok) {
+      alert(
+        data.message ||
+          "Erro ao fazer login"
+      );
+
+      return;
+    }
+
+    localStorage.setItem(
+      "medflow_token",
+      data.token
+    );
+
+    localStorage.setItem(
+      "medflow_user",
+      JSON.stringify(data.user)
+    );
+
+    router.push("/agenda");
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      "Erro ao conectar com servidor"
+    );
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <div className="login-page">
