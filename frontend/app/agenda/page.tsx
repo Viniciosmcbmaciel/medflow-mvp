@@ -8,15 +8,15 @@ import interactionPlugin from "@fullcalendar/interaction";
 
 import ptBrLocale from "@fullcalendar/core/locales/pt-br";
 
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 type Appointment = {
-  id: string;
-
+  id: number;
   title: string;
-
   start: string;
-
   end: string;
 
   status:
@@ -27,10 +27,14 @@ type Appointment = {
 };
 
 export default function AgendaPage() {
+  /* =========================================
+     EVENTOS
+  ========================================= */
+
   const [events, setEvents] =
     useState<Appointment[]>([
       {
-        id: "1",
+        id: 1,
 
         title:
           "Consulta • João Silva",
@@ -45,6 +49,22 @@ export default function AgendaPage() {
       },
     ]);
 
+  /* =========================================
+     PACIENTES
+  ========================================= */
+
+  const [patients, setPatients] =
+    useState<any[]>([]);
+
+  const [
+    filteredPatients,
+    setFilteredPatients,
+  ] = useState<any[]>([]);
+
+  /* =========================================
+     MODAL
+  ========================================= */
+
   const [openModal, setOpenModal] =
     useState(false);
 
@@ -54,6 +74,10 @@ export default function AgendaPage() {
   ] = useState<Appointment | null>(
     null
   );
+
+  /* =========================================
+     FORMULARIO
+  ========================================= */
 
   const [selectedDate, setSelectedDate] =
     useState("");
@@ -73,10 +97,99 @@ export default function AgendaPage() {
   const [source, setSource] =
     useState("");
 
-  const [
-    appointmentType,
-    setAppointmentType,
-  ] = useState("Consulta");
+  const [appointmentType, setAppointmentType] =
+    useState("Consulta");
+
+  /* =========================================
+     CARREGAR PACIENTES
+  ========================================= */
+
+  useEffect(() => {
+    async function loadPatients() {
+      try {
+        const token =
+          localStorage.getItem(
+            "medflow_token"
+          );
+
+        const response =
+          await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/patients`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+        const data =
+          await response.json();
+
+        setPatients(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadPatients();
+  }, []);
+
+  /* =========================================
+     PESQUISA
+  ========================================= */
+
+  function searchPatients(
+    value: string
+  ) {
+    setPatientName(value);
+
+    if (!value) {
+      setFilteredPatients([]);
+      return;
+    }
+
+    const filtered =
+      patients.filter((patient) =>
+        patient.fullName
+          ?.toLowerCase()
+          .includes(
+            value.toLowerCase()
+          )
+      );
+
+    setFilteredPatients(filtered);
+  }
+
+  /* =========================================
+     SELECIONAR PACIENTE
+  ========================================= */
+
+  function selectPatient(
+    patient: any
+  ) {
+    setPatientName(
+      patient.fullName || ""
+    );
+
+    setBirthDate(
+      patient.birthDate?.slice(
+        0,
+        10
+      ) || ""
+    );
+
+    setCpf(patient.cpf || "");
+
+    setInsurance(
+      patient.insurance || ""
+    );
+
+    setFilteredPatients([]);
+  }
+
+  /* =========================================
+     ABRIR MODAL
+  ========================================= */
 
   function handleDateClick(
     info: any
@@ -85,6 +198,10 @@ export default function AgendaPage() {
 
     setOpenModal(true);
   }
+
+  /* =========================================
+     CRIAR AGENDAMENTO
+  ========================================= */
 
   function createAppointment() {
     if (!patientName) {
@@ -110,7 +227,7 @@ export default function AgendaPage() {
       ...events,
 
       {
-        id: Date.now().toString(),
+        id: Date.now(),
 
         title: `${appointmentType} • ${patientName}`,
 
@@ -131,6 +248,10 @@ export default function AgendaPage() {
     setInsurance("");
     setSource("");
   }
+
+  /* =========================================
+     STATUS
+  ========================================= */
 
   function updateStatus(
     status:
@@ -225,10 +346,8 @@ export default function AgendaPage() {
                 marginTop: 8,
               }}
             >
-              Clique em qualquer
-              horário da agenda para
-              criar um novo
-              agendamento.
+              Clique em qualquer horário
+              para criar um agendamento.
             </p>
           </div>
 
@@ -305,50 +424,15 @@ export default function AgendaPage() {
               padding: 36,
             }}
           >
-            <div
+            <h2
               style={{
-                display: "flex",
-                justifyContent:
-                  "space-between",
-                alignItems:
-                  "center",
-                marginBottom: 28,
+                fontSize: 32,
+                fontWeight: 800,
+                marginBottom: 24,
               }}
             >
-              <div>
-                <h2
-                  style={{
-                    fontSize: 32,
-                    fontWeight: 800,
-                  }}
-                >
-                  Novo Agendamento
-                </h2>
-
-                <p
-                  style={{
-                    color:
-                      "#64748b",
-                    marginTop: 8,
-                  }}
-                >
-                  Configure o
-                  atendimento do
-                  paciente.
-                </p>
-              </div>
-
-              <button
-                className="secondary-button"
-                onClick={() =>
-                  setOpenModal(
-                    false
-                  )
-                }
-              >
-                Fechar
-              </button>
-            </div>
+              Novo Agendamento
+            </h2>
 
             <div
               style={{
@@ -358,10 +442,13 @@ export default function AgendaPage() {
                 gap: 18,
               }}
             >
+              {/* PACIENTE */}
               <div
                 style={{
                   gridColumn:
                     "1 / span 2",
+
+                  position: "relative",
                 }}
               >
                 <label className="form-label">
@@ -370,19 +457,111 @@ export default function AgendaPage() {
 
                 <input
                   className="modal-input"
-                  placeholder="Pesquisar ou digitar nome"
-                  value={
-                    patientName
-                  }
+                  placeholder="Pesquisar paciente"
+                  value={patientName}
                   onChange={(e) =>
-                    setPatientName(
-                      e.target
-                        .value
+                    searchPatients(
+                      e.target.value
                     )
                   }
                 />
+
+                {filteredPatients.length >
+                  0 && (
+                  <div
+                    style={{
+                      position:
+                        "absolute",
+
+                      top: "100%",
+
+                      left: 0,
+
+                      right: 0,
+
+                      background:
+                        "white",
+
+                      border:
+                        "1px solid #d1d5db",
+
+                      borderRadius: 14,
+
+                      marginTop: 6,
+
+                      zIndex: 999,
+
+                      maxHeight: 240,
+
+                      overflowY:
+                        "auto",
+
+                      boxShadow:
+                        "0 10px 25px rgba(0,0,0,0.08)",
+                    }}
+                  >
+                    {filteredPatients.map(
+                      (patient) => (
+                        <button
+                          key={
+                            patient.id
+                          }
+                          type="button"
+                          onClick={() =>
+                            selectPatient(
+                              patient
+                            )
+                          }
+                          style={{
+                            width: "100%",
+
+                            textAlign:
+                              "left",
+
+                            padding: 14,
+
+                            border:
+                              "none",
+
+                            background:
+                              "white",
+
+                            cursor:
+                              "pointer",
+
+                            borderBottom:
+                              "1px solid #f1f5f9",
+                          }}
+                        >
+                          <strong>
+                            {
+                              patient.fullName
+                            }
+                          </strong>
+
+                          <div
+                            style={{
+                              fontSize: 13,
+
+                              color:
+                                "#64748b",
+
+                              marginTop: 4,
+                            }}
+                          >
+                            CPF:{" "}
+                            {
+                              patient.cpf
+                            }
+                          </div>
+                        </button>
+                      )
+                    )}
+                  </div>
+                )}
               </div>
 
+              {/* DATA */}
               <div>
                 <label className="form-label">
                   Data e horário
@@ -391,26 +570,22 @@ export default function AgendaPage() {
                 <input
                   type="datetime-local"
                   className="modal-input"
-                  value={
-                    selectedDate
-                      ? selectedDate.slice(
-                          0,
-                          16
-                        )
-                      : ""
-                  }
+                  value={selectedDate.slice(
+                    0,
+                    16
+                  )}
                   onChange={(e) =>
                     setSelectedDate(
-                      e.target
-                        .value
+                      e.target.value
                     )
                   }
                 />
               </div>
 
+              {/* TIPO */}
               <div>
                 <label className="form-label">
-                  Tipo de consulta
+                  Tipo
                 </label>
 
                 <select
@@ -420,8 +595,7 @@ export default function AgendaPage() {
                   }
                   onChange={(e) =>
                     setAppointmentType(
-                      e.target
-                        .value
+                      e.target.value
                     )
                   }
                 >
@@ -443,26 +617,25 @@ export default function AgendaPage() {
                 </select>
               </div>
 
+              {/* NASCIMENTO */}
               <div>
                 <label className="form-label">
-                  Data de nascimento
+                  Nascimento
                 </label>
 
                 <input
                   type="date"
                   className="modal-input"
-                  value={
-                    birthDate
-                  }
+                  value={birthDate}
                   onChange={(e) =>
                     setBirthDate(
-                      e.target
-                        .value
+                      e.target.value
                     )
                   }
                 />
               </div>
 
+              {/* CPF */}
               <div>
                 <label className="form-label">
                   CPF
@@ -470,17 +643,16 @@ export default function AgendaPage() {
 
                 <input
                   className="modal-input"
-                  placeholder="000.000.000-00"
                   value={cpf}
                   onChange={(e) =>
                     setCpf(
-                      e.target
-                        .value
+                      e.target.value
                     )
                   }
                 />
               </div>
 
+              {/* CONVENIO */}
               <div>
                 <label className="form-label">
                   Convênio
@@ -488,19 +660,16 @@ export default function AgendaPage() {
 
                 <input
                   className="modal-input"
-                  placeholder="Particular ou convênio"
-                  value={
-                    insurance
-                  }
+                  value={insurance}
                   onChange={(e) =>
                     setInsurance(
-                      e.target
-                        .value
+                      e.target.value
                     )
                   }
                 />
               </div>
 
+              {/* COMO CONHECEU */}
               <div>
                 <label className="form-label">
                   Como conheceu
@@ -511,8 +680,7 @@ export default function AgendaPage() {
                   value={source}
                   onChange={(e) =>
                     setSource(
-                      e.target
-                        .value
+                      e.target.value
                     )
                   }
                 >
@@ -543,6 +711,7 @@ export default function AgendaPage() {
               </div>
             </div>
 
+            {/* FOOTER */}
             <div
               style={{
                 display: "flex",
@@ -555,9 +724,7 @@ export default function AgendaPage() {
               <button
                 className="secondary-button"
                 onClick={() =>
-                  setOpenModal(
-                    false
-                  )
+                  setOpenModal(false)
                 }
               >
                 Cancelar
@@ -636,18 +803,6 @@ export default function AgendaPage() {
               </button>
 
               <button
-                style={{
-                  background:
-                    "#ef4444",
-                  color: "white",
-                  border: "none",
-                  padding:
-                    "14px 20px",
-                  borderRadius: 14,
-                  fontWeight: 700,
-                  cursor:
-                    "pointer",
-                }}
                 onClick={() =>
                   updateStatus(
                     "cancelado"
@@ -658,18 +813,6 @@ export default function AgendaPage() {
               </button>
 
               <button
-                style={{
-                  background:
-                    "#0f172a",
-                  color: "white",
-                  border: "none",
-                  padding:
-                    "14px 20px",
-                  borderRadius: 14,
-                  fontWeight: 700,
-                  cursor:
-                    "pointer",
-                }}
                 onClick={
                   deleteAppointment
                 }
