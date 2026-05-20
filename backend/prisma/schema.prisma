@@ -49,18 +49,26 @@ model User {
 }
 
 model Patient {
-  id        String    @id @default(cuid())
-  fullName  String
-  cpf       String?   @unique
-  birthDate DateTime?
-  phone     String?
-  email     String?
-  address   String?
-  allergies String?
-  createdAt DateTime  @default(now())
+  id String @id @default(cuid())
 
-  medicalRecords    MedicalRecord[]
-  appointments      Appointment[]
+  fullName String
+
+  birthDate String?
+
+  cpf String?
+
+  phone String?
+
+  email String?
+
+  insurance String?
+
+  createdAt DateTime @default(now())
+
+  medicalRecords MedicalRecord[]
+
+  appointments Appointment[]
+
   medicalEvolutions MedicalEvolution[]
 }
 

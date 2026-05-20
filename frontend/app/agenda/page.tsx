@@ -8,7 +8,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 
 import ptBrLocale from "@fullcalendar/core/locales/pt-br";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Appointment = {
   id: string;
@@ -26,7 +26,27 @@ type Appointment = {
     | "concluido";
 };
 
+type Patient = {
+  id: string;
+
+  fullName: string;
+
+  birthDate?: string;
+
+  cpf?: string;
+
+  insurance?: string;
+
+  phone?: string;
+
+  email?: string;
+};
+
 export default function AgendaPage() {
+  /* =========================================
+     AGENDAMENTOS
+  ========================================= */
+
   const [events, setEvents] =
     useState<Appointment[]>([
       {
@@ -45,6 +65,22 @@ export default function AgendaPage() {
       },
     ]);
 
+  /* =========================================
+     PACIENTES
+  ========================================= */
+
+  const [patients, setPatients] =
+    useState<Patient[]>([]);
+
+  const [
+    filteredPatients,
+    setFilteredPatients,
+  ] = useState<Patient[]>([]);
+
+  /* =========================================
+     MODAIS
+  ========================================= */
+
   const [openModal, setOpenModal] =
     useState(false);
 
@@ -54,6 +90,10 @@ export default function AgendaPage() {
   ] = useState<Appointment | null>(
     null
   );
+
+  /* =========================================
+     FORM
+  ========================================= */
 
   const [selectedDate, setSelectedDate] =
     useState("");
@@ -75,6 +115,80 @@ export default function AgendaPage() {
 
   const [appointmentType, setAppointmentType] =
     useState("Consulta");
+
+  /* =========================================
+     BUSCAR PACIENTES
+  ========================================= */
+
+  useEffect(() => {
+    loadPatients();
+  }, []);
+
+  async function loadPatients() {
+    try {
+      const response = await fetch(
+        "https://medflow-mvp-production.up.railway.app/patients"
+      );
+
+      const data =
+        await response.json();
+
+      setPatients(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  /* =========================================
+     AUTOCOMPLETE
+  ========================================= */
+
+  function handlePatientSearch(
+    value: string
+  ) {
+    setPatientName(value);
+
+    if (!value) {
+      setFilteredPatients([]);
+
+      return;
+    }
+
+    const filtered =
+      patients.filter((patient) =>
+        patient.fullName
+          .toLowerCase()
+          .includes(
+            value.toLowerCase()
+          )
+      );
+
+    setFilteredPatients(filtered);
+  }
+
+  function selectPatient(
+    patient: Patient
+  ) {
+    setPatientName(
+      patient.fullName
+    );
+
+    setBirthDate(
+      patient.birthDate || ""
+    );
+
+    setCpf(patient.cpf || "");
+
+    setInsurance(
+      patient.insurance || ""
+    );
+
+    setFilteredPatients([]);
+  }
+
+  /* =========================================
+     CALENDARIO
+  ========================================= */
 
   function handleDateClick(
     info: any
@@ -124,11 +238,78 @@ export default function AgendaPage() {
     setOpenModal(false);
 
     setPatientName("");
+
     setBirthDate("");
+
     setCpf("");
+
     setInsurance("");
+
     setSource("");
   }
+
+  /* =========================================
+     NOVO PACIENTE
+  ========================================= */
+
+  async function createPatient() {
+    try {
+      const response = await fetch(
+        "https://medflow-mvp-production.up.railway.app/patients",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            fullName:
+              patientName,
+
+            birthDate,
+
+            cpf,
+
+            phone: "",
+
+            email: "",
+
+            insurance,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Erro ao salvar paciente"
+        );
+      }
+
+      const patient =
+        await response.json();
+
+      setPatients([
+        patient,
+        ...patients,
+      ]);
+
+      alert(
+        "Paciente cadastrado com sucesso!"
+      );
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Erro ao cadastrar paciente"
+      );
+    }
+  }
+
+  /* =========================================
+     STATUS
+  ========================================= */
 
   function updateStatus(
     status:
@@ -293,7 +474,7 @@ export default function AgendaPage() {
         </div>
       </main>
 
-      {/* MODAL NOVO */}
+      {/* MODAL */}
       {openModal && (
         <div className="premium-modal-overlay">
           <div
@@ -308,8 +489,10 @@ export default function AgendaPage() {
                 display: "flex",
                 justifyContent:
                   "space-between",
+
                 alignItems:
                   "center",
+
                 marginBottom: 28,
               }}
             >
@@ -327,6 +510,7 @@ export default function AgendaPage() {
                   style={{
                     color:
                       "#64748b",
+
                     marginTop: 8,
                   }}
                 >
@@ -351,15 +535,21 @@ export default function AgendaPage() {
             <div
               style={{
                 display: "grid",
+
                 gridTemplateColumns:
                   "1fr 1fr",
+
                 gap: 18,
               }}
             >
+              {/* PACIENTE */}
               <div
                 style={{
                   gridColumn:
                     "1 / span 2",
+
+                  position:
+                    "relative",
                 }}
               >
                 <label className="form-label">
@@ -368,17 +558,95 @@ export default function AgendaPage() {
 
                 <input
                   className="modal-input"
-                  placeholder="Pesquisar ou digitar nome"
+                  placeholder="Pesquisar paciente..."
                   value={
                     patientName
                   }
                   onChange={(e) =>
-                    setPatientName(
-                      e.target
-                        .value
+                    handlePatientSearch(
+                      e.target.value
                     )
                   }
                 />
+
+                {filteredPatients.length >
+                  0 && (
+                  <div
+                    style={{
+                      position:
+                        "absolute",
+
+                      top: 90,
+
+                      left: 0,
+
+                      right: 0,
+
+                      background:
+                        "white",
+
+                      border:
+                        "1px solid #e2e8f0",
+
+                      borderRadius: 14,
+
+                      zIndex: 999,
+
+                      maxHeight: 220,
+
+                      overflowY:
+                        "auto",
+
+                      boxShadow:
+                        "0 10px 30px rgba(0,0,0,0.08)",
+                    }}
+                  >
+                    {filteredPatients.map(
+                      (patient) => (
+                        <div
+                          key={
+                            patient.id
+                          }
+                          onClick={() =>
+                            selectPatient(
+                              patient
+                            )
+                          }
+                          style={{
+                            padding: 14,
+
+                            cursor:
+                              "pointer",
+
+                            borderBottom:
+                              "1px solid #f1f5f9",
+                          }}
+                        >
+                          <strong>
+                            {
+                              patient.fullName
+                            }
+                          </strong>
+
+                          <p
+                            style={{
+                              fontSize: 13,
+
+                              color:
+                                "#64748b",
+
+                              marginTop: 4,
+                            }}
+                          >
+                            CPF:{" "}
+                            {patient.cpf ||
+                              "Não informado"}
+                          </p>
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -441,7 +709,7 @@ export default function AgendaPage() {
 
               <div>
                 <label className="form-label">
-                  Data de nascimento
+                  Data nascimento
                 </label>
 
                 <input
@@ -466,7 +734,6 @@ export default function AgendaPage() {
 
                 <input
                   className="modal-input"
-                  placeholder="000.000.000-00"
                   value={cpf}
                   onChange={(e) =>
                     setCpf(
@@ -484,7 +751,6 @@ export default function AgendaPage() {
 
                 <input
                   className="modal-input"
-                  placeholder="Particular ou convênio"
                   value={
                     insurance
                   }
@@ -539,40 +805,58 @@ export default function AgendaPage() {
               </div>
             </div>
 
+            {/* FOOTER */}
             <div
               style={{
                 display: "flex",
+
                 justifyContent:
-                  "flex-end",
-                gap: 12,
+                  "space-between",
+
                 marginTop: 30,
               }}
             >
               <button
                 className="secondary-button"
-                onClick={() =>
-                  setOpenModal(
-                    false
-                  )
+                onClick={
+                  createPatient
                 }
               >
-                Cancelar
+                + Novo Paciente
               </button>
 
-              <button
-                className="primary-button"
-                onClick={
-                  createAppointment
-                }
+              <div
+                style={{
+                  display: "flex",
+                  gap: 12,
+                }}
               >
-                Salvar Agendamento
-              </button>
+                <button
+                  className="secondary-button"
+                  onClick={() =>
+                    setOpenModal(
+                      false
+                    )
+                  }
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  className="primary-button"
+                  onClick={
+                    createAppointment
+                  }
+                >
+                  Salvar Agendamento
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL STATUS */}
+      {/* STATUS */}
       {selectedAppointment && (
         <div className="premium-modal-overlay">
           <div

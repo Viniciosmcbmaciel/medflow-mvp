@@ -12,7 +12,23 @@ import medicalEvolutionRoutes from "./routes/medical-evolution.routes.js";
 
 import { authMiddleware } from "./middleware/auth.js";
 
+import express from "express";
+import cors from "cors";
+
+import patientsRoutes from "./routes/patients.routes.js";
+
 const app = express();
+
+app.use(cors());
+
+app.use(express.json());
+
+app.use(
+  "/patients",
+  patientsRoutes
+);
+
+export default app;
 
 /* =========================================
    CORS
