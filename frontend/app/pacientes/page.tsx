@@ -1,53 +1,61 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://medflow-mvp-production.up.railway.app/api";
 
 type Patient = {
   id: string;
-
   fullName: string;
-
   cpf: string;
-
-  phone: string;
-
-  insurance: string;
-
   birthDate: string;
+  phone: string;
+  insurance: string;
+  email: string;
 };
 
-const API =
-  "https://medflow-mvp-production.up.railway.app";
-
-export default function PatientsPage() {
-  const [patients, setPatients] =
-    useState<Patient[]>([]);
-
+export default function PacientesPage() {
   const [loading, setLoading] =
     useState(false);
 
-  const [form, setForm] =
-    useState({
-      fullName: "",
-      cpf: "",
-      birthDate: "",
-      phone: "",
-      insurance: "",
-      email: "",
-    });
+  const [patients, setPatients] =
+    useState<Patient[]>([]);
 
-  useEffect(() => {
-    loadPatients();
-  }, []);
+  const [fullName, setFullName] =
+    useState("");
+
+  const [cpf, setCpf] =
+    useState("");
+
+  const [birthDate, setBirthDate] =
+    useState("");
+
+  const [phone, setPhone] =
+    useState("");
+
+  const [insurance, setInsurance] =
+    useState("");
+
+  const [email, setEmail] =
+    useState("");
+
+  /* =========================================
+     BUSCAR PACIENTES
+  ========================================= */
 
   async function loadPatients() {
     try {
       const response = await fetch(
-        `${API}/patients`
+        `${API_URL}/patients`
       );
+
+      if (!response.ok) {
+        throw new Error(
+          "Erro ao buscar pacientes"
+        );
+      }
 
       const data =
         await response.json();
@@ -58,12 +66,20 @@ export default function PatientsPage() {
     }
   }
 
+  useEffect(() => {
+    loadPatients();
+  }, []);
+
+  /* =========================================
+     CADASTRAR PACIENTE
+  ========================================= */
+
   async function createPatient() {
     try {
       setLoading(true);
 
       const response = await fetch(
-        `${API}/patients`,
+        `${API_URL}/patients`,
         {
           method: "POST",
 
@@ -72,7 +88,14 @@ export default function PatientsPage() {
               "application/json",
           },
 
-          body: JSON.stringify(form),
+          body: JSON.stringify({
+            fullName,
+            cpf,
+            birthDate,
+            phone,
+            insurance,
+            email,
+          }),
         }
       );
 
@@ -81,24 +104,23 @@ export default function PatientsPage() {
 
       if (!response.ok) {
         alert(
-          data.message
+          data.message ||
+            "Erro ao cadastrar paciente"
         );
 
         return;
       }
 
       alert(
-        "Paciente cadastrado!"
+        "Paciente cadastrado com sucesso!"
       );
 
-      setForm({
-        fullName: "",
-        cpf: "",
-        birthDate: "",
-        phone: "",
-        insurance: "",
-        email: "",
-      });
+      setFullName("");
+      setCpf("");
+      setBirthDate("");
+      setPhone("");
+      setInsurance("");
+      setEmail("");
 
       loadPatients();
     } catch (error) {
@@ -114,131 +136,171 @@ export default function PatientsPage() {
 
   return (
     <div className="dashboard-layout">
+      {/* SIDEBAR */}
       <aside className="sidebar">
         <h1 className="sidebar-title">
           MedFlow
         </h1>
+
+        <nav className="sidebar-menu">
+          <a href="/agenda">
+            Agenda
+          </a>
+
+          <a href="/pacientes">
+            Pacientes
+          </a>
+
+          <a href="/prontuarios">
+            Prontuários
+          </a>
+
+          <a href="/prescricoes">
+            Prescrições
+          </a>
+
+          <a href="/historico">
+            Histórico
+          </a>
+        </nav>
       </aside>
 
+      {/* MAIN */}
       <main className="main-content">
         <div className="card">
-          <h1
+          {/* HEADER */}
+          <div
             style={{
-              fontSize: 34,
-              fontWeight: 800,
-              marginBottom: 30,
+              marginBottom: 32,
             }}
           >
-            Pacientes
-          </h1>
+            <h1
+              style={{
+                fontSize: 38,
+                fontWeight: 900,
+              }}
+            >
+              Pacientes
+            </h1>
+
+            <p
+              style={{
+                color: "#64748b",
+                marginTop: 10,
+              }}
+            >
+              Cadastro e gestão
+              hospitalar de pacientes.
+            </p>
+          </div>
 
           {/* FORM */}
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns:
-                "1fr 1fr 1fr",
-              gap: 16,
-              marginBottom: 32,
+              background: "white",
+              padding: 28,
+              borderRadius: 24,
+              border:
+                "1px solid #e2e8f0",
+              marginBottom: 30,
             }}
           >
-            <input
-              className="modal-input"
-              placeholder="Nome completo"
-              value={form.fullName}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  fullName:
-                    e.target.value,
-                })
-              }
-            />
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "1fr 1fr 1fr",
+                gap: 18,
+              }}
+            >
+              <input
+                className="modal-input"
+                placeholder="Nome completo"
+                value={fullName}
+                onChange={(e) =>
+                  setFullName(
+                    e.target.value
+                  )
+                }
+              />
 
-            <input
-              className="modal-input"
-              placeholder="CPF"
-              value={form.cpf}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  cpf:
-                    e.target.value,
-                })
-              }
-            />
+              <input
+                className="modal-input"
+                placeholder="CPF"
+                value={cpf}
+                onChange={(e) =>
+                  setCpf(
+                    e.target.value
+                  )
+                }
+              />
 
-            <input
-              type="date"
-              className="modal-input"
-              value={form.birthDate}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  birthDate:
-                    e.target.value,
-                })
-              }
-            />
+              <input
+                type="date"
+                className="modal-input"
+                value={birthDate}
+                onChange={(e) =>
+                  setBirthDate(
+                    e.target.value
+                  )
+                }
+              />
 
-            <input
-              className="modal-input"
-              placeholder="Telefone"
-              value={form.phone}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  phone:
-                    e.target.value,
-                })
-              }
-            />
+              <input
+                className="modal-input"
+                placeholder="Telefone"
+                value={phone}
+                onChange={(e) =>
+                  setPhone(
+                    e.target.value
+                  )
+                }
+              />
 
-            <input
-              className="modal-input"
-              placeholder="Convênio"
-              value={form.insurance}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  insurance:
-                    e.target.value,
-                })
-              }
-            />
+              <input
+                className="modal-input"
+                placeholder="Convênio"
+                value={insurance}
+                onChange={(e) =>
+                  setInsurance(
+                    e.target.value
+                  )
+                }
+              />
 
-            <input
-              className="modal-input"
-              placeholder="Email"
-              value={form.email}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  email:
-                    e.target.value,
-                })
+              <input
+                className="modal-input"
+                placeholder="E-mail"
+                value={email}
+                onChange={(e) =>
+                  setEmail(
+                    e.target.value
+                  )
+                }
+              />
+            </div>
+
+            <button
+              className="primary-button"
+              style={{
+                marginTop: 24,
+              }}
+              onClick={
+                createPatient
               }
-            />
+              disabled={loading}
+            >
+              {loading
+                ? "Salvando..."
+                : "Cadastrar Paciente"}
+            </button>
           </div>
-
-          <button
-            className="primary-button"
-            onClick={
-              createPatient
-            }
-            disabled={loading}
-          >
-            {loading
-              ? "Salvando..."
-              : "Cadastrar Paciente"}
-          </button>
 
           {/* LISTA */}
           <div
             style={{
-              marginTop: 40,
               display: "grid",
-              gap: 16,
+              gap: 18,
             }}
           >
             {patients.map(
@@ -248,43 +310,92 @@ export default function PatientsPage() {
                   style={{
                     background:
                       "white",
+                    borderRadius: 22,
+                    padding: 24,
                     border:
                       "1px solid #e2e8f0",
-                    borderRadius: 18,
-                    padding: 20,
                   }}
                 >
-                  <h2
+                  <div
                     style={{
-                      fontWeight: 700,
-                      fontSize: 20,
+                      display: "flex",
+                      justifyContent:
+                        "space-between",
+                      alignItems:
+                        "center",
                     }}
                   >
-                    {
-                      patient.fullName
-                    }
-                  </h2>
+                    <div>
+                      <h2
+                        style={{
+                          fontSize: 22,
+                          fontWeight: 800,
+                        }}
+                      >
+                        {
+                          patient.fullName
+                        }
+                      </h2>
 
-                  <p>
-                    CPF:{" "}
-                    {
-                      patient.cpf
-                    }
-                  </p>
+                      <p
+                        style={{
+                          color:
+                            "#64748b",
+                          marginTop: 6,
+                        }}
+                      >
+                        CPF:{" "}
+                        {patient.cpf}
+                      </p>
 
-                  <p>
-                    Telefone:{" "}
-                    {
-                      patient.phone
-                    }
-                  </p>
+                      <p
+                        style={{
+                          color:
+                            "#64748b",
+                        }}
+                      >
+                        Telefone:{" "}
+                        {
+                          patient.phone
+                        }
+                      </p>
 
-                  <p>
-                    Convênio:{" "}
-                    {
-                      patient.insurance
-                    }
-                  </p>
+                      <p
+                        style={{
+                          color:
+                            "#64748b",
+                        }}
+                      >
+                        Convênio:{" "}
+                        {
+                          patient.insurance
+                        }
+                      </p>
+
+                      <p
+                        style={{
+                          color:
+                            "#64748b",
+                        }}
+                      >
+                        Email:{" "}
+                        {
+                          patient.email
+                        }
+                      </p>
+                    </div>
+
+                    <a
+                      href={`/prontuarios/${patient.id}`}
+                      className="primary-button"
+                      style={{
+                        textDecoration:
+                          "none",
+                      }}
+                    >
+                      Abrir Prontuário
+                    </a>
+                  </div>
                 </div>
               )
             )}
