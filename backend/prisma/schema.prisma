@@ -53,9 +53,11 @@ model Patient {
 
   fullName String
 
+  cpf String? @unique
+
   birthDate String?
 
-  cpf String?
+  gender String?
 
   phone String?
 
@@ -63,7 +65,31 @@ model Patient {
 
   insurance String?
 
+  maritalStatus String?
+
+  occupation String?
+
+  emergencyContact String?
+
+  emergencyPhone String?
+
+  address String?
+
+  city String?
+
+  state String?
+
+  zipCode String?
+
+  allergies String?
+
+  bloodType String?
+
+  observations String?
+
   createdAt DateTime @default(now())
+
+  updatedAt DateTime @default(now()) @updatedAt
 
   medicalRecords MedicalRecord[]
 
