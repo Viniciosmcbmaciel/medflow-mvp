@@ -181,7 +181,7 @@ export default function ProntuariosPage() {
           patientId:
             selectedPatient.id,
 
-          anamnesis:
+          chiefComplaint:
             complaint,
 
           diagnosis,
@@ -199,7 +199,7 @@ export default function ProntuariosPage() {
       console.error(data);
 
       throw new Error(
-        data.message ||
+        data.error ||
           "Erro ao salvar prontuário"
       );
     }
@@ -227,6 +227,7 @@ export default function ProntuariosPage() {
     setLoading(false);
   }
 }
+  
 
   return (
     <div className="dashboard-layout">
