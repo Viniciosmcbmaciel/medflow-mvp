@@ -899,132 +899,250 @@ export default function AgendaPage() {
       )}
 
       {/* STATUS */}
-      {selectedAppointment && (
-        <div className="premium-modal-overlay">
-          <div
-            className="premium-modal"
-            style={{
-              maxWidth: 520,
-              padding: 30,
-            }}
-          >
-            <h2
-              style={{
-                fontSize: 28,
-                fontWeight: 800,
-                marginBottom: 12,
-              }}
-            >
-              Gerenciar Consulta
-            </h2>
+{selectedAppointment && (
+  <div className="premium-modal-overlay">
+    <div
+      className="premium-modal"
+      style={{
+        maxWidth: 560,
+        padding: 32,
+      }}
+    >
+      {/* HEADER */}
+      <div
+        style={{
+          marginBottom: 24,
+        }}
+      >
+        <h2
+          style={{
+            fontSize: 30,
+            fontWeight: 800,
+            marginBottom: 10,
+          }}
+        >
+          Gerenciar Consulta
+        </h2>
 
-            <p
-              style={{
-                color: "#64748b",
-                marginBottom: 24,
-              }}
-            >
-              {
-                selectedAppointment.title
-              }
-            </p>
+        <p
+          style={{
+            color: "#64748b",
+            fontSize: 16,
+          }}
+        >
+          {
+            selectedAppointment.title
+          }
+        </p>
+      </div>
 
-            <div
-              style={{
-                display: "grid",
-                gap: 12,
-              }}
-            >
-              <button
-                className="primary-button"
-                onClick={() =>
-                  updateStatus(
-                    "confirmado"
-                  )
-                }
-              >
-                ✅ Confirmar
-              </button>
+      {/* INFO */}
+      <div
+        style={{
+          background: "#f8fafc",
+          borderRadius: 18,
+          padding: 18,
+          marginBottom: 24,
+          border:
+            "1px solid #e2e8f0",
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gap: 12,
+          }}
+        >
+          <div>
+            <strong>
+              Status:
+            </strong>{" "}
+            {
+              selectedAppointment.status
+            }
+          </div>
 
-              <button
-                className="secondary-button"
-                onClick={() =>
-                  updateStatus(
-                    "concluido"
-                  )
-                }
-              >
-                ✔️ Concluir
-              </button>
+          <div>
+            <strong>
+              Início:
+            </strong>{" "}
+            {new Date(
+              selectedAppointment.start
+            ).toLocaleString(
+              "pt-BR"
+            )}
+          </div>
 
-              <button
-                style={{
-                  background:
-                    "#ef4444",
-
-                  color: "white",
-
-                  border: "none",
-
-                  padding:
-                    "14px 20px",
-
-                  borderRadius: 14,
-
-                  fontWeight: 700,
-
-                  cursor:
-                    "pointer",
-                }}
-                onClick={() =>
-                  updateStatus(
-                    "cancelado"
-                  )
-                }
-              >
-                ❌ Cancelar
-              </button>
-
-              <button
-                style={{
-                  background:
-                    "#0f172a",
-
-                  color: "white",
-
-                  border: "none",
-
-                  padding:
-                    "14px 20px",
-
-                  borderRadius: 14,
-
-                  fontWeight: 700,
-
-                  cursor:
-                    "pointer",
-                }}
-                onClick={
-                  deleteAppointment
-                }
-              >
-                🗑 Excluir
-              </button>
-
-              <button
-                className="secondary-button"
-                onClick={() =>
-                  setSelectedAppointment(
-                    null
-                  )
-                }
-              >
-                Fechar
-              </button>
-            </div>
+          <div>
+            <strong>
+              Fim:
+            </strong>{" "}
+            {new Date(
+              selectedAppointment.end
+            ).toLocaleString(
+              "pt-BR"
+            )}
           </div>
         </div>
-      )}
+      </div>
+
+      {/* AÇÕES PRINCIPAIS */}
+      <div
+        style={{
+          display: "grid",
+          gap: 14,
+          marginBottom: 24,
+        }}
+      >
+        {/* TELECONSULTA */}
+        <button
+          className="primary-button"
+          style={{
+            width: "100%",
+            padding: 16,
+            fontSize: 16,
+          }}
+          onClick={() =>
+            window.open(
+              `/teleconsulta/${selectedAppointment.id}`,
+              "_blank"
+            )
+          }
+        >
+          📹 Iniciar Teleconsulta
+        </button>
+
+        {/* PRONTUARIO */}
+        <button
+          className="secondary-button"
+          style={{
+            width: "100%",
+            padding: 16,
+            fontSize: 16,
+          }}
+          onClick={() =>
+            window.open(
+              `/prontuarios?appointmentId=${selectedAppointment.id}`,
+              "_blank"
+            )
+          }
+        >
+          📋 Abrir Prontuário
+        </button>
+
+        {/* PRESCRIÇÃO */}
+        <button
+          className="secondary-button"
+          style={{
+            width: "100%",
+            padding: 16,
+            fontSize: 16,
+          }}
+          onClick={() =>
+            window.open(
+              `/prescricoes?appointmentId=${selectedAppointment.id}`,
+              "_blank"
+            )
+          }
+        >
+          💊 Abrir Prescrição
+        </button>
+      </div>
+
+      {/* STATUS */}
+      <div
+        style={{
+          display: "grid",
+          gap: 12,
+        }}
+      >
+        <button
+          className="primary-button"
+          onClick={() =>
+            updateStatus(
+              "confirmado"
+            )
+          }
+        >
+          ✅ Confirmar Consulta
+        </button>
+
+        <button
+          className="secondary-button"
+          onClick={() =>
+            updateStatus(
+              "concluido"
+            )
+          }
+        >
+          ✔️ Finalizar Consulta
+        </button>
+
+        <button
+          style={{
+            background:
+              "#ef4444",
+
+            color: "white",
+
+            border: "none",
+
+            padding:
+              "14px 20px",
+
+            borderRadius: 14,
+
+            fontWeight: 700,
+
+            cursor:
+              "pointer",
+          }}
+          onClick={() =>
+            updateStatus(
+              "cancelado"
+            )
+          }
+        >
+          ❌ Cancelar Consulta
+        </button>
+
+        <button
+          style={{
+            background:
+              "#0f172a",
+
+            color: "white",
+
+            border: "none",
+
+            padding:
+              "14px 20px",
+
+            borderRadius: 14,
+
+            fontWeight: 700,
+
+            cursor:
+              "pointer",
+          }}
+          onClick={
+            deleteAppointment
+          }
+        >
+          🗑 Excluir Consulta
+        </button>
+
+        <button
+          className="secondary-button"
+          onClick={() =>
+            setSelectedAppointment(
+              null
+            )
+          }
+        >
+          Fechar
+        </button>
+      </div>
     </div>
-  );
-}
+  </div>
+)}
