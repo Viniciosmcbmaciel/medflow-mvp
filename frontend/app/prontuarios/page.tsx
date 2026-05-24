@@ -5,132 +5,98 @@ import {
   useState,
 } from "react";
 
-type Patient = {
-  id: string;
-  fullName: string;
-  cpf?: string;
-  birthDate?: string;
-  phone?: string;
-  insurance?: string;
-};
-
 type MedicalRecord = {
   id: string;
-  patientId: string;
-  complaint: string;
+
+  chiefComplaint: string;
+
   diagnosis: string;
-  observations: string;
+
+  evolution: string;
+
   createdAt: string;
+};
+
+type Patient = {
+  id: string;
+
+  fullName: string;
+
+  cpf?: string;
+
+  birthDate?: string;
+
+  phone?: string;
+
+  insurance?: string;
+
+  email?: string;
 };
 
 export default function ProntuariosPage() {
   /* =========================================
-     STATES
+     PACIENTE
   ========================================= */
 
-  const [patients, setPatients] =
-    useState<Patient[]>([]);
+  const [patient, setPatient] =
+    useState<Patient | null>(
+      null
+    );
 
-  const [filteredPatients, setFilteredPatients] =
-    useState<Patient[]>([]);
+  /* =========================================
+     FORM
+  ========================================= */
 
-  const [selectedPatient, setSelectedPatient] =
-    useState<Patient | null>(null);
-
-  const [search, setSearch] =
-    useState("");
-
-  const [complaint, setComplaint] =
-    useState("");
+  const [
+    chiefComplaint,
+    setChiefComplaint,
+  ] = useState("");
 
   const [diagnosis, setDiagnosis] =
     useState("");
 
-  const [observations, setObservations] =
+  const [evolution, setEvolution] =
     useState("");
 
-  const [records, setRecords] =
-    useState<MedicalRecord[]>([]);
+  /* =========================================
+     HISTORICO
+  ========================================= */
+
+  const [history, setHistory] =
+    useState<MedicalRecord[]>(
+      []
+    );
 
   const [loading, setLoading] =
     useState(false);
 
   /* =========================================
-     LOAD PATIENTS
+     LOAD PATIENT
   ========================================= */
 
   useEffect(() => {
-    loadPatients();
+    const storedPatient =
+      localStorage.getItem(
+        "selected_patient"
+      );
+
+    if (storedPatient) {
+      const parsed =
+        JSON.parse(
+          storedPatient
+        );
+
+      setPatient(parsed);
+
+      loadHistory(parsed.id);
+    }
   }, []);
 
-  async function loadPatients() {
-    try {
-      const response = await fetch(
-        "https://medflow-mvp-production.up.railway.app/api/patients"
-      );
-
-      if (!response.ok) {
-        return;
-      }
-
-      const data =
-        await response.json();
-
-      setPatients(data);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
   /* =========================================
-     SEARCH PATIENT
+     LOAD HISTORY
   ========================================= */
 
-  function handleSearch(
-    value: string
-  ) {
-    setSearch(value);
-
-    if (!value) {
-      setFilteredPatients([]);
-      return;
-    }
-
-    const filtered =
-      patients.filter((patient) =>
-        patient.fullName
-          .toLowerCase()
-          .includes(
-            value.toLowerCase()
-          )
-      );
-
-    setFilteredPatients(filtered);
-  }
-
-  /* =========================================
-     SELECT PATIENT
-  ========================================= */
-
-  async function selectPatient(
-    patient: Patient
-  ) {
-    setSelectedPatient(patient);
-
-    setSearch(patient.fullName);
-
-    setFilteredPatients([]);
-
-    await loadMedicalRecords(
-      patient.id
-    );
-  }
-
-  /* =========================================
-     LOAD RECORDS
-  ========================================= */
-
-  async function loadMedicalRecords(
+  async function loadHistory(
     patientId: string
   ) {
     try {
@@ -145,7 +111,7 @@ export default function ProntuariosPage() {
       const data =
         await response.json();
 
-      setRecords(data);
+      setHistory(data);
     } catch (error) {
       console.error(error);
     }
@@ -155,79 +121,80 @@ export default function ProntuariosPage() {
      SAVE RECORD
   ========================================= */
 
-  async function saveMedicalRecord() {
-  if (!selectedPatient) {
-    alert(
-      "Selecione um paciente"
-    );
-
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const response = await fetch(
-      "https://medflow-mvp-production.up.railway.app/api/medical-records",
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-
-        body: JSON.stringify({
-          patientId:
-            selectedPatient.id,
-
-          chiefComplaint:
-            complaint,
-
-          diagnosis,
-
-          evolution:
-            observations,
-        }),
-      }
-    );
-
-    const data =
-      await response.json();
-
-    if (!response.ok) {
-      console.error(data);
-
-      throw new Error(
-        data.error ||
-          "Erro ao salvar prontuário"
+  async function saveRecord() {
+    if (!patient) {
+      alert(
+        "Selecione um paciente"
       );
+
+      return;
     }
 
-    alert(
-      "Prontuário salvo com sucesso!"
-    );
+    if (!chiefComplaint) {
+      alert(
+        "Informe a queixa principal"
+      );
 
-    setComplaint("");
+      return;
+    }
 
-    setDiagnosis("");
+    try {
+      setLoading(true);
 
-    setObservations("");
+      const response = await fetch(
+        "https://medflow-mvp-production.up.railway.app/api/medical-records",
+        {
+          method: "POST",
 
-    await loadMedicalRecords(
-      selectedPatient.id
-    );
-  } catch (error) {
-    console.error(error);
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
 
-    alert(
-      "Erro ao salvar prontuário"
-    );
-  } finally {
-    setLoading(false);
+          body: JSON.stringify({
+            patientId:
+              patient.id,
+
+            chiefComplaint,
+
+            diagnosis,
+
+            evolution,
+          }),
+        }
+      );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Erro ao salvar prontuário"
+        );
+      }
+
+      alert(
+        "Prontuário salvo com sucesso!"
+      );
+
+      setChiefComplaint("");
+
+      setDiagnosis("");
+
+      setEvolution("");
+
+      loadHistory(patient.id);
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Erro ao salvar prontuário"
+      );
+    } finally {
+      setLoading(false);
+    }
   }
-}
-  
 
   return (
     <div className="dashboard-layout">
@@ -263,6 +230,7 @@ export default function ProntuariosPage() {
       {/* MAIN */}
       <main className="main-content">
         <div className="card">
+          {/* HEADER */}
           <div
             style={{
               marginBottom: 28,
@@ -274,7 +242,7 @@ export default function ProntuariosPage() {
                 fontWeight: 800,
               }}
             >
-              Prontuário Eletrônico
+              Prontuário Médico
             </h1>
 
             <p
@@ -283,105 +251,13 @@ export default function ProntuariosPage() {
                 marginTop: 8,
               }}
             >
-              Sistema clínico de evolução médica.
+              Gestão clínica
+              integrada do paciente.
             </p>
           </div>
 
-          {/* BUSCA */}
-          <div
-            style={{
-              position: "relative",
-              marginBottom: 30,
-            }}
-          >
-            <input
-              className="modal-input"
-              placeholder="Pesquisar paciente..."
-              value={search}
-              onChange={(e) =>
-                handleSearch(
-                  e.target.value
-                )
-              }
-            />
-
-            {filteredPatients.length >
-              0 && (
-              <div
-                style={{
-                  position:
-                    "absolute",
-
-                  top: 60,
-
-                  left: 0,
-
-                  right: 0,
-
-                  background:
-                    "white",
-
-                  border:
-                    "1px solid #e2e8f0",
-
-                  borderRadius: 16,
-
-                  overflow:
-                    "hidden",
-
-                  zIndex: 999,
-
-                  boxShadow:
-                    "0 10px 30px rgba(0,0,0,0.08)",
-                }}
-              >
-                {filteredPatients.map(
-                  (patient) => (
-                    <div
-                      key={patient.id}
-                      onClick={() =>
-                        selectPatient(
-                          patient
-                        )
-                      }
-                      style={{
-                        padding: 16,
-
-                        cursor:
-                          "pointer",
-
-                        borderBottom:
-                          "1px solid #f1f5f9",
-                      }}
-                    >
-                      <strong>
-                        {
-                          patient.fullName
-                        }
-                      </strong>
-
-                      <p
-                        style={{
-                          color:
-                            "#64748b",
-
-                          fontSize: 13,
-
-                          marginTop: 4,
-                        }}
-                      >
-                        CPF:{" "}
-                        {patient.cpf}
-                      </p>
-                    </div>
-                  )
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* DADOS */}
-          {selectedPatient && (
+          {/* PACIENTE */}
+          {patient && (
             <div
               style={{
                 background:
@@ -399,9 +275,9 @@ export default function ProntuariosPage() {
             >
               <h2
                 style={{
-                  fontSize: 24,
+                  fontSize: 26,
                   fontWeight: 800,
-                  marginBottom: 20,
+                  marginBottom: 18,
                 }}
               >
                 Dados do Paciente
@@ -412,205 +288,198 @@ export default function ProntuariosPage() {
                   display: "grid",
 
                   gridTemplateColumns:
-                    "1fr 1fr 1fr",
+                    "1fr 1fr",
 
-                  gap: 18,
+                  gap: 16,
                 }}
               >
-                <div>
+                <p>
                   <strong>
-                    Nome
-                  </strong>
+                    Nome:
+                  </strong>{" "}
+                  {
+                    patient.fullName
+                  }
+                </p>
 
-                  <p>
-                    {
-                      selectedPatient.fullName
-                    }
-                  </p>
-                </div>
-
-                <div>
+                <p>
                   <strong>
-                    CPF
-                  </strong>
+                    CPF:
+                  </strong>{" "}
+                  {patient.cpf}
+                </p>
 
-                  <p>
-                    {
-                      selectedPatient.cpf
-                    }
-                  </p>
-                </div>
-
-                <div>
+                <p>
                   <strong>
-                    Telefone
-                  </strong>
+                    Telefone:
+                  </strong>{" "}
+                  {patient.phone}
+                </p>
 
-                  <p>
-                    {
-                      selectedPatient.phone
-                    }
-                  </p>
-                </div>
+                <p>
+                  <strong>
+                    Convênio:
+                  </strong>{" "}
+                  {
+                    patient.insurance
+                  }
+                </p>
               </div>
             </div>
           )}
 
           {/* FORM */}
-          {selectedPatient && (
+          <div
+            style={{
+              display: "grid",
+              gap: 24,
+            }}
+          >
+            <div>
+              <label className="form-label">
+                Queixa principal
+              </label>
+
+              <textarea
+                className="modal-input"
+                value={
+                  chiefComplaint
+                }
+                onChange={(e) =>
+                  setChiefComplaint(
+                    e.target.value
+                  )
+                }
+                style={{
+                  minHeight: 120,
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="form-label">
+                Diagnóstico
+              </label>
+
+              <textarea
+                className="modal-input"
+                value={diagnosis}
+                onChange={(e) =>
+                  setDiagnosis(
+                    e.target.value
+                  )
+                }
+                style={{
+                  minHeight: 120,
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="form-label">
+                Evolução /
+                Observações
+              </label>
+
+              <textarea
+                className="modal-input"
+                value={evolution}
+                onChange={(e) =>
+                  setEvolution(
+                    e.target.value
+                  )
+                }
+                style={{
+                  minHeight: 160,
+                }}
+              />
+            </div>
+
+            <button
+              className="primary-button"
+              onClick={saveRecord}
+              disabled={loading}
+            >
+              {loading
+                ? "Salvando..."
+                : "Salvar Prontuário"}
+            </button>
+          </div>
+
+          {/* HISTORICO */}
+          <div
+            style={{
+              marginTop: 50,
+            }}
+          >
+            <h2
+              style={{
+                fontSize: 32,
+                fontWeight: 800,
+                marginBottom: 24,
+              }}
+            >
+              Histórico Clínico
+            </h2>
+
             <div
               style={{
                 display: "grid",
                 gap: 20,
               }}
             >
-              <div>
-                <label className="form-label">
-                  Queixa principal
-                </label>
+              {history.map(
+                (record) => (
+                  <div
+                    key={record.id}
+                    style={{
+                      background:
+                        "#f8fafc",
 
-                <textarea
-                  className="modal-input"
-                  value={complaint}
-                  onChange={(e) =>
-                    setComplaint(
-                      e.target.value
-                    )
-                  }
-                  style={{
-                    minHeight: 120,
-                  }}
-                />
-              </div>
+                      border:
+                        "1px solid #e2e8f0",
 
-              <div>
-                <label className="form-label">
-                  Diagnóstico
-                </label>
+                      borderRadius: 22,
 
-                <textarea
-                  className="modal-input"
-                  value={diagnosis}
-                  onChange={(e) =>
-                    setDiagnosis(
-                      e.target.value
-                    )
-                  }
-                  style={{
-                    minHeight: 120,
-                  }}
-                />
-              </div>
-
-              <div>
-                <label className="form-label">
-                  Evolução /
-                  Observações
-                </label>
-
-                <textarea
-                  className="modal-input"
-                  value={observations}
-                  onChange={(e) =>
-                    setObservations(
-                      e.target.value
-                    )
-                  }
-                  style={{
-                    minHeight: 160,
-                  }}
-                />
-              </div>
-
-              <button
-                className="primary-button"
-                onClick={
-                  saveMedicalRecord
-                }
-                disabled={loading}
-              >
-                {loading
-                  ? "Salvando..."
-                  : "Salvar Prontuário"}
-              </button>
-            </div>
-          )}
-
-          {/* HISTÓRICO */}
-          {selectedPatient && (
-            <div
-              style={{
-                marginTop: 40,
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: 28,
-                  fontWeight: 800,
-                  marginBottom: 20,
-                }}
-              >
-                Histórico Clínico
-              </h2>
-
-              <div
-                style={{
-                  display: "grid",
-                  gap: 18,
-                }}
-              >
-                {records.map(
-                  (record) => (
+                      padding: 24,
+                    }}
+                  >
                     <div
-                      key={record.id}
                       style={{
-                        background:
-                          "white",
+                        marginBottom: 14,
 
-                        border:
-                          "1px solid #e2e8f0",
+                        color:
+                          "#64748b",
 
-                        borderRadius: 20,
-
-                        padding: 24,
+                        fontSize: 14,
                       }}
                     >
-                      <div
-                        style={{
-                          marginBottom: 16,
-                        }}
-                      >
-                        <strong>
-                          Data:
-                        </strong>{" "}
-                        {new Date(
-                          record.createdAt
-                        ).toLocaleString(
-                          "pt-BR"
-                        )}
-                      </div>
+                      {new Date(
+                        record.createdAt
+                      ).toLocaleString(
+                        "pt-BR"
+                      )}
+                    </div>
 
-                      <div
-                        style={{
-                          marginBottom: 14,
-                        }}
-                      >
+                    <div
+                      style={{
+                        display: "grid",
+                        gap: 14,
+                      }}
+                    >
+                      <div>
                         <strong>
                           Queixa:
                         </strong>
 
                         <p>
                           {
-                            record.complaint
+                            record.chiefComplaint
                           }
                         </p>
                       </div>
 
-                      <div
-                        style={{
-                          marginBottom: 14,
-                        }}
-                      >
+                      <div>
                         <strong>
                           Diagnóstico:
                         </strong>
@@ -624,21 +493,44 @@ export default function ProntuariosPage() {
 
                       <div>
                         <strong>
-                          Observações:
+                          Evolução:
                         </strong>
 
                         <p>
                           {
-                            record.observations
+                            record.evolution
                           }
                         </p>
                       </div>
                     </div>
-                  )
-                )}
-              </div>
+                  </div>
+                )
+              )}
+
+              {history.length ===
+                0 && (
+                <div
+                  style={{
+                    padding: 30,
+
+                    textAlign:
+                      "center",
+
+                    color:
+                      "#64748b",
+
+                    background:
+                      "#f8fafc",
+
+                    borderRadius: 20,
+                  }}
+                >
+                  Nenhum histórico
+                  clínico encontrado.
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </main>
     </div>
