@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
   "https://medflow-mvp-production.up.railway.app/api";
 
 type Patient = {
@@ -17,11 +16,11 @@ type Patient = {
 };
 
 export default function PacientesPage() {
-  const [loading, setLoading] =
-    useState(false);
-
   const [patients, setPatients] =
     useState<Patient[]>([]);
+
+  const [loading, setLoading] =
+    useState(false);
 
   const [fullName, setFullName] =
     useState("");
@@ -42,7 +41,7 @@ export default function PacientesPage() {
     useState("");
 
   /* =========================================
-     BUSCAR PACIENTES
+     CARREGAR
   ========================================= */
 
   async function loadPatients() {
@@ -71,7 +70,7 @@ export default function PacientesPage() {
   }, []);
 
   /* =========================================
-     CADASTRAR PACIENTE
+     CADASTRAR
   ========================================= */
 
   async function createPatient() {
@@ -103,12 +102,10 @@ export default function PacientesPage() {
         await response.json();
 
       if (!response.ok) {
-        alert(
+        throw new Error(
           data.message ||
-            "Erro ao cadastrar paciente"
+            "Erro ao cadastrar"
         );
-
-        return;
       }
 
       alert(
@@ -168,38 +165,32 @@ export default function PacientesPage() {
       {/* MAIN */}
       <main className="main-content">
         <div className="card">
-          {/* HEADER */}
-          <div
+          <h1
             style={{
+              fontSize: 42,
+              fontWeight: 900,
+              marginBottom: 12,
+            }}
+          >
+            Pacientes
+          </h1>
+
+          <p
+            style={{
+              color: "#64748b",
               marginBottom: 32,
             }}
           >
-            <h1
-              style={{
-                fontSize: 38,
-                fontWeight: 900,
-              }}
-            >
-              Pacientes
-            </h1>
-
-            <p
-              style={{
-                color: "#64748b",
-                marginTop: 10,
-              }}
-            >
-              Cadastro e gestão
-              hospitalar de pacientes.
-            </p>
-          </div>
+            Cadastro hospitalar de
+            pacientes.
+          </p>
 
           {/* FORM */}
           <div
             style={{
               background: "white",
-              padding: 28,
               borderRadius: 24,
+              padding: 24,
               border:
                 "1px solid #e2e8f0",
               marginBottom: 30,
@@ -210,7 +201,7 @@ export default function PacientesPage() {
                 display: "grid",
                 gridTemplateColumns:
                   "1fr 1fr 1fr",
-                gap: 18,
+                gap: 16,
               }}
             >
               <input
@@ -270,7 +261,7 @@ export default function PacientesPage() {
 
               <input
                 className="modal-input"
-                placeholder="E-mail"
+                placeholder="Email"
                 value={email}
                 onChange={(e) =>
                   setEmail(
@@ -283,7 +274,7 @@ export default function PacientesPage() {
             <button
               className="primary-button"
               style={{
-                marginTop: 24,
+                marginTop: 20,
               }}
               onClick={
                 createPatient
@@ -311,91 +302,43 @@ export default function PacientesPage() {
                     background:
                       "white",
                     borderRadius: 22,
-                    padding: 24,
+                    padding: 22,
                     border:
                       "1px solid #e2e8f0",
                   }}
                 >
-                  <div
+                  <h2
                     style={{
-                      display: "flex",
-                      justifyContent:
-                        "space-between",
-                      alignItems:
-                        "center",
+                      fontSize: 22,
+                      fontWeight: 800,
                     }}
                   >
-                    <div>
-                      <h2
-                        style={{
-                          fontSize: 22,
-                          fontWeight: 800,
-                        }}
-                      >
-                        {
-                          patient.fullName
-                        }
-                      </h2>
+                    {
+                      patient.fullName
+                    }
+                  </h2>
 
-                      <p
-                        style={{
-                          color:
-                            "#64748b",
-                          marginTop: 6,
-                        }}
-                      >
-                        CPF:{" "}
-                        {patient.cpf}
-                      </p>
+                  <p>
+                    CPF:{" "}
+                    {patient.cpf}
+                  </p>
 
-                      <p
-                        style={{
-                          color:
-                            "#64748b",
-                        }}
-                      >
-                        Telefone:{" "}
-                        {
-                          patient.phone
-                        }
-                      </p>
+                  <p>
+                    Telefone:{" "}
+                    {patient.phone}
+                  </p>
 
-                      <p
-                        style={{
-                          color:
-                            "#64748b",
-                        }}
-                      >
-                        Convênio:{" "}
-                        {
-                          patient.insurance
-                        }
-                      </p>
+                  <p>
+                    Convênio:{" "}
+                    {
+                      patient.insurance
+                    }
+                  </p>
 
-                      <p
-                        style={{
-                          color:
-                            "#64748b",
-                        }}
-                      >
-                        Email:{" "}
-                        {
-                          patient.email
-                        }
-                      </p>
-                    </div>
-
-                    <a
-                      href={`/prontuarios/${patient.id}`}
-                      className="primary-button"
-                      style={{
-                        textDecoration:
-                          "none",
-                      }}
-                    >
-                      Abrir Prontuário
-                    </a>
-                  </div>
+                  <p>
+                    Email:{" "}
+                    {patient.email}
+                  </p>
                 </div>
               )
             )}
