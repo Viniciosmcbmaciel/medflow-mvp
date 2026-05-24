@@ -899,6 +899,7 @@ export default function AgendaPage() {
       )}
 
       {/* STATUS */}
+{/* STATUS */}
 {selectedAppointment && (
   <div className="premium-modal-overlay">
     <div
@@ -930,9 +931,7 @@ export default function AgendaPage() {
             fontSize: 16,
           }}
         >
-          {
-            selectedAppointment.title
-          }
+          {selectedAppointment.title}
         </p>
       </div>
 
@@ -943,8 +942,7 @@ export default function AgendaPage() {
           borderRadius: 18,
           padding: 18,
           marginBottom: 24,
-          border:
-            "1px solid #e2e8f0",
+          border: "1px solid #e2e8f0",
         }}
       >
         <div
@@ -954,39 +952,27 @@ export default function AgendaPage() {
           }}
         >
           <div>
-            <strong>
-              Status:
-            </strong>{" "}
-            {
-              selectedAppointment.status
-            }
+            <strong>Status:</strong>{" "}
+            {selectedAppointment.status}
           </div>
 
           <div>
-            <strong>
-              Início:
-            </strong>{" "}
+            <strong>Início:</strong>{" "}
             {new Date(
               selectedAppointment.start
-            ).toLocaleString(
-              "pt-BR"
-            )}
+            ).toLocaleString("pt-BR")}
           </div>
 
           <div>
-            <strong>
-              Fim:
-            </strong>{" "}
+            <strong>Fim:</strong>{" "}
             {new Date(
               selectedAppointment.end
-            ).toLocaleString(
-              "pt-BR"
-            )}
+            ).toLocaleString("pt-BR")}
           </div>
         </div>
       </div>
 
-      {/* AÇÕES PRINCIPAIS */}
+      {/* AÇÕES */}
       <div
         style={{
           display: "grid",
@@ -994,7 +980,6 @@ export default function AgendaPage() {
           marginBottom: 24,
         }}
       >
-        {/* TELECONSULTA */}
         <button
           className="primary-button"
           style={{
@@ -1012,7 +997,6 @@ export default function AgendaPage() {
           📹 Iniciar Teleconsulta
         </button>
 
-        {/* PRONTUARIO */}
         <button
           className="secondary-button"
           style={{
@@ -1022,7 +1006,7 @@ export default function AgendaPage() {
           }}
           onClick={() =>
             window.open(
-              `/prontuarios?appointmentId=${selectedAppointment.id}`,
+              `/prontuarios?id=${selectedAppointment.id}`,
               "_blank"
             )
           }
@@ -1030,7 +1014,6 @@ export default function AgendaPage() {
           📋 Abrir Prontuário
         </button>
 
-        {/* PRESCRIÇÃO */}
         <button
           className="secondary-button"
           style={{
@@ -1040,12 +1023,12 @@ export default function AgendaPage() {
           }}
           onClick={() =>
             window.open(
-              `/prescricoes?appointmentId=${selectedAppointment.id}`,
+              `/prescricoes?id=${selectedAppointment.id}`,
               "_blank"
             )
           }
         >
-          💊 Abrir Prescrição
+          💊 Prescrição
         </button>
       </div>
 
@@ -1059,9 +1042,7 @@ export default function AgendaPage() {
         <button
           className="primary-button"
           onClick={() =>
-            updateStatus(
-              "confirmado"
-            )
+            updateStatus("confirmado")
           }
         >
           ✅ Confirmar Consulta
@@ -1070,9 +1051,7 @@ export default function AgendaPage() {
         <button
           className="secondary-button"
           onClick={() =>
-            updateStatus(
-              "concluido"
-            )
+            updateStatus("concluido")
           }
         >
           ✔️ Finalizar Consulta
@@ -1080,27 +1059,16 @@ export default function AgendaPage() {
 
         <button
           style={{
-            background:
-              "#ef4444",
-
+            background: "#ef4444",
             color: "white",
-
             border: "none",
-
-            padding:
-              "14px 20px",
-
+            padding: "14px 20px",
             borderRadius: 14,
-
             fontWeight: 700,
-
-            cursor:
-              "pointer",
+            cursor: "pointer",
           }}
           onClick={() =>
-            updateStatus(
-              "cancelado"
-            )
+            updateStatus("cancelado")
           }
         >
           ❌ Cancelar Consulta
@@ -1108,26 +1076,15 @@ export default function AgendaPage() {
 
         <button
           style={{
-            background:
-              "#0f172a",
-
+            background: "#0f172a",
             color: "white",
-
             border: "none",
-
-            padding:
-              "14px 20px",
-
+            padding: "14px 20px",
             borderRadius: 14,
-
             fontWeight: 700,
-
-            cursor:
-              "pointer",
+            cursor: "pointer",
           }}
-          onClick={
-            deleteAppointment
-          }
+          onClick={deleteAppointment}
         >
           🗑 Excluir Consulta
         </button>
