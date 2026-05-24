@@ -46,10 +46,6 @@ type Patient = {
 };
 
 export default function AgendaPage() {
-  /* =========================================
-     AGENDAMENTOS
-  ========================================= */
-
   const [events, setEvents] =
     useState<Appointment[]>([
       {
@@ -68,10 +64,6 @@ export default function AgendaPage() {
       },
     ]);
 
-  /* =========================================
-     PACIENTES
-  ========================================= */
-
   const [patients, setPatients] =
     useState<Patient[]>([]);
 
@@ -79,10 +71,6 @@ export default function AgendaPage() {
     filteredPatients,
     setFilteredPatients,
   ] = useState<Patient[]>([]);
-
-  /* =========================================
-     MODAIS
-  ========================================= */
 
   const [openModal, setOpenModal] =
     useState(false);
@@ -93,10 +81,6 @@ export default function AgendaPage() {
   ] = useState<Appointment | null>(
     null
   );
-
-  /* =========================================
-     FORM
-  ========================================= */
 
   const [selectedDate, setSelectedDate] =
     useState("");
@@ -124,10 +108,6 @@ export default function AgendaPage() {
     setAppointmentType,
   ] = useState("Consulta");
 
-  /* =========================================
-     BUSCAR PACIENTES
-  ========================================= */
-
   useEffect(() => {
     loadPatients();
   }, []);
@@ -150,10 +130,6 @@ export default function AgendaPage() {
       console.error(error);
     }
   }
-
-  /* =========================================
-     AUTOCOMPLETE
-  ========================================= */
 
   function handlePatientSearch(
     value: string
@@ -201,10 +177,6 @@ export default function AgendaPage() {
 
     setFilteredPatients([]);
   }
-
-  /* =========================================
-     CALENDARIO
-  ========================================= */
 
   function handleDateClick(
     info: any
@@ -266,10 +238,6 @@ export default function AgendaPage() {
     setSource("");
   }
 
-  /* =========================================
-     NOVO PACIENTE
-  ========================================= */
-
   async function createPatient() {
     try {
       const response = await fetch(
@@ -325,10 +293,6 @@ export default function AgendaPage() {
     }
   }
 
-  /* =========================================
-     STATUS
-  ========================================= */
-
   function updateStatus(
     status:
       | "confirmado"
@@ -370,7 +334,6 @@ export default function AgendaPage() {
 
   return (
     <div className="dashboard-layout">
-      {/* SIDEBAR */}
       <aside className="sidebar">
         <h1 className="sidebar-title">
           MedFlow
@@ -399,7 +362,6 @@ export default function AgendaPage() {
         </nav>
       </aside>
 
-      {/* MAIN */}
       <main className="main-content">
         <div className="card">
           <div
@@ -492,7 +454,7 @@ export default function AgendaPage() {
         </div>
       </main>
 
-      {/* MODAL */}
+      {/* MODAL NOVO */}
       {openModal && (
         <div className="premium-modal-overlay">
           <div
@@ -502,70 +464,28 @@ export default function AgendaPage() {
               padding: 36,
             }}
           >
-            <div
+            <h2
               style={{
-                display: "flex",
-                justifyContent:
-                  "space-between",
-
-                alignItems:
-                  "center",
-
-                marginBottom: 28,
+                fontSize: 32,
+                fontWeight: 800,
+                marginBottom: 24,
               }}
             >
-              <div>
-                <h2
-                  style={{
-                    fontSize: 32,
-                    fontWeight: 800,
-                  }}
-                >
-                  Novo Agendamento
-                </h2>
-
-                <p
-                  style={{
-                    color:
-                      "#64748b",
-
-                    marginTop: 8,
-                  }}
-                >
-                  Configure o
-                  atendimento do
-                  paciente.
-                </p>
-              </div>
-
-              <button
-                className="secondary-button"
-                onClick={() =>
-                  setOpenModal(
-                    false
-                  )
-                }
-              >
-                Fechar
-              </button>
-            </div>
+              Novo Agendamento
+            </h2>
 
             <div
               style={{
                 display: "grid",
-
                 gridTemplateColumns:
                   "1fr 1fr",
-
                 gap: 18,
               }}
             >
-              {/* PACIENTE */}
               <div
                 style={{
                   gridColumn:
                     "1 / span 2",
-
                   position:
                     "relative",
                 }}
@@ -574,287 +494,155 @@ export default function AgendaPage() {
                   Nome do paciente
                 </label>
 
-                <div
-                  style={{
-                    position:
-                      "relative",
-                  }}
-                >
-                  <input
-                    className="modal-input"
-                    placeholder="Pesquisar paciente"
-                    value={
-                      patientName
-                    }
-                    onChange={(e) =>
-                      handlePatientSearch(
-                        e.target
-                          .value
+                <input
+                  className="modal-input"
+                  placeholder="Pesquisar paciente"
+                  value={patientName}
+                  onChange={(e) =>
+                    handlePatientSearch(
+                      e.target.value
+                    )
+                  }
+                />
+
+                {filteredPatients.length >
+                  0 && (
+                  <div
+                    style={{
+                      position:
+                        "absolute",
+                      top: 90,
+                      left: 0,
+                      right: 0,
+                      background:
+                        "white",
+                      border:
+                        "1px solid #e2e8f0",
+                      borderRadius: 14,
+                      zIndex: 999,
+                    }}
+                  >
+                    {filteredPatients.map(
+                      (
+                        patient
+                      ) => (
+                        <div
+                          key={
+                            patient.id
+                          }
+                          onClick={() =>
+                            selectPatient(
+                              patient
+                            )
+                          }
+                          style={{
+                            padding: 14,
+                            cursor:
+                              "pointer",
+                          }}
+                        >
+                          {
+                            patient.fullName
+                          }
+                        </div>
                       )
-                    }
-                  />
-
-                  {filteredPatients.length >
-                    0 && (
-                    <div
-                      style={{
-                        position:
-                          "absolute",
-
-                        top: 60,
-
-                        left: 0,
-
-                        right: 0,
-
-                        background:
-                          "white",
-
-                        border:
-                          "1px solid #e2e8f0",
-
-                        borderRadius: 14,
-
-                        zIndex: 999,
-
-                        overflow:
-                          "hidden",
-
-                        boxShadow:
-                          "0 10px 30px rgba(0,0,0,0.08)",
-                      }}
-                    >
-                      {filteredPatients.map(
-                        (
-                          patient
-                        ) => (
-                          <div
-                            key={
-                              patient.id
-                            }
-                            onClick={() =>
-                              selectPatient(
-                                patient
-                              )
-                            }
-                            style={{
-                              padding: 14,
-
-                              cursor:
-                                "pointer",
-
-                              borderBottom:
-                                "1px solid #f1f5f9",
-                            }}
-                          >
-                            <strong>
-                              {
-                                patient.fullName
-                              }
-                            </strong>
-
-                            <p
-                              style={{
-                                color:
-                                  "#64748b",
-
-                                fontSize: 13,
-
-                                marginTop: 4,
-                              }}
-                            >
-                              CPF:{" "}
-                              {
-                                patient.cpf
-                              }
-                            </p>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              <div>
-                <label className="form-label">
-                  Data e horário
-                </label>
+              <input
+                type="datetime-local"
+                className="modal-input"
+                value={selectedDate.slice(
+                  0,
+                  16
+                )}
+                onChange={(e) =>
+                  setSelectedDate(
+                    e.target.value
+                  )
+                }
+              />
 
-                <input
-                  type="datetime-local"
-                  className="modal-input"
-                  value={selectedDate.slice(
-                    0,
-                    16
-                  )}
-                  onChange={(e) =>
-                    setSelectedDate(
-                      e.target
-                        .value
-                    )
-                  }
-                />
-              </div>
+              <select
+                className="modal-input"
+                value={
+                  appointmentType
+                }
+                onChange={(e) =>
+                  setAppointmentType(
+                    e.target.value
+                  )
+                }
+              >
+                <option>
+                  Consulta
+                </option>
 
-              <div>
-                <label className="form-label">
-                  Tipo de consulta
-                </label>
+                <option>
+                  Retorno
+                </option>
 
-                <select
-                  className="modal-input"
-                  value={
-                    appointmentType
-                  }
-                  onChange={(e) =>
-                    setAppointmentType(
-                      e.target
-                        .value
-                    )
-                  }
-                >
-                  <option>
-                    Consulta
-                  </option>
+                <option>
+                  Avaliação
+                </option>
 
-                  <option>
-                    Retorno
-                  </option>
+                <option>
+                  Teleconsulta
+                </option>
+              </select>
 
-                  <option>
-                    Avaliação
-                  </option>
+              <input
+                type="date"
+                className="modal-input"
+                value={birthDate}
+                onChange={(e) =>
+                  setBirthDate(
+                    e.target.value
+                  )
+                }
+              />
 
-                  <option>
-                    Teleconsulta
-                  </option>
-                </select>
-              </div>
+              <input
+                className="modal-input"
+                placeholder="CPF"
+                value={cpf}
+                onChange={(e) =>
+                  setCpf(
+                    e.target.value
+                  )
+                }
+              />
 
-              <div>
-                <label className="form-label">
-                  Data nascimento
-                </label>
+              <input
+                className="modal-input"
+                placeholder="Telefone"
+                value={phone}
+                onChange={(e) =>
+                  setPhone(
+                    e.target.value
+                  )
+                }
+              />
 
-                <input
-                  type="date"
-                  className="modal-input"
-                  value={
-                    birthDate
-                  }
-                  onChange={(e) =>
-                    setBirthDate(
-                      e.target
-                        .value
-                    )
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="form-label">
-                  CPF
-                </label>
-
-                <input
-                  className="modal-input"
-                  value={cpf}
-                  onChange={(e) =>
-                    setCpf(
-                      e.target
-                        .value
-                    )
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="form-label">
-                  Telefone
-                </label>
-
-                <input
-                  className="modal-input"
-                  value={phone}
-                  onChange={(e) =>
-                    setPhone(
-                      e.target
-                        .value
-                    )
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="form-label">
-                  Convênio
-                </label>
-
-                <input
-                  className="modal-input"
-                  value={
-                    insurance
-                  }
-                  onChange={(e) =>
-                    setInsurance(
-                      e.target
-                        .value
-                    )
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="form-label">
-                  Como conheceu
-                </label>
-
-                <select
-                  className="modal-input"
-                  value={source}
-                  onChange={(e) =>
-                    setSource(
-                      e.target
-                        .value
-                    )
-                  }
-                >
-                  <option value="">
-                    Selecionar
-                  </option>
-
-                  <option>
-                    Instagram
-                  </option>
-
-                  <option>
-                    Google
-                  </option>
-
-                  <option>
-                    Indicação
-                  </option>
-
-                  <option>
-                    Convênio
-                  </option>
-
-                  <option>
-                    Outro
-                  </option>
-                </select>
-              </div>
+              <input
+                className="modal-input"
+                placeholder="Convênio"
+                value={insurance}
+                onChange={(e) =>
+                  setInsurance(
+                    e.target.value
+                  )
+                }
+              />
             </div>
 
-            {/* FOOTER */}
             <div
               style={{
                 display: "flex",
-
                 justifyContent:
                   "space-between",
-
                 marginTop: 30,
               }}
             >
@@ -898,208 +686,157 @@ export default function AgendaPage() {
         </div>
       )}
 
-      {/* STATUS */}
-{/* STATUS */}
-{selectedAppointment && (
-  <div className="premium-modal-overlay">
-    <div
-      className="premium-modal"
-      style={{
-        maxWidth: 560,
-        padding: 32,
-      }}
-    >
-      {/* HEADER */}
-      <div
-        style={{
-          marginBottom: 24,
-        }}
-      >
-        <h2
-          style={{
-            fontSize: 30,
-            fontWeight: 800,
-            marginBottom: 10,
-          }}
-        >
-          Gerenciar Consulta
-        </h2>
+      {/* MODAL GERENCIAR */}
+      {selectedAppointment && (
+        <div className="premium-modal-overlay">
+          <div
+            className="premium-modal"
+            style={{
+              maxWidth: 560,
+              padding: 32,
+            }}
+          >
+            <h2
+              style={{
+                fontSize: 30,
+                fontWeight: 800,
+                marginBottom: 10,
+              }}
+            >
+              Gerenciar Consulta
+            </h2>
 
-        <p
-          style={{
-            color: "#64748b",
-            fontSize: 16,
-          }}
-        >
-          {selectedAppointment.title}
-        </p>
-      </div>
+            <p
+              style={{
+                color: "#64748b",
+                marginBottom: 24,
+              }}
+            >
+              {
+                selectedAppointment.title
+              }
+            </p>
 
-      {/* INFO */}
-      <div
-        style={{
-          background: "#f8fafc",
-          borderRadius: 18,
-          padding: 18,
-          marginBottom: 24,
-          border: "1px solid #e2e8f0",
-        }}
-      >
-        <div
-          style={{
-            display: "grid",
-            gap: 12,
-          }}
-        >
-          <div>
-            <strong>Status:</strong>{" "}
-            {selectedAppointment.status}
-          </div>
+            <div
+              style={{
+                display: "grid",
+                gap: 12,
+              }}
+            >
+              <button
+                className="primary-button"
+                onClick={() =>
+                  window.open(
+                    `/teleconsulta/${selectedAppointment.id}`,
+                    "_blank"
+                  )
+                }
+              >
+                📹 Iniciar Teleconsulta
+              </button>
 
-          <div>
-            <strong>Início:</strong>{" "}
-            {new Date(
-              selectedAppointment.start
-            ).toLocaleString("pt-BR")}
-          </div>
+              <button
+                className="secondary-button"
+                onClick={() =>
+                  window.open(
+                    `/prontuarios?id=${selectedAppointment.id}`,
+                    "_blank"
+                  )
+                }
+              >
+                📋 Abrir Prontuário
+              </button>
 
-          <div>
-            <strong>Fim:</strong>{" "}
-            {new Date(
-              selectedAppointment.end
-            ).toLocaleString("pt-BR")}
+              <button
+                className="secondary-button"
+                onClick={() =>
+                  window.open(
+                    `/prescricoes?id=${selectedAppointment.id}`,
+                    "_blank"
+                  )
+                }
+              >
+                💊 Prescrição
+              </button>
+
+              <button
+                className="primary-button"
+                onClick={() =>
+                  updateStatus(
+                    "confirmado"
+                  )
+                }
+              >
+                ✅ Confirmar
+              </button>
+
+              <button
+                className="secondary-button"
+                onClick={() =>
+                  updateStatus(
+                    "concluido"
+                  )
+                }
+              >
+                ✔️ Concluir
+              </button>
+
+              <button
+                style={{
+                  background:
+                    "#ef4444",
+                  color: "white",
+                  border: "none",
+                  padding:
+                    "14px 20px",
+                  borderRadius: 14,
+                  fontWeight: 700,
+                  cursor:
+                    "pointer",
+                }}
+                onClick={() =>
+                  updateStatus(
+                    "cancelado"
+                  )
+                }
+              >
+                ❌ Cancelar
+              </button>
+
+              <button
+                style={{
+                  background:
+                    "#0f172a",
+                  color: "white",
+                  border: "none",
+                  padding:
+                    "14px 20px",
+                  borderRadius: 14,
+                  fontWeight: 700,
+                  cursor:
+                    "pointer",
+                }}
+                onClick={
+                  deleteAppointment
+                }
+              >
+                🗑 Excluir
+              </button>
+
+              <button
+                className="secondary-button"
+                onClick={() =>
+                  setSelectedAppointment(
+                    null
+                  )
+                }
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* AÇÕES */}
-      <div
-        style={{
-          display: "grid",
-          gap: 14,
-          marginBottom: 24,
-        }}
-      >
-        <button
-          className="primary-button"
-          style={{
-            width: "100%",
-            padding: 16,
-            fontSize: 16,
-          }}
-          onClick={() =>
-            window.open(
-              `/teleconsulta/${selectedAppointment.id}`,
-              "_blank"
-            )
-          }
-        >
-          📹 Iniciar Teleconsulta
-        </button>
-
-        <button
-          className="secondary-button"
-          style={{
-            width: "100%",
-            padding: 16,
-            fontSize: 16,
-          }}
-          onClick={() =>
-            window.open(
-              `/prontuarios?id=${selectedAppointment.id}`,
-              "_blank"
-            )
-          }
-        >
-          📋 Abrir Prontuário
-        </button>
-
-        <button
-          className="secondary-button"
-          style={{
-            width: "100%",
-            padding: 16,
-            fontSize: 16,
-          }}
-          onClick={() =>
-            window.open(
-              `/prescricoes?id=${selectedAppointment.id}`,
-              "_blank"
-            )
-          }
-        >
-          💊 Prescrição
-        </button>
-      </div>
-
-      {/* STATUS */}
-      <div
-        style={{
-          display: "grid",
-          gap: 12,
-        }}
-      >
-        <button
-          className="primary-button"
-          onClick={() =>
-            updateStatus("confirmado")
-          }
-        >
-          ✅ Confirmar Consulta
-        </button>
-
-        <button
-          className="secondary-button"
-          onClick={() =>
-            updateStatus("concluido")
-          }
-        >
-          ✔️ Finalizar Consulta
-        </button>
-
-        <button
-          style={{
-            background: "#ef4444",
-            color: "white",
-            border: "none",
-            padding: "14px 20px",
-            borderRadius: 14,
-            fontWeight: 700,
-            cursor: "pointer",
-          }}
-          onClick={() =>
-            updateStatus("cancelado")
-          }
-        >
-          ❌ Cancelar Consulta
-        </button>
-
-        <button
-          style={{
-            background: "#0f172a",
-            color: "white",
-            border: "none",
-            padding: "14px 20px",
-            borderRadius: 14,
-            fontWeight: 700,
-            cursor: "pointer",
-          }}
-          onClick={deleteAppointment}
-        >
-          🗑 Excluir Consulta
-        </button>
-
-        <button
-          className="secondary-button"
-          onClick={() =>
-            setSelectedAppointment(
-              null
-            )
-          }
-        >
-          Fechar
-        </button>
-      </div>
+      )}
     </div>
-  </div>
-)}
+  );
+}
