@@ -156,69 +156,77 @@ export default function ProntuariosPage() {
   ========================================= */
 
   async function saveMedicalRecord() {
-    if (!selectedPatient) {
-      alert(
-        "Selecione um paciente"
-      );
+  if (!selectedPatient) {
+    alert(
+      "Selecione um paciente"
+    );
 
-      return;
-    }
+    return;
+  }
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const response = await fetch(
-        "https://medflow-mvp-production.up.railway.app/api/medical-records",
-        {
-          method: "POST",
+    const response = await fetch(
+      "https://medflow-mvp-production.up.railway.app/api/medical-records",
+      {
+        method: "POST",
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
 
-          body: JSON.stringify({
-            patientId:
-              selectedPatient.id,
+        body: JSON.stringify({
+          patientId:
+            selectedPatient.id,
 
+          anamnesis:
             complaint,
 
-            diagnosis,
+          diagnosis,
 
+          evolution:
             observations,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          "Erro ao salvar prontuário"
-        );
+        }),
       }
+    );
 
-      alert(
-        "Prontuário salvo com sucesso!"
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      console.error(data);
+
+      throw new Error(
+        data.message ||
+          "Erro ao salvar prontuário"
       );
-
-      setComplaint("");
-
-      setDiagnosis("");
-
-      setObservations("");
-
-      await loadMedicalRecords(
-        selectedPatient.id
-      );
-    } catch (error) {
-      console.error(error);
-
-      alert(
-        "Erro ao salvar prontuário"
-      );
-    } finally {
-      setLoading(false);
     }
+
+    alert(
+      "Prontuário salvo com sucesso!"
+    );
+
+    setComplaint("");
+
+    setDiagnosis("");
+
+    setObservations("");
+
+    await loadMedicalRecords(
+      selectedPatient.id
+    );
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      "Erro ao salvar prontuário"
+    );
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <div className="dashboard-layout">
