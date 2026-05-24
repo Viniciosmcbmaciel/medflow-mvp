@@ -97,25 +97,55 @@ export default function ProntuariosPage() {
   ========================================= */
 
   async function loadHistory(
-    patientId: string
-  ) {
-    try {
-      const response = await fetch(
-        `https://medflow-mvp-production.up.railway.app/api/medical-records/patient/${patientId}`
+  patientId: string
+) {
+  try {
+    const response = await fetch(
+      `https://medflow-mvp-production.up.railway.app/api/medical-records/patient/${patientId}`
+    );
+
+    if (!response.ok) {
+      console.error(
+        "Erro ao buscar histórico"
       );
 
-      if (!response.ok) {
-        return;
-      }
-
-      const data =
-        await response.json();
-
-      setHistory(data);
-    } catch (error) {
-      console.error(error);
+      return;
     }
+
+    const data =
+      await response.json();
+
+    console.log(
+      "HISTORICO:",
+      data
+    );
+
+    const formatted =
+      data.map((item: any) => ({
+        id: item.id,
+
+        chiefComplaint:
+          item.chiefComplaint ||
+          item.complaint ||
+          "",
+
+        diagnosis:
+          item.diagnosis || "",
+
+        evolution:
+          item.evolution ||
+          item.observations ||
+          "",
+
+        createdAt:
+          item.createdAt,
+      }));
+
+    setHistory(formatted);
+  } catch (error) {
+    console.error(error);
   }
+}
 
   /* =========================================
      SAVE RECORD
@@ -184,7 +214,7 @@ export default function ProntuariosPage() {
 
       setEvolution("");
 
-      loadHistory(patient.id);
+      await loadHistory(patient.id);
     } catch (error) {
       console.error(error);
 
