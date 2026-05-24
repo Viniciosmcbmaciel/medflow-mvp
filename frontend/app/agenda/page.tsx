@@ -102,24 +102,16 @@ export default function AgendaPage() {
     useState("");
 
   const [patientName, setPatientName] =
-  useState("");
-
-const [patients, setPatients] =
-  useState<any[]>([]);
-
-const [
-  filteredPatients,
-  setFilteredPatients,
-] = useState<any[]>([]);
+    useState("");
 
   const [birthDate, setBirthDate] =
     useState("");
 
   const [cpf, setCpf] =
-  useState("");
+    useState("");
 
-const [phone, setPhone] =
-  useState("");
+  const [phone, setPhone] =
+    useState("");
 
   const [insurance, setInsurance] =
     useState("");
@@ -127,35 +119,37 @@ const [phone, setPhone] =
   const [source, setSource] =
     useState("");
 
-  const [appointmentType, setAppointmentType] =
-    useState("Consulta");
+  const [
+    appointmentType,
+    setAppointmentType,
+  ] = useState("Consulta");
 
   /* =========================================
      BUSCAR PACIENTES
   ========================================= */
 
   useEffect(() => {
-  loadPatients();
-}, []);
+    loadPatients();
+  }, []);
 
-async function loadPatients() {
-  try {
-    const response = await fetch(
-      "https://medflow-mvp-production.up.railway.app/api/patients"
-    );
+  async function loadPatients() {
+    try {
+      const response = await fetch(
+        "https://medflow-mvp-production.up.railway.app/api/patients"
+      );
 
-    if (!response.ok) {
-      return;
+      if (!response.ok) {
+        return;
+      }
+
+      const data =
+        await response.json();
+
+      setPatients(data);
+    } catch (error) {
+      console.error(error);
     }
-
-    const data =
-      await response.json();
-
-    setPatients(data);
-  } catch (error) {
-    console.error(error);
   }
-}
 
   /* =========================================
      AUTOCOMPLETE
@@ -201,6 +195,10 @@ async function loadPatients() {
       patient.insurance || ""
     );
 
+    setPhone(
+      patient.phone || ""
+    );
+
     setFilteredPatients([]);
   }
 
@@ -215,52 +213,6 @@ async function loadPatients() {
 
     setOpenModal(true);
   }
-
-function handlePatientSearch(
-  value: string
-) {
-  setPatientName(value);
-
-  if (!value) {
-    setFilteredPatients([]);
-    return;
-  }
-
-  const filtered =
-    patients.filter((patient) =>
-      patient.fullName
-        .toLowerCase()
-        .includes(
-          value.toLowerCase()
-        )
-    );
-
-  setFilteredPatients(filtered);
-}
-
-function selectPatient(
-  patient: any
-) {
-  setPatientName(
-    patient.fullName
-  );
-
-  setCpf(patient.cpf || "");
-
-  setBirthDate(
-    patient.birthDate || ""
-  );
-
-  setInsurance(
-    patient.insurance || ""
-  );
-
-  setPhone(
-    patient.phone || ""
-  );
-
-  setFilteredPatients([]);
-}
 
   function createAppointment() {
     if (!patientName) {
@@ -307,6 +259,8 @@ function selectPatient(
 
     setCpf("");
 
+    setPhone("");
+
     setInsurance("");
 
     setSource("");
@@ -319,7 +273,7 @@ function selectPatient(
   async function createPatient() {
     try {
       const response = await fetch(
-        "https://medflow-mvp-production.up.railway.app/patients",
+        "https://medflow-mvp-production.up.railway.app/api/patients",
         {
           method: "POST",
 
@@ -336,7 +290,7 @@ function selectPatient(
 
             cpf,
 
-            phone: "",
+            phone,
 
             email: "",
 
@@ -621,78 +575,106 @@ function selectPatient(
                 </label>
 
                 <div
-  style={{
-    position: "relative",
-  }}
->
-  <input
-    className="modal-input"
-    placeholder="Pesquisar paciente"
-    value={patientName}
-    onChange={(e) =>
-      handlePatientSearch(
-        e.target.value
-      )
-    }
-  />
+                  style={{
+                    position:
+                      "relative",
+                  }}
+                >
+                  <input
+                    className="modal-input"
+                    placeholder="Pesquisar paciente"
+                    value={
+                      patientName
+                    }
+                    onChange={(e) =>
+                      handlePatientSearch(
+                        e.target
+                          .value
+                      )
+                    }
+                  />
 
-  {filteredPatients.length >
-    0 && (
-    <div
-      style={{
-        position: "absolute",
-        top: 60,
-        left: 0,
-        right: 0,
-        background: "white",
-        border:
-          "1px solid #e2e8f0",
-        borderRadius: 14,
-        zIndex: 999,
-        overflow: "hidden",
-        boxShadow:
-          "0 10px 30px rgba(0,0,0,0.08)",
-      }}
-    >
-      {filteredPatients.map(
-        (patient) => (
-          <div
-            key={patient.id}
-            onClick={() =>
-              selectPatient(
-                patient
-              )
-            }
-            style={{
-              padding: 14,
-              cursor: "pointer",
-              borderBottom:
-                "1px solid #f1f5f9",
-            }}
-          >
-            <strong>
-              {
-                patient.fullName
-              }
-            </strong>
+                  {filteredPatients.length >
+                    0 && (
+                    <div
+                      style={{
+                        position:
+                          "absolute",
 
-            <p
-              style={{
-                color:
-                  "#64748b",
-                fontSize: 13,
-                marginTop: 4,
-              }}
-            >
-              CPF:{" "}
-              {patient.cpf}
-            </p>
-          </div>
-        )
-      )}
-    </div>
-  )}
-</div>
+                        top: 60,
+
+                        left: 0,
+
+                        right: 0,
+
+                        background:
+                          "white",
+
+                        border:
+                          "1px solid #e2e8f0",
+
+                        borderRadius: 14,
+
+                        zIndex: 999,
+
+                        overflow:
+                          "hidden",
+
+                        boxShadow:
+                          "0 10px 30px rgba(0,0,0,0.08)",
+                      }}
+                    >
+                      {filteredPatients.map(
+                        (
+                          patient
+                        ) => (
+                          <div
+                            key={
+                              patient.id
+                            }
+                            onClick={() =>
+                              selectPatient(
+                                patient
+                              )
+                            }
+                            style={{
+                              padding: 14,
+
+                              cursor:
+                                "pointer",
+
+                              borderBottom:
+                                "1px solid #f1f5f9",
+                            }}
+                          >
+                            <strong>
+                              {
+                                patient.fullName
+                              }
+                            </strong>
+
+                            <p
+                              style={{
+                                color:
+                                  "#64748b",
+
+                                fontSize: 13,
+
+                                marginTop: 4,
+                              }}
+                            >
+                              CPF:{" "}
+                              {
+                                patient.cpf
+                              }
+                            </p>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
 
               <div>
                 <label className="form-label">
@@ -702,12 +684,10 @@ function selectPatient(
                 <input
                   type="datetime-local"
                   className="modal-input"
-                  value={
-                    selectedDate.slice(
-                      0,
-                      16
-                    )
-                  }
+                  value={selectedDate.slice(
+                    0,
+                    16
+                  )}
                   onChange={(e) =>
                     setSelectedDate(
                       e.target
@@ -789,21 +769,22 @@ function selectPatient(
                 />
               </div>
 
-<div>
-  <label className="form-label">
-    Telefone
-  </label>
+              <div>
+                <label className="form-label">
+                  Telefone
+                </label>
 
-  <input
-    className="modal-input"
-    value={phone}
-    onChange={(e) =>
-      setPhone(
-        e.target.value
-      )
-    }
-  />
-</div>
+                <input
+                  className="modal-input"
+                  value={phone}
+                  onChange={(e) =>
+                    setPhone(
+                      e.target
+                        .value
+                    )
+                  }
+                />
+              </div>
 
               <div>
                 <label className="form-label">
