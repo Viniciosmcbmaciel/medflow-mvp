@@ -5,32 +5,21 @@ import {
   useState,
 } from "react";
 
-type MedicalRecord = {
-  id: string;
-
-  chiefComplaint: string;
-
-  diagnosis: string;
-
-  evolution: string;
-
-  createdAt: string;
-};
-
 type Patient = {
   id: string;
-
   fullName: string;
-
   cpf?: string;
-
   birthDate?: string;
-
   phone?: string;
-
   insurance?: string;
+};
 
-  email?: string;
+type MedicalRecord = {
+  id: string;
+  chiefComplaint: string;
+  diagnosis: string;
+  evolution: string;
+  createdAt: string;
 };
 
 export default function ProntuariosPage() {
@@ -80,16 +69,16 @@ export default function ProntuariosPage() {
         "selected_patient"
       );
 
-    if (storedPatient) {
-      const parsed =
-        JSON.parse(
-          storedPatient
-        );
-
-      setPatient(parsed);
-
-      loadHistory(parsed.id);
+    if (!storedPatient) {
+      return;
     }
+
+    const parsed =
+      JSON.parse(storedPatient);
+
+    setPatient(parsed);
+
+    loadHistory(parsed.id);
   }, []);
 
   /* =========================================
@@ -97,64 +86,63 @@ export default function ProntuariosPage() {
   ========================================= */
 
   async function loadHistory(
-  patientId: string
-) {
-  try {
-    const response = await fetch(
-      `https://medflow-mvp-production.up.railway.app/api/medical-records/patient/${patientId}`
-    );
-
-    if (!response.ok) {
-      console.error(
-        "Erro ao buscar histórico"
+    patientId: string
+  ) {
+    try {
+      const response = await fetch(
+        `https://medflow-mvp-production.up.railway.app/api/medical-records/patient/${patientId}`
       );
 
-      return;
+      if (!response.ok) {
+        console.error(
+          "Erro ao carregar histórico"
+        );
+
+        return;
+      }
+
+      const data =
+        await response.json();
+
+      console.log(
+        "HISTORICO:",
+        data
+      );
+
+      const formatted =
+        data.map((item: any) => ({
+          id: item.id,
+
+          chiefComplaint:
+            item.chiefComplaint ||
+            "",
+
+          diagnosis:
+            item.diagnosis ||
+            "",
+
+          evolution:
+            item.evolution ||
+            "",
+
+          createdAt:
+            item.createdAt,
+        }));
+
+      setHistory(formatted);
+    } catch (error) {
+      console.error(error);
     }
-
-    const data =
-      await response.json();
-
-    console.log(
-      "HISTORICO:",
-      data
-    );
-
-    const formatted =
-      data.map((item: any) => ({
-        id: item.id,
-
-        chiefComplaint:
-          item.chiefComplaint ||
-          item.complaint ||
-          "",
-
-        diagnosis:
-          item.diagnosis || "",
-
-        evolution:
-          item.evolution ||
-          item.observations ||
-          "",
-
-        createdAt:
-          item.createdAt,
-      }));
-
-    setHistory(formatted);
-  } catch (error) {
-    console.error(error);
   }
-}
 
   /* =========================================
-     SAVE RECORD
+     SAVE
   ========================================= */
 
   async function saveRecord() {
     if (!patient) {
       alert(
-        "Selecione um paciente"
+        "Nenhum paciente selecionado"
       );
 
       return;
@@ -197,10 +185,15 @@ export default function ProntuariosPage() {
       const data =
         await response.json();
 
+      console.log(
+        "SAVE:",
+        data
+      );
+
       if (!response.ok) {
         throw new Error(
           data.error ||
-            "Erro ao salvar prontuário"
+            "Erro ao salvar"
         );
       }
 
@@ -208,13 +201,19 @@ export default function ProntuariosPage() {
         "Prontuário salvo com sucesso!"
       );
 
+      /* LIMPAR */
+
       setChiefComplaint("");
 
       setDiagnosis("");
 
       setEvolution("");
 
-      await loadHistory(patient.id);
+      /* RECARREGAR HISTORICO */
+
+      await loadHistory(
+        patient.id
+      );
     } catch (error) {
       console.error(error);
 
@@ -263,7 +262,7 @@ export default function ProntuariosPage() {
           {/* HEADER */}
           <div
             style={{
-              marginBottom: 28,
+              marginBottom: 30,
             }}
           >
             <h1
@@ -300,14 +299,14 @@ export default function ProntuariosPage() {
 
                 padding: 24,
 
-                marginBottom: 30,
+                marginBottom: 28,
               }}
             >
               <h2
                 style={{
-                  fontSize: 26,
+                  fontSize: 28,
                   fontWeight: 800,
-                  marginBottom: 18,
+                  marginBottom: 20,
                 }}
               >
                 Dados do Paciente
@@ -362,7 +361,7 @@ export default function ProntuariosPage() {
           <div
             style={{
               display: "grid",
-              gap: 24,
+              gap: 22,
             }}
           >
             <div>
@@ -455,7 +454,7 @@ export default function ProntuariosPage() {
             <div
               style={{
                 display: "grid",
-                gap: 20,
+                gap: 18,
               }}
             >
               {history.map(
@@ -469,14 +468,14 @@ export default function ProntuariosPage() {
                       border:
                         "1px solid #e2e8f0",
 
-                      borderRadius: 22,
+                      borderRadius: 20,
 
                       padding: 24,
                     }}
                   >
                     <div
                       style={{
-                        marginBottom: 14,
+                        marginBottom: 16,
 
                         color:
                           "#64748b",
@@ -546,17 +545,17 @@ export default function ProntuariosPage() {
                     textAlign:
                       "center",
 
-                    color:
-                      "#64748b",
-
                     background:
                       "#f8fafc",
 
                     borderRadius: 20,
+
+                    color:
+                      "#64748b",
                   }}
                 >
                   Nenhum histórico
-                  clínico encontrado.
+                  encontrado.
                 </div>
               )}
             </div>
