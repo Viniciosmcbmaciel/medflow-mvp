@@ -8,7 +8,10 @@ import interactionPlugin from "@fullcalendar/interaction";
 
 import ptBrLocale from "@fullcalendar/core/locales/pt-br";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 type Appointment = {
   id: string;
@@ -99,13 +102,24 @@ export default function AgendaPage() {
     useState("");
 
   const [patientName, setPatientName] =
-    useState("");
+  useState("");
+
+const [patients, setPatients] =
+  useState<any[]>([]);
+
+const [
+  filteredPatients,
+  setFilteredPatients,
+] = useState<any[]>([]);
 
   const [birthDate, setBirthDate] =
     useState("");
 
   const [cpf, setCpf] =
-    useState("");
+  useState("");
+
+const [phone, setPhone] =
+  useState("");
 
   const [insurance, setInsurance] =
     useState("");
@@ -121,23 +135,27 @@ export default function AgendaPage() {
   ========================================= */
 
   useEffect(() => {
-    loadPatients();
-  }, []);
+  loadPatients();
+}, []);
 
-  async function loadPatients() {
-    try {
-      const response = await fetch(
-        "https://medflow-mvp-production.up.railway.app/patients"
-      );
+async function loadPatients() {
+  try {
+    const response = await fetch(
+      "https://medflow-mvp-production.up.railway.app/api/patients"
+    );
 
-      const data =
-        await response.json();
-
-      setPatients(data);
-    } catch (error) {
-      console.error(error);
+    if (!response.ok) {
+      return;
     }
+
+    const data =
+      await response.json();
+
+    setPatients(data);
+  } catch (error) {
+    console.error(error);
   }
+}
 
   /* =========================================
      AUTOCOMPLETE
@@ -197,6 +215,52 @@ export default function AgendaPage() {
 
     setOpenModal(true);
   }
+
+function handlePatientSearch(
+  value: string
+) {
+  setPatientName(value);
+
+  if (!value) {
+    setFilteredPatients([]);
+    return;
+  }
+
+  const filtered =
+    patients.filter((patient) =>
+      patient.fullName
+        .toLowerCase()
+        .includes(
+          value.toLowerCase()
+        )
+    );
+
+  setFilteredPatients(filtered);
+}
+
+function selectPatient(
+  patient: any
+) {
+  setPatientName(
+    patient.fullName
+  );
+
+  setCpf(patient.cpf || "");
+
+  setBirthDate(
+    patient.birthDate || ""
+  );
+
+  setInsurance(
+    patient.insurance || ""
+  );
+
+  setPhone(
+    patient.phone || ""
+  );
+
+  setFilteredPatients([]);
+}
 
   function createAppointment() {
     if (!patientName) {
@@ -556,98 +620,79 @@ export default function AgendaPage() {
                   Nome do paciente
                 </label>
 
-                <input
-                  className="modal-input"
-                  placeholder="Pesquisar paciente..."
-                  value={
-                    patientName
-                  }
-                  onChange={(e) =>
-                    handlePatientSearch(
-                      e.target.value
-                    )
-                  }
-                />
+                <div
+  style={{
+    position: "relative",
+  }}
+>
+  <input
+    className="modal-input"
+    placeholder="Pesquisar paciente"
+    value={patientName}
+    onChange={(e) =>
+      handlePatientSearch(
+        e.target.value
+      )
+    }
+  />
 
-                {filteredPatients.length >
-                  0 && (
-                  <div
-                    style={{
-                      position:
-                        "absolute",
+  {filteredPatients.length >
+    0 && (
+    <div
+      style={{
+        position: "absolute",
+        top: 60,
+        left: 0,
+        right: 0,
+        background: "white",
+        border:
+          "1px solid #e2e8f0",
+        borderRadius: 14,
+        zIndex: 999,
+        overflow: "hidden",
+        boxShadow:
+          "0 10px 30px rgba(0,0,0,0.08)",
+      }}
+    >
+      {filteredPatients.map(
+        (patient) => (
+          <div
+            key={patient.id}
+            onClick={() =>
+              selectPatient(
+                patient
+              )
+            }
+            style={{
+              padding: 14,
+              cursor: "pointer",
+              borderBottom:
+                "1px solid #f1f5f9",
+            }}
+          >
+            <strong>
+              {
+                patient.fullName
+              }
+            </strong>
 
-                      top: 90,
-
-                      left: 0,
-
-                      right: 0,
-
-                      background:
-                        "white",
-
-                      border:
-                        "1px solid #e2e8f0",
-
-                      borderRadius: 14,
-
-                      zIndex: 999,
-
-                      maxHeight: 220,
-
-                      overflowY:
-                        "auto",
-
-                      boxShadow:
-                        "0 10px 30px rgba(0,0,0,0.08)",
-                    }}
-                  >
-                    {filteredPatients.map(
-                      (patient) => (
-                        <div
-                          key={
-                            patient.id
-                          }
-                          onClick={() =>
-                            selectPatient(
-                              patient
-                            )
-                          }
-                          style={{
-                            padding: 14,
-
-                            cursor:
-                              "pointer",
-
-                            borderBottom:
-                              "1px solid #f1f5f9",
-                          }}
-                        >
-                          <strong>
-                            {
-                              patient.fullName
-                            }
-                          </strong>
-
-                          <p
-                            style={{
-                              fontSize: 13,
-
-                              color:
-                                "#64748b",
-
-                              marginTop: 4,
-                            }}
-                          >
-                            CPF:{" "}
-                            {patient.cpf ||
-                              "Não informado"}
-                          </p>
-                        </div>
-                      )
-                    )}
-                  </div>
-                )}
-              </div>
+            <p
+              style={{
+                color:
+                  "#64748b",
+                fontSize: 13,
+                marginTop: 4,
+              }}
+            >
+              CPF:{" "}
+              {patient.cpf}
+            </p>
+          </div>
+        )
+      )}
+    </div>
+  )}
+</div>
 
               <div>
                 <label className="form-label">
@@ -743,6 +788,22 @@ export default function AgendaPage() {
                   }
                 />
               </div>
+
+<div>
+  <label className="form-label">
+    Telefone
+  </label>
+
+  <input
+    className="modal-input"
+    value={phone}
+    onChange={(e) =>
+      setPhone(
+        e.target.value
+      )
+    }
+  />
+</div>
 
               <div>
                 <label className="form-label">
