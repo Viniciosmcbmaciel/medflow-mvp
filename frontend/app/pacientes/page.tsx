@@ -61,6 +61,22 @@ export default function PacientesPage() {
     useState("");
 
   /* =========================================
+     EDITAR PACIENTE
+  ========================================= */
+
+  const [
+    selectedPatient,
+    setSelectedPatient,
+  ] = useState<Patient | null>(
+    null
+  );
+
+  const [
+    openEditModal,
+    setOpenEditModal,
+  ] = useState(false);
+
+  /* =========================================
      LOAD
   ========================================= */
 
@@ -167,15 +183,10 @@ export default function PacientesPage() {
       );
 
       setFullName("");
-
       setCpf("");
-
       setBirthDate("");
-
       setPhone("");
-
       setInsurance("");
-
       setEmail("");
 
       await loadPatients();
@@ -184,6 +195,56 @@ export default function PacientesPage() {
 
       alert(
         "Erro ao cadastrar paciente"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /* =========================================
+     UPDATE PATIENT
+  ========================================= */
+
+  async function updatePatient() {
+    if (!selectedPatient) return;
+
+    try {
+      setLoading(true);
+
+      const response = await fetch(
+        `https://medflow-mvp-production.up.railway.app/api/patients/${selectedPatient.id}`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify(
+            selectedPatient
+          ),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Erro ao atualizar paciente"
+        );
+      }
+
+      alert(
+        "Paciente atualizado com sucesso!"
+      );
+
+      setOpenEditModal(false);
+
+      await loadPatients();
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Erro ao atualizar paciente"
       );
     } finally {
       setLoading(false);
@@ -292,10 +353,8 @@ export default function PacientesPage() {
           <div
             style={{
               display: "grid",
-
               gridTemplateColumns:
                 "1fr 1fr 1fr",
-
               gap: 18,
             }}
           >
@@ -382,48 +441,13 @@ export default function PacientesPage() {
           </button>
         </div>
 
-        {/* PESQUISA */}
+        {/* LISTA */}
         <div
           className="card"
           style={{
             marginTop: 24,
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              justifyContent:
-                "space-between",
-
-              alignItems: "center",
-
-              marginBottom: 24,
-            }}
-          >
-            <h2
-              style={{
-                fontSize: 24,
-                fontWeight: 800,
-              }}
-            >
-              Pacientes Cadastrados
-            </h2>
-
-            <input
-              className="modal-input"
-              placeholder="Pesquisar paciente..."
-              value={search}
-              onChange={(e) =>
-                handleSearch(
-                  e.target.value
-                )
-              }
-              style={{
-                width: 320,
-              }}
-            />
-          </div>
-
           <div
             style={{
               display: "grid",
@@ -437,19 +461,13 @@ export default function PacientesPage() {
                   style={{
                     background:
                       "#f8fafc",
-
                     border:
                       "1px solid #e2e8f0",
-
                     borderRadius: 24,
-
                     padding: 24,
-
                     display: "flex",
-
                     justifyContent:
                       "space-between",
-
                     alignItems:
                       "center",
                   }}
@@ -467,55 +485,18 @@ export default function PacientesPage() {
                       }
                     </h3>
 
-                    <div
-                      style={{
-                        display: "grid",
+                    <p>
+                      CPF: {
+                        patient.cpf
+                      }
+                    </p>
 
-                        gridTemplateColumns:
-                          "1fr 1fr",
-
-                        gap: 10,
-
-                        color:
-                          "#475569",
-                      }}
-                    >
-                      <p>
-                        <strong>
-                          CPF:
-                        </strong>{" "}
-                        {
-                          patient.cpf
-                        }
-                      </p>
-
-                      <p>
-                        <strong>
-                          Telefone:
-                        </strong>{" "}
-                        {
-                          patient.phone
-                        }
-                      </p>
-
-                      <p>
-                        <strong>
-                          Convênio:
-                        </strong>{" "}
-                        {
-                          patient.insurance
-                        }
-                      </p>
-
-                      <p>
-                        <strong>
-                          E-mail:
-                        </strong>{" "}
-                        {
-                          patient.email
-                        }
-                      </p>
-                    </div>
+                    <p>
+                      Telefone:{" "}
+                      {
+                        patient.phone
+                      }
+                    </p>
                   </div>
 
                   <div
@@ -545,12 +526,152 @@ export default function PacientesPage() {
                     >
                       📄 Prontuário
                     </button>
+
+                    <button
+                      className="secondary-button"
+                      onClick={() => {
+                        setSelectedPatient(
+                          patient
+                        );
+
+                        setOpenEditModal(
+                          true
+                        );
+                      }}
+                    >
+                      ✏️ Editar
+                    </button>
                   </div>
                 </div>
               )
             )}
           </div>
         </div>
+
+        {/* MODAL EDITAR */}
+        {openEditModal &&
+          selectedPatient && (
+            <div className="premium-modal-overlay">
+              <div className="premium-modal">
+                <h2
+                  style={{
+                    marginBottom: 24,
+                  }}
+                >
+                  Editar Paciente
+                </h2>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gap: 16,
+                  }}
+                >
+                  <input
+                    className="modal-input"
+                    value={
+                      selectedPatient.fullName
+                    }
+                    onChange={(e) =>
+                      setSelectedPatient({
+                        ...selectedPatient,
+                        fullName:
+                          e.target
+                            .value,
+                      })
+                    }
+                  />
+
+                  <input
+                    className="modal-input"
+                    value={
+                      selectedPatient.cpf ||
+                      ""
+                    }
+                    onChange={(e) =>
+                      setSelectedPatient({
+                        ...selectedPatient,
+                        cpf: e.target.value,
+                      })
+                    }
+                  />
+
+                  <input
+                    className="modal-input"
+                    value={
+                      selectedPatient.phone ||
+                      ""
+                    }
+                    onChange={(e) =>
+                      setSelectedPatient({
+                        ...selectedPatient,
+                        phone:
+                          e.target.value,
+                      })
+                    }
+                  />
+
+                  <input
+                    className="modal-input"
+                    value={
+                      selectedPatient.insurance ||
+                      ""
+                    }
+                    onChange={(e) =>
+                      setSelectedPatient({
+                        ...selectedPatient,
+                        insurance:
+                          e.target.value,
+                      })
+                    }
+                  />
+
+                  <input
+                    className="modal-input"
+                    value={
+                      selectedPatient.email ||
+                      ""
+                    }
+                    onChange={(e) =>
+                      setSelectedPatient({
+                        ...selectedPatient,
+                        email:
+                          e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 12,
+                    marginTop: 24,
+                  }}
+                >
+                  <button
+                    className="primary-button"
+                    onClick={
+                      updatePatient
+                    }
+                  >
+                    💾 Salvar
+                  </button>
+
+                  <button
+                    className="secondary-button"
+                    onClick={() =>
+                      setOpenEditModal(
+                        false
+                      )
+                    }
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
       </main>
     </div>
   );
