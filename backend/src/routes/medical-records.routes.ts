@@ -5,104 +5,239 @@ import { generateSimplePdf } from "../utils/pdf.js";
 const router = Router();
 const prisma = new PrismaClient();
 
-router.get("/:patientId", async (req, res) => {
-  try {
-    const { patientId } = req.params;
+/* =========================================
+   LISTAR HISTÓRICO DO PACIENTE
+========================================= */
 
-    const records = await prisma.medicalRecord.findMany({
-      where: { patientId },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+router.get(
+  "/patient/:patientId",
+  async (req, res) => {
+    try {
+      const { patientId } =
+        req.params;
 
-    res.json(records);
-  } catch (error) {
-    res.status(500).json({ error: "Erro ao buscar prontuários" });
-  }
-});
+      const records =
+        await prisma.medicalRecord.findMany(
+          {
+            where: {
+              patientId,
+            },
 
-router.post("/", async (req, res) => {
-  try {
-    const {
-      patientId,
-      chiefComplaint,
-      historyPresentIllness,
-      medications,
-      physicalExam,
-      conduct,
-      notes,
-    } = req.body;
+            orderBy: {
+              createdAt:
+                "desc",
+            },
 
-    if (!patientId || !chiefComplaint) {
-      return res.status(400).json({
-        error: "Paciente e queixa principal são obrigatórios.",
-      });
+            include: {
+              patient: true,
+            },
+          }
+        );
+
+      return res.json(records);
+    } catch (error) {
+      console.error(error);
+
+      return res
+        .status(500)
+        .json({
+          error:
+            "Erro ao buscar prontuários",
+        });
     }
+  }
+);
 
-    const record = await prisma.medicalRecord.create({
-      data: {
+/* =========================================
+   CRIAR PRONTUÁRIO
+========================================= */
+
+router.post(
+  "/",
+  async (req, res) => {
+    try {
+      const {
         patientId,
         chiefComplaint,
-        historyPresentIllness,
-        medications,
-        physicalExam,
-        conduct,
-        notes,
-      },
-    });
+        diagnosis,
+        evolution,
+      } = req.body;
 
-    res.status(201).json(record);
-  } catch (error) {
-    res.status(500).json({ error: "Erro ao criar prontuário" });
-  }
-});
-
-router.get("/:id/pdf", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const record = await prisma.medicalRecord.findUnique({
-      where: { id },
-      include: {
-        patient: true,
-        user: true,
-      },
-    });
-
-    if (!record) {
-      return res.status(404).json({ error: "Registro não encontrado." });
-    }
-
-    return generateSimplePdf(
-      res,
-      "Evolução Clínica / Prontuário",
-      [
-        { label: "Paciente", value: record.patient.fullName },
-        {
-          label: "Data do registro",
-          value: new Date(record.createdAt).toLocaleString("pt-BR"),
-        },
-        { label: "Queixa principal", value: record.chiefComplaint || "—" },
-        {
-          label: "História da doença atual",
-          value: record.historyPresentIllness || "—",
-        },
-        { label: "Medicamentos em uso", value: record.medications || "—" },
-        { label: "Exame físico", value: record.physicalExam || "—" },
-        { label: "Conduta", value: record.conduct || "—" },
-        { label: "Observações", value: record.notes || "—" },
-      ],
-      `prontuario-${record.id}.pdf`,
-      {
-        professionalName: record.user?.name || "Médico responsável",
-        professionalCrm: "CRM 000000",
-        signed: false,
+      if (
+        !patientId ||
+        !chiefComplaint
+      ) {
+        return res
+          .status(400)
+          .json({
+            error:
+              "Paciente e queixa principal são obrigatórios.",
+          });
       }
-    );
-  } catch (error) {
-    return res.status(500).json({ error: "Erro ao gerar PDF do prontuário." });
+
+      /* VALIDAR PACIENTE */
+
+      const patient =
+        await prisma.patient.findUnique(
+          {
+            where: {
+              id: patientId,
+            },
+          }
+        );
+
+      if (!patient) {
+        return res
+          .status(404)
+          .json({
+            error:
+              "Paciente não encontrado.",
+          });
+      }
+
+      /* CRIAR PRONTUÁRIO */
+
+      const record =
+        await prisma.medicalRecord.create(
+          {
+            data: {
+              patientId,
+
+              chiefComplaint,
+
+              diagnosis,
+
+              evolution,
+            },
+
+            include: {
+              patient: true,
+            },
+          }
+        );
+
+      return res
+        .status(201)
+        .json(record);
+    } catch (error) {
+      console.error(error);
+
+      return res
+        .status(500)
+        .json({
+          error:
+            "Erro ao criar prontuário",
+        });
+    }
   }
-});
+);
+
+/* =========================================
+   PDF DO PRONTUÁRIO
+========================================= */
+
+router.get(
+  "/:id/pdf",
+  async (req, res) => {
+    try {
+      const { id } =
+        req.params;
+
+      const record =
+        await prisma.medicalRecord.findUnique(
+          {
+            where: { id },
+
+            include: {
+              patient: true,
+            },
+          }
+        );
+
+      if (!record) {
+        return res
+          .status(404)
+          .json({
+            error:
+              "Registro não encontrado.",
+          });
+      }
+
+      return generateSimplePdf(
+        res,
+        "Evolução Clínica / Prontuário",
+        [
+          {
+            label:
+              "Paciente",
+            value:
+              record.patient
+                .fullName,
+          },
+
+          {
+            label:
+              "Data do registro",
+
+            value:
+              new Date(
+                record.createdAt
+              ).toLocaleString(
+                "pt-BR"
+              ),
+          },
+
+          {
+            label:
+              "Queixa principal",
+
+            value:
+              record.chiefComplaint ||
+              "—",
+          },
+
+          {
+            label:
+              "Diagnóstico",
+
+            value:
+              record.diagnosis ||
+              "—",
+          },
+
+          {
+            label:
+              "Evolução",
+
+            value:
+              record.evolution ||
+              "—",
+          },
+        ],
+
+        `prontuario-${record.id}.pdf`,
+
+        {
+          professionalName:
+            "Médico responsável",
+
+          professionalCrm:
+            "CRM 000000",
+
+          signed: false,
+        }
+      );
+    } catch (error) {
+      console.error(error);
+
+      return res
+        .status(500)
+        .json({
+          error:
+            "Erro ao gerar PDF do prontuário.",
+        });
+    }
+  }
+);
 
 export default router;

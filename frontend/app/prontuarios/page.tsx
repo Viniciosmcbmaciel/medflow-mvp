@@ -77,13 +77,17 @@ export default function ProntuariosPage() {
       JSON.parse(storedPatient);
 
     setPatient(parsed);
-
-    loadHistory(parsed.id);
   }, []);
 
   /* =========================================
      LOAD HISTORY
   ========================================= */
+
+  useEffect(() => {
+    if (patient?.id) {
+      loadHistory(patient.id);
+    }
+  }, [patient]);
 
   async function loadHistory(
     patientId: string
