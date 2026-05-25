@@ -3,10 +3,11 @@ import { PrismaClient } from "@prisma/client";
 import { generateSimplePdf } from "../utils/pdf.js";
 
 const router = Router();
+
 const prisma = new PrismaClient();
 
 /* =========================================
-   LISTAR HISTÓRICO DO PACIENTE
+   HISTÓRICO DO PACIENTE
 ========================================= */
 
 router.get(
@@ -75,8 +76,6 @@ router.post(
           });
       }
 
-      /* VALIDAR PACIENTE */
-
       const patient =
         await prisma.patient.findUnique(
           {
@@ -95,8 +94,6 @@ router.post(
           });
       }
 
-      /* CRIAR PRONTUÁRIO */
-
       const record =
         await prisma.medicalRecord.create(
           {
@@ -105,9 +102,11 @@ router.post(
 
               chiefComplaint,
 
-              diagnosis,
+              historyPresentIllness:
+                diagnosis,
 
-              evolution,
+              notes:
+                evolution,
             },
 
             include: {
@@ -133,7 +132,7 @@ router.post(
 );
 
 /* =========================================
-   PDF DO PRONTUÁRIO
+   PDF
 ========================================= */
 
 router.get(
@@ -165,11 +164,14 @@ router.get(
 
       return generateSimplePdf(
         res,
-        "Evolução Clínica / Prontuário",
+
+        "Prontuário Médico",
+
         [
           {
             label:
               "Paciente",
+
             value:
               record.patient
                 .fullName,
@@ -177,7 +179,7 @@ router.get(
 
           {
             label:
-              "Data do registro",
+              "Data",
 
             value:
               new Date(
@@ -189,7 +191,7 @@ router.get(
 
           {
             label:
-              "Queixa principal",
+              "Queixa Principal",
 
             value:
               record.chiefComplaint ||
@@ -201,7 +203,7 @@ router.get(
               "Diagnóstico",
 
             value:
-              record.diagnosis ||
+              record.historyPresentIllness ||
               "—",
           },
 
@@ -210,7 +212,7 @@ router.get(
               "Evolução",
 
             value:
-              record.evolution ||
+              record.notes ||
               "—",
           },
         ],
@@ -234,7 +236,7 @@ router.get(
         .status(500)
         .json({
           error:
-            "Erro ao gerar PDF do prontuário.",
+            "Erro ao gerar PDF",
         });
     }
   }
