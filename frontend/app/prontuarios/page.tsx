@@ -16,9 +16,21 @@ type Patient = {
 
 type MedicalRecord = {
   id: string;
-  chiefComplaint: string;
-  diagnosis: string;
-  evolution: string;
+
+  chiefComplaint?: string;
+
+  historyPresentIllness?: string;
+
+  physicalExam?: string;
+
+  diagnosticHypothesis?: string;
+
+  conduct?: string;
+
+  prescription?: string;
+
+  notes?: string;
+
   createdAt: string;
 };
 
@@ -33,7 +45,7 @@ export default function ProntuariosPage() {
     );
 
   /* =========================================
-     FORM
+     FORM SOAP
   ========================================= */
 
   const [
@@ -41,10 +53,52 @@ export default function ProntuariosPage() {
     setChiefComplaint,
   ] = useState("");
 
-  const [diagnosis, setDiagnosis] =
+  const [
+    historyPresentIllness,
+    setHistoryPresentIllness,
+  ] = useState("");
+
+  const [
+    physicalExam,
+    setPhysicalExam,
+  ] = useState("");
+
+  const [
+    diagnosticHypothesis,
+    setDiagnosticHypothesis,
+  ] = useState("");
+
+  const [conduct, setConduct] =
     useState("");
 
-  const [evolution, setEvolution] =
+  const [
+    prescription,
+    setPrescription,
+  ] = useState("");
+
+  const [notes, setNotes] =
+    useState("");
+
+  /* =========================================
+     SINAIS VITAIS
+  ========================================= */
+
+  const [bloodPressure, setBloodPressure] =
+    useState("");
+
+  const [heartRate, setHeartRate] =
+    useState("");
+
+  const [temperature, setTemperature] =
+    useState("");
+
+  const [weight, setWeight] =
+    useState("");
+
+  const [height, setHeight] =
+    useState("");
+
+  const [cid, setCid] =
     useState("");
 
   /* =========================================
@@ -52,15 +106,13 @@ export default function ProntuariosPage() {
   ========================================= */
 
   const [history, setHistory] =
-    useState<MedicalRecord[]>(
-      []
-    );
+    useState<MedicalRecord[]>([]);
 
   const [loading, setLoading] =
     useState(false);
 
   /* =========================================
-     LOAD PATIENT
+     LOAD
   ========================================= */
 
   useEffect(() => {
@@ -69,25 +121,19 @@ export default function ProntuariosPage() {
         "selected_patient"
       );
 
-    if (!storedPatient) {
-      return;
-    }
+    if (!storedPatient) return;
 
     const parsed =
       JSON.parse(storedPatient);
 
     setPatient(parsed);
+
+    loadHistory(parsed.id);
   }, []);
 
   /* =========================================
      LOAD HISTORY
   ========================================= */
-
-  useEffect(() => {
-    if (patient?.id) {
-      loadHistory(patient.id);
-    }
-  }, [patient]);
 
   async function loadHistory(
     patientId: string
@@ -97,43 +143,10 @@ export default function ProntuariosPage() {
         `https://medflow-mvp-production.up.railway.app/api/medical-records/patient/${patientId}`
       );
 
-      if (!response.ok) {
-        console.error(
-          "Erro ao carregar histórico"
-        );
-
-        return;
-      }
-
       const data =
         await response.json();
 
-      console.log(
-        "HISTORICO:",
-        data
-      );
-
-      const formatted =
-        data.map((item: any) => ({
-          id: item.id,
-
-          chiefComplaint:
-            item.chiefComplaint ||
-            "",
-
-          diagnosis:
-            item.diagnosis ||
-            "",
-
-          evolution:
-            item.evolution ||
-            "",
-
-          createdAt:
-            item.createdAt,
-        }));
-
-      setHistory(formatted);
+      setHistory(data);
     } catch (error) {
       console.error(error);
     }
@@ -146,15 +159,7 @@ export default function ProntuariosPage() {
   async function saveRecord() {
     if (!patient) {
       alert(
-        "Nenhum paciente selecionado"
-      );
-
-      return;
-    }
-
-    if (!chiefComplaint) {
-      alert(
-        "Informe a queixa principal"
+        "Paciente não selecionado"
       );
 
       return;
@@ -179,9 +184,29 @@ export default function ProntuariosPage() {
 
             chiefComplaint,
 
-            diagnosis,
+            historyPresentIllness,
 
-            evolution,
+            physicalExam: `
+PA: ${bloodPressure}
+FC: ${heartRate}
+TEMP: ${temperature}
+PESO: ${weight}
+ALTURA: ${height}
+
+${physicalExam}
+            `,
+
+            diagnosticHypothesis: `
+CID: ${cid}
+
+${diagnosticHypothesis}
+            `,
+
+            conduct,
+
+            prescription,
+
+            notes,
           }),
         }
       );
@@ -189,15 +214,11 @@ export default function ProntuariosPage() {
       const data =
         await response.json();
 
-      console.log(
-        "SAVE:",
-        data
-      );
-
       if (!response.ok) {
+        console.log(data);
+
         throw new Error(
-          data.error ||
-            "Erro ao salvar"
+          "Erro ao salvar"
         );
       }
 
@@ -209,11 +230,29 @@ export default function ProntuariosPage() {
 
       setChiefComplaint("");
 
-      setDiagnosis("");
+      setHistoryPresentIllness("");
 
-      setEvolution("");
+      setPhysicalExam("");
 
-      /* RECARREGAR HISTORICO */
+      setDiagnosticHypothesis("");
+
+      setConduct("");
+
+      setPrescription("");
+
+      setNotes("");
+
+      setBloodPressure("");
+
+      setHeartRate("");
+
+      setTemperature("");
+
+      setWeight("");
+
+      setHeight("");
+
+      setCid("");
 
       await loadHistory(
         patient.id
@@ -262,119 +301,191 @@ export default function ProntuariosPage() {
 
       {/* MAIN */}
       <main className="main-content">
-        <div className="card">
-          {/* HEADER */}
-          <div
+        {/* HEADER */}
+        <div
+          style={{
+            marginBottom: 28,
+          }}
+        >
+          <h1
             style={{
-              marginBottom: 30,
+              fontSize: 36,
+              fontWeight: 800,
             }}
           >
-            <h1
+            Prontuário Médico
+          </h1>
+
+          <p
+            style={{
+              color: "#64748b",
+              marginTop: 8,
+            }}
+          >
+            Registro clínico completo
+            integrado ao paciente.
+          </p>
+        </div>
+
+        {/* PACIENTE */}
+        {patient && (
+          <div
+            className="card"
+            style={{
+              marginBottom: 24,
+            }}
+          >
+            <h2
               style={{
-                fontSize: 34,
+                fontSize: 28,
                 fontWeight: 800,
+                marginBottom: 24,
               }}
             >
-              Prontuário Médico
-            </h1>
+              Dados do Paciente
+            </h2>
 
-            <p
-              style={{
-                color: "#64748b",
-                marginTop: 8,
-              }}
-            >
-              Gestão clínica
-              integrada do paciente.
-            </p>
-          </div>
-
-          {/* PACIENTE */}
-          {patient && (
             <div
               style={{
-                background:
-                  "#f8fafc",
-
-                border:
-                  "1px solid #e2e8f0",
-
-                borderRadius: 24,
-
-                padding: 24,
-
-                marginBottom: 28,
+                display: "grid",
+                gridTemplateColumns:
+                  "1fr 1fr",
+                gap: 14,
               }}
             >
-              <h2
-                style={{
-                  fontSize: 28,
-                  fontWeight: 800,
-                  marginBottom: 20,
-                }}
-              >
-                Dados do Paciente
-              </h2>
+              <p>
+                <strong>Nome:</strong>{" "}
+                {patient.fullName}
+              </p>
 
-              <div
-                style={{
-                  display: "grid",
+              <p>
+                <strong>CPF:</strong>{" "}
+                {patient.cpf}
+              </p>
 
-                  gridTemplateColumns:
-                    "1fr 1fr",
+              <p>
+                <strong>Telefone:</strong>{" "}
+                {patient.phone}
+              </p>
 
-                  gap: 16,
-                }}
-              >
-                <p>
-                  <strong>
-                    Nome:
-                  </strong>{" "}
-                  {
-                    patient.fullName
-                  }
-                </p>
-
-                <p>
-                  <strong>
-                    CPF:
-                  </strong>{" "}
-                  {patient.cpf}
-                </p>
-
-                <p>
-                  <strong>
-                    Telefone:
-                  </strong>{" "}
-                  {patient.phone}
-                </p>
-
-                <p>
-                  <strong>
-                    Convênio:
-                  </strong>{" "}
-                  {
-                    patient.insurance
-                  }
-                </p>
-              </div>
+              <p>
+                <strong>Convênio:</strong>{" "}
+                {patient.insurance}
+              </p>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* FORM */}
+        {/* SINAIS VITAIS */}
+        <div className="card">
+          <h2
+            style={{
+              fontSize: 26,
+              fontWeight: 800,
+              marginBottom: 24,
+            }}
+          >
+            Sinais Vitais
+          </h2>
+
           <div
             style={{
               display: "grid",
-              gap: 22,
+              gridTemplateColumns:
+                "1fr 1fr 1fr 1fr 1fr",
+              gap: 16,
+            }}
+          >
+            <input
+              className="modal-input"
+              placeholder="PA"
+              value={bloodPressure}
+              onChange={(e) =>
+                setBloodPressure(
+                  e.target.value
+                )
+              }
+            />
+
+            <input
+              className="modal-input"
+              placeholder="FC"
+              value={heartRate}
+              onChange={(e) =>
+                setHeartRate(
+                  e.target.value
+                )
+              }
+            />
+
+            <input
+              className="modal-input"
+              placeholder="Temp"
+              value={temperature}
+              onChange={(e) =>
+                setTemperature(
+                  e.target.value
+                )
+              }
+            />
+
+            <input
+              className="modal-input"
+              placeholder="Peso"
+              value={weight}
+              onChange={(e) =>
+                setWeight(
+                  e.target.value
+                )
+              }
+            />
+
+            <input
+              className="modal-input"
+              placeholder="Altura"
+              value={height}
+              onChange={(e) =>
+                setHeight(
+                  e.target.value
+                )
+              }
+            />
+          </div>
+        </div>
+
+        {/* SOAP */}
+        <div
+          className="card"
+          style={{
+            marginTop: 24,
+          }}
+        >
+          <h2
+            style={{
+              fontSize: 30,
+              fontWeight: 800,
+              marginBottom: 28,
+            }}
+          >
+            Evolução Clínica
+          </h2>
+
+          <div
+            style={{
+              display: "grid",
+              gap: 24,
             }}
           >
             <div>
               <label className="form-label">
-                Queixa principal
+                Queixa Principal
               </label>
 
               <textarea
                 className="modal-input"
+                style={{
+                  minHeight: 100,
+                }}
                 value={
                   chiefComplaint
                 }
@@ -383,48 +494,138 @@ export default function ProntuariosPage() {
                     e.target.value
                   )
                 }
-                style={{
-                  minHeight: 120,
-                }}
               />
             </div>
 
             <div>
               <label className="form-label">
-                Diagnóstico
+                História da Doença Atual
               </label>
 
               <textarea
                 className="modal-input"
-                value={diagnosis}
+                style={{
+                  minHeight: 140,
+                }}
+                value={
+                  historyPresentIllness
+                }
                 onChange={(e) =>
-                  setDiagnosis(
+                  setHistoryPresentIllness(
                     e.target.value
                   )
                 }
-                style={{
-                  minHeight: 120,
-                }}
               />
             </div>
 
             <div>
               <label className="form-label">
-                Evolução /
+                Exame Físico
+              </label>
+
+              <textarea
+                className="modal-input"
+                style={{
+                  minHeight: 140,
+                }}
+                value={physicalExam}
+                onChange={(e) =>
+                  setPhysicalExam(
+                    e.target.value
+                  )
+                }
+              />
+            </div>
+
+            <div>
+              <label className="form-label">
+                Hipótese Diagnóstica
+              </label>
+
+              <input
+                className="modal-input"
+                placeholder="CID"
+                value={cid}
+                onChange={(e) =>
+                  setCid(
+                    e.target.value
+                  )
+                }
+                style={{
+                  marginBottom: 14,
+                }}
+              />
+
+              <textarea
+                className="modal-input"
+                style={{
+                  minHeight: 120,
+                }}
+                value={
+                  diagnosticHypothesis
+                }
+                onChange={(e) =>
+                  setDiagnosticHypothesis(
+                    e.target.value
+                  )
+                }
+              />
+            </div>
+
+            <div>
+              <label className="form-label">
+                Conduta
+              </label>
+
+              <textarea
+                className="modal-input"
+                style={{
+                  minHeight: 120,
+                }}
+                value={conduct}
+                onChange={(e) =>
+                  setConduct(
+                    e.target.value
+                  )
+                }
+              />
+            </div>
+
+            <div>
+              <label className="form-label">
+                Prescrição
+              </label>
+
+              <textarea
+                className="modal-input"
+                style={{
+                  minHeight: 120,
+                }}
+                value={prescription}
+                onChange={(e) =>
+                  setPrescription(
+                    e.target.value
+                  )
+                }
+              />
+            </div>
+
+            <div>
+              <label className="form-label">
                 Observações
               </label>
 
               <textarea
                 className="modal-input"
-                value={evolution}
+                style={{
+                  minHeight: 140,
+                }}
+                value={notes}
                 onChange={(e) =>
-                  setEvolution(
+                  setNotes(
                     e.target.value
                   )
                 }
-                style={{
-                  minHeight: 160,
-                }}
               />
             </div>
 
@@ -435,134 +636,146 @@ export default function ProntuariosPage() {
             >
               {loading
                 ? "Salvando..."
-                : "Salvar Prontuário"}
+                : "Salvar Evolução"}
             </button>
           </div>
+        </div>
 
-          {/* HISTORICO */}
-          <div
+        {/* HISTORICO */}
+        <div
+          style={{
+            marginTop: 34,
+          }}
+        >
+          <h2
             style={{
-              marginTop: 50,
+              fontSize: 32,
+              fontWeight: 800,
+              marginBottom: 24,
             }}
           >
-            <h2
-              style={{
-                fontSize: 32,
-                fontWeight: 800,
-                marginBottom: 24,
-              }}
-            >
-              Histórico Clínico
-            </h2>
+            Timeline Clínica
+          </h2>
 
-            <div
-              style={{
-                display: "grid",
-                gap: 18,
-              }}
-            >
-              {history.map(
-                (record) => (
+          <div
+            style={{
+              display: "grid",
+              gap: 18,
+            }}
+          >
+            {history.map(
+              (record) => (
+                <div
+                  key={record.id}
+                  className="card"
+                >
                   <div
-                    key={record.id}
                     style={{
-                      background:
-                        "#f8fafc",
-
-                      border:
-                        "1px solid #e2e8f0",
-
-                      borderRadius: 20,
-
-                      padding: 24,
+                      marginBottom: 18,
+                      color:
+                        "#64748b",
                     }}
                   >
-                    <div
-                      style={{
-                        marginBottom: 16,
+                    {new Date(
+                      record.createdAt
+                    ).toLocaleString(
+                      "pt-BR"
+                    )}
+                  </div>
 
-                        color:
-                          "#64748b",
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: 18,
+                    }}
+                  >
+                    <div>
+                      <strong>
+                        Queixa Principal
+                      </strong>
 
-                        fontSize: 14,
-                      }}
-                    >
-                      {new Date(
-                        record.createdAt
-                      ).toLocaleString(
-                        "pt-BR"
-                      )}
+                      <p>
+                        {
+                          record.chiefComplaint
+                        }
+                      </p>
                     </div>
 
-                    <div
-                      style={{
-                        display: "grid",
-                        gap: 14,
-                      }}
-                    >
-                      <div>
-                        <strong>
-                          Queixa:
-                        </strong>
+                    <div>
+                      <strong>
+                        HDA
+                      </strong>
 
-                        <p>
-                          {
-                            record.chiefComplaint
-                          }
-                        </p>
-                      </div>
+                      <p>
+                        {
+                          record.historyPresentIllness
+                        }
+                      </p>
+                    </div>
 
-                      <div>
-                        <strong>
-                          Diagnóstico:
-                        </strong>
+                    <div>
+                      <strong>
+                        Exame Físico
+                      </strong>
 
-                        <p>
-                          {
-                            record.diagnosis
-                          }
-                        </p>
-                      </div>
+                      <p>
+                        {
+                          record.physicalExam
+                        }
+                      </p>
+                    </div>
 
-                      <div>
-                        <strong>
-                          Evolução:
-                        </strong>
+                    <div>
+                      <strong>
+                        Hipótese Diagnóstica
+                      </strong>
 
-                        <p>
-                          {
-                            record.evolution
-                          }
-                        </p>
-                      </div>
+                      <p>
+                        {
+                          record.diagnosticHypothesis
+                        }
+                      </p>
+                    </div>
+
+                    <div>
+                      <strong>
+                        Conduta
+                      </strong>
+
+                      <p>
+                        {
+                          record.conduct
+                        }
+                      </p>
+                    </div>
+
+                    <div>
+                      <strong>
+                        Prescrição
+                      </strong>
+
+                      <p>
+                        {
+                          record.prescription
+                        }
+                      </p>
+                    </div>
+
+                    <div>
+                      <strong>
+                        Observações
+                      </strong>
+
+                      <p>
+                        {
+                          record.notes
+                        }
+                      </p>
                     </div>
                   </div>
-                )
-              )}
-
-              {history.length ===
-                0 && (
-                <div
-                  style={{
-                    padding: 30,
-
-                    textAlign:
-                      "center",
-
-                    background:
-                      "#f8fafc",
-
-                    borderRadius: 20,
-
-                    color:
-                      "#64748b",
-                  }}
-                >
-                  Nenhum histórico
-                  encontrado.
                 </div>
-              )}
-            </div>
+              )
+            )}
           </div>
         </div>
       </main>
