@@ -4,15 +4,16 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  const hashedPassword =
+  const passwordHash =
     await bcrypt.hash(
-      "admin123",
+      "123456",
       10
     );
 
   await prisma.user.upsert({
     where: {
-      email: "admin@medflow.com",
+      email:
+        "admin@medflow.com",
     },
 
     update: {},
@@ -23,15 +24,14 @@ async function main() {
       email:
         "admin@medflow.com",
 
-      passwordHash:
-        hashedPassword,
+      passwordHash,
 
       role: "ADMIN",
     },
   });
 
   console.log(
-    "Seed executado com sucesso!"
+    "Usuário admin criado!"
   );
 }
 
