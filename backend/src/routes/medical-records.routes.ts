@@ -1,13 +1,99 @@
 import { Router } from "express";
-import { PrismaClient } from "@prisma/client";
-import { generateSimplePdf } from "../utils/pdf.js";
+import { z } from "zod";
+import { prisma } from "../config/prisma.js";
 
 const router = Router();
 
-const prisma = new PrismaClient();
+/* =========================================
+   CREATE MEDICAL RECORD
+========================================= */
+
+router.post("/", async (req, res) => {
+  const schema = z.object({
+    patientId: z.string(),
+
+    chiefComplaint: z.string().optional().nullable(),
+
+    historyPresentIllness:
+      z.string().optional().nullable(),
+
+    physicalExam:
+      z.string().optional().nullable(),
+
+    diagnosticHypothesis:
+      z.string().optional().nullable(),
+
+    conduct:
+      z.string().optional().nullable(),
+
+    prescription:
+      z.string().optional().nullable(),
+
+    notes:
+      z.string().optional().nullable(),
+  });
+
+  const parsed =
+    schema.safeParse(req.body);
+
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: "Dados inválidos",
+      details:
+        parsed.error.flatten(),
+    });
+  }
+
+  try {
+    const record =
+      await prisma.medicalRecord.create({
+        data: {
+          patientId:
+            parsed.data.patientId,
+
+          chiefComplaint:
+            parsed.data
+              .chiefComplaint,
+
+          historyPresentIllness:
+            parsed.data
+              .historyPresentIllness,
+
+          physicalExam:
+            parsed.data
+              .physicalExam,
+
+          diagnosticHypothesis:
+            parsed.data
+              .diagnosticHypothesis,
+
+          conduct:
+            parsed.data.conduct,
+
+          prescription:
+            parsed.data
+              .prescription,
+
+          notes:
+            parsed.data.notes,
+        },
+      });
+
+    return res.status(201).json(
+      record
+    );
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      error:
+        "Erro ao salvar prontuário",
+    });
+  }
+});
 
 /* =========================================
-   HISTÓRICO DO PACIENTE
+   GET PATIENT HISTORY
 ========================================= */
 
 router.get(
@@ -25,8 +111,7 @@ router.get(
             },
 
             orderBy: {
-              createdAt:
-                "desc",
+              createdAt: "desc",
             },
 
             include: {
@@ -39,205 +124,124 @@ router.get(
     } catch (error) {
       console.error(error);
 
-      return res
-        .status(500)
-        .json({
-          error:
-            "Erro ao buscar prontuários",
-        });
+      return res.status(500).json({
+        error:
+          "Erro ao buscar histórico",
+      });
     }
   }
 );
 
 /* =========================================
-   CRIAR PRONTUÁRIO
+   GET SINGLE RECORD
 ========================================= */
 
-router.post(
-  "/",
-  async (req, res) => {
-    try {
-      const {
-        patientId,
-        chiefComplaint,
-        diagnosis,
-        evolution,
-      } = req.body;
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
 
-      if (
-        !patientId ||
-        !chiefComplaint
-      ) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "Paciente e queixa principal são obrigatórios.",
-          });
-      }
-
-      const patient =
-        await prisma.patient.findUnique(
-          {
-            where: {
-              id: patientId,
-            },
-          }
-        );
-
-      if (!patient) {
-        return res
-          .status(404)
-          .json({
-            error:
-              "Paciente não encontrado.",
-          });
-      }
-
-      const record =
-        await prisma.medicalRecord.create(
-          {
-            data: {
-              patientId,
-
-              chiefComplaint,
-
-              historyPresentIllness:
-                diagnosis,
-
-              notes:
-                evolution,
-            },
-
-            include: {
-              patient: true,
-            },
-          }
-        );
-
-      return res
-        .status(201)
-        .json(record);
-    } catch (error) {
-      console.error(error);
-
-      return res
-        .status(500)
-        .json({
-          error:
-            "Erro ao criar prontuário",
-        });
-    }
-  }
-);
-
-/* =========================================
-   PDF
-========================================= */
-
-router.get(
-  "/:id/pdf",
-  async (req, res) => {
-    try {
-      const { id } =
-        req.params;
-
-      const record =
-        await prisma.medicalRecord.findUnique(
-          {
-            where: { id },
-
-            include: {
-              patient: true,
-            },
-          }
-        );
-
-      if (!record) {
-        return res
-          .status(404)
-          .json({
-            error:
-              "Registro não encontrado.",
-          });
-      }
-
-      return generateSimplePdf(
-        res,
-
-        "Prontuário Médico",
-
-        [
-          {
-            label:
-              "Paciente",
-
-            value:
-              record.patient
-                .fullName,
-          },
-
-          {
-            label:
-              "Data",
-
-            value:
-              new Date(
-                record.createdAt
-              ).toLocaleString(
-                "pt-BR"
-              ),
-          },
-
-          {
-            label:
-              "Queixa Principal",
-
-            value:
-              record.chiefComplaint ||
-              "—",
-          },
-
-          {
-            label:
-              "Diagnóstico",
-
-            value:
-              record.historyPresentIllness ||
-              "—",
-          },
-
-          {
-            label:
-              "Evolução",
-
-            value:
-              record.notes ||
-              "—",
-          },
-        ],
-
-        `prontuario-${record.id}.pdf`,
-
+    const record =
+      await prisma.medicalRecord.findUnique(
         {
-          professionalName:
-            "Médico responsável",
+          where: { id },
 
-          professionalCrm:
-            "CRM 000000",
-
-          signed: false,
+          include: {
+            patient: true,
+          },
         }
       );
+
+    if (!record) {
+      return res.status(404).json({
+        error:
+          "Prontuário não encontrado",
+      });
+    }
+
+    return res.json(record);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      error:
+        "Erro ao buscar prontuário",
+    });
+  }
+});
+
+/* =========================================
+   UPDATE RECORD
+========================================= */
+
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updated =
+      await prisma.medicalRecord.update({
+        where: { id },
+
+        data: {
+          chiefComplaint:
+            req.body.chiefComplaint,
+
+          historyPresentIllness:
+            req.body
+              .historyPresentIllness,
+
+          physicalExam:
+            req.body.physicalExam,
+
+          diagnosticHypothesis:
+            req.body
+              .diagnosticHypothesis,
+
+          conduct:
+            req.body.conduct,
+
+          prescription:
+            req.body.prescription,
+
+          notes:
+            req.body.notes,
+        },
+      });
+
+    return res.json(updated);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      error:
+        "Erro ao atualizar prontuário",
+    });
+  }
+});
+
+/* =========================================
+   DELETE RECORD
+========================================= */
+
+router.delete(
+  "/:id",
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      await prisma.medicalRecord.delete({
+        where: { id },
+      });
+
+      return res.json({
+        success: true,
+      });
     } catch (error) {
       console.error(error);
 
-      return res
-        .status(500)
-        .json({
-          error:
-            "Erro ao gerar PDF",
-        });
+      return res.status(500).json({
+        error:
+          "Erro ao excluir prontuário",
+      });
     }
   }
 );
