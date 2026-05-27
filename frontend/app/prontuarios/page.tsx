@@ -95,6 +95,9 @@ export default function ProntuariosPage() {
     null
   );
 
+  const [searchHistory, setSearchHistory] =
+    useState("");
+
   /* =========================================
      LOAD
   ========================================= */
@@ -114,6 +117,75 @@ export default function ProntuariosPage() {
 
     loadHistory(parsed.id);
   }, []);
+
+  /* =========================================
+     AUTO SAVE DRAFT
+  ========================================= */
+
+  useEffect(() => {
+    const savedDraft =
+      localStorage.getItem(
+        "medical_draft"
+      );
+
+    if (!savedDraft) return;
+
+    const draft =
+      JSON.parse(savedDraft);
+
+    setChiefComplaint(
+      draft.chiefComplaint || ""
+    );
+
+    setHistoryPresentIllness(
+      draft.historyPresentIllness ||
+        ""
+    );
+
+    setPhysicalExam(
+      draft.physicalExam || ""
+    );
+
+    setDiagnosticHypothesis(
+      draft.diagnosticHypothesis ||
+        ""
+    );
+
+    setConduct(
+      draft.conduct || ""
+    );
+
+    setPrescription(
+      draft.prescription || ""
+    );
+
+    setNotes(
+      draft.notes || ""
+    );
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "medical_draft",
+      JSON.stringify({
+        chiefComplaint,
+        historyPresentIllness,
+        physicalExam,
+        diagnosticHypothesis,
+        conduct,
+        prescription,
+        notes,
+      })
+    );
+  }, [
+    chiefComplaint,
+    historyPresentIllness,
+    physicalExam,
+    diagnosticHypothesis,
+    conduct,
+    prescription,
+    notes,
+  ]);
 
   /* =========================================
      LOAD HISTORY
@@ -335,6 +407,10 @@ ${diagnosticHypothesis}
       setCid("");
 
       setEditingRecord(null);
+
+      localStorage.removeItem(
+        "medical_draft"
+      );
 
       await loadHistory(
         patient.id
@@ -581,138 +657,6 @@ ${diagnosticHypothesis}
               />
             </div>
 
-            <div>
-              <label className="form-label">
-                História da Doença Atual
-              </label>
-
-              <textarea
-                className="modal-input"
-                style={{
-                  minHeight: 140,
-                }}
-                value={
-                  historyPresentIllness
-                }
-                onChange={(e) =>
-                  setHistoryPresentIllness(
-                    e.target.value
-                  )
-                }
-              />
-            </div>
-
-            <div>
-              <label className="form-label">
-                Exame Físico
-              </label>
-
-              <textarea
-                className="modal-input"
-                style={{
-                  minHeight: 140,
-                }}
-                value={physicalExam}
-                onChange={(e) =>
-                  setPhysicalExam(
-                    e.target.value
-                  )
-                }
-              />
-            </div>
-
-            <div>
-              <label className="form-label">
-                Hipótese Diagnóstica
-              </label>
-
-              <input
-                className="modal-input"
-                placeholder="CID"
-                value={cid}
-                onChange={(e) =>
-                  setCid(
-                    e.target.value
-                  )
-                }
-                style={{
-                  marginBottom: 14,
-                }}
-              />
-
-              <textarea
-                className="modal-input"
-                style={{
-                  minHeight: 120,
-                }}
-                value={
-                  diagnosticHypothesis
-                }
-                onChange={(e) =>
-                  setDiagnosticHypothesis(
-                    e.target.value
-                  )
-                }
-              />
-            </div>
-
-            <div>
-              <label className="form-label">
-                Conduta
-              </label>
-
-              <textarea
-                className="modal-input"
-                style={{
-                  minHeight: 120,
-                }}
-                value={conduct}
-                onChange={(e) =>
-                  setConduct(
-                    e.target.value
-                  )
-                }
-              />
-            </div>
-
-            <div>
-              <label className="form-label">
-                Prescrição
-              </label>
-
-              <textarea
-                className="modal-input"
-                style={{
-                  minHeight: 120,
-                }}
-                value={prescription}
-                onChange={(e) =>
-                  setPrescription(
-                    e.target.value
-                  )
-                }
-              />
-            </div>
-
-            <div>
-              <label className="form-label">
-                Observações
-              </label>
-
-              <textarea
-                className="modal-input"
-                style={{
-                  minHeight: 140,
-                }}
-                value={notes}
-                onChange={(e) =>
-                  setNotes(
-                    e.target.value
-                  )
-                }
-              />
-            </div>
-
             <button
               className="primary-button"
               onClick={saveRecord}
@@ -743,184 +687,248 @@ ${diagnosticHypothesis}
             Timeline Clínica
           </h2>
 
+          <input
+            className="modal-input"
+            placeholder="Pesquisar no histórico clínico..."
+            value={searchHistory}
+            onChange={(e) =>
+              setSearchHistory(
+                e.target.value
+              )
+            }
+            style={{
+              marginBottom: 20,
+            }}
+          />
+
           <div
             style={{
               display: "grid",
               gap: 18,
             }}
           >
-            {history.map((record) => (
-              <div
-                key={record.id}
-                className="card"
-              >
-                {/* HEADER */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent:
-                      "space-between",
-                    alignItems:
-                      "center",
-                    marginBottom: 20,
-                    gap: 12,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <div
-                    style={{
-                      color: "#64748b",
-                    }}
-                  >
-                    {new Date(
-                      record.createdAt
-                    ).toLocaleString(
-                      "pt-BR"
-                    )}
-                  </div>
+            {history
+              .filter((record) => {
+                const content = `
+                ${record.chiefComplaint}
+                ${record.historyPresentIllness}
+                ${record.diagnosticHypothesis}
+                ${record.conduct}
+                ${record.notes}
+              `.toLowerCase();
 
+                return content.includes(
+                  searchHistory.toLowerCase()
+                );
+              })
+              .map((record) => (
+                <div
+                  key={record.id}
+                  className="card"
+                >
+                  {/* HEADER */}
                   <div
                     style={{
                       display: "flex",
-                      gap: 10,
+                      justifyContent:
+                        "space-between",
+                      alignItems:
+                        "center",
+                      marginBottom: 20,
+                      gap: 12,
                       flexWrap: "wrap",
                     }}
                   >
-                    <button
-                      className="secondary-button"
-                      onClick={() =>
-                        loadRecordToEdit(
-                          record
-                        )
-                      }
-                    >
-                      ✏️ Editar
-                    </button>
+                    <div>
+                      <div
+                        style={{
+                          color: "#64748b",
+                          marginBottom: 12,
+                        }}
+                      >
+                        {new Date(
+                          record.createdAt
+                        ).toLocaleString(
+                          "pt-BR"
+                        )}
+                      </div>
 
-                    <button
-                      className="secondary-button"
-                      onClick={() =>
-                        window.open(
-                          `https://medflow-mvp-production.up.railway.app/api/medical-records/pdf/${record.id}`,
-                          "_blank"
-                        )
-                      }
-                    >
-                      📄 PDF
-                    </button>
+                      <div
+                        style={{
+                          display:
+                            "inline-flex",
+                          background:
+                            "#dbeafe",
+                          color: "#1d4ed8",
+                          padding:
+                            "6px 12px",
+                          borderRadius:
+                            999,
+                          fontWeight: 700,
+                          fontSize: 13,
+                        }}
+                      >
+                        🏥 CID Clínico
+                      </div>
+                    </div>
 
-                    <button
+                    <div
                       style={{
-                        background:
-                          "#ef4444",
-                        color: "white",
-                        border: "none",
-                        borderRadius: 14,
-                        padding:
-                          "12px 16px",
-                        cursor: "pointer",
-                        fontWeight: 700,
+                        display: "flex",
+                        gap: 10,
+                        flexWrap: "wrap",
                       }}
-                      onClick={() =>
-                        deleteRecord(
-                          record.id
-                        )
-                      }
                     >
-                      🗑 Excluir
-                    </button>
+                      <button
+                        className="secondary-button"
+                        onClick={() =>
+                          loadRecordToEdit(
+                            record
+                          )
+                        }
+                      >
+                        ✏️ Editar
+                      </button>
+
+                      <button
+                        className="secondary-button"
+                        onClick={() =>
+                          window.open(
+                            `https://medflow-mvp-production.up.railway.app/api/medical-records/pdf/${record.id}`,
+                            "_blank"
+                          )
+                        }
+                      >
+                        📄 PDF
+                      </button>
+
+                      <button
+                        style={{
+                          background:
+                            "#ef4444",
+                          color:
+                            "white",
+                          border:
+                            "none",
+                          borderRadius:
+                            14,
+                          padding:
+                            "12px 16px",
+                          cursor:
+                            "pointer",
+                          fontWeight: 700,
+                        }}
+                        onClick={() =>
+                          deleteRecord(
+                            record.id
+                          )
+                        }
+                      >
+                        🗑 Excluir
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* CONTENT */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: 18,
+                    }}
+                  >
+                    <div>
+                      <strong>
+                        Queixa Principal
+                      </strong>
+
+                      <p>
+                        {
+                          record.chiefComplaint
+                        }
+                      </p>
+                    </div>
+
+                    <div>
+                      <strong>
+                        HDA
+                      </strong>
+
+                      <p>
+                        {
+                          record.historyPresentIllness
+                        }
+                      </p>
+                    </div>
+
+                    <div>
+                      <strong>
+                        Exame Físico
+                      </strong>
+
+                      <pre
+                        style={{
+                          whiteSpace:
+                            "pre-wrap",
+                          fontFamily:
+                            "inherit",
+                          lineHeight:
+                            1.7,
+                        }}
+                      >
+                        {
+                          record.physicalExam
+                        }
+                      </pre>
+                    </div>
+
+                    <div>
+                      <strong>
+                        Hipótese Diagnóstica
+                      </strong>
+
+                      <p>
+                        {
+                          record.diagnosticHypothesis
+                        }
+                      </p>
+                    </div>
+
+                    <div>
+                      <strong>
+                        Conduta
+                      </strong>
+
+                      <p>
+                        {
+                          record.conduct
+                        }
+                      </p>
+                    </div>
+
+                    <div>
+                      <strong>
+                        Prescrição
+                      </strong>
+
+                      <p>
+                        {
+                          record.prescription
+                        }
+                      </p>
+                    </div>
+
+                    <div>
+                      <strong>
+                        Observações
+                      </strong>
+
+                      <p>
+                        {record.notes}
+                      </p>
+                    </div>
                   </div>
                 </div>
-
-                {/* CONTENT */}
-                <div
-                  style={{
-                    display: "grid",
-                    gap: 18,
-                  }}
-                >
-                  <div>
-                    <strong>
-                      Queixa Principal
-                    </strong>
-
-                    <p>
-                      {
-                        record.chiefComplaint
-                      }
-                    </p>
-                  </div>
-
-                  <div>
-                    <strong>HDA</strong>
-
-                    <p>
-                      {
-                        record.historyPresentIllness
-                      }
-                    </p>
-                  </div>
-
-                  <div>
-                    <strong>
-                      Exame Físico
-                    </strong>
-
-                    <p>
-                      {
-                        record.physicalExam
-                      }
-                    </p>
-                  </div>
-
-                  <div>
-                    <strong>
-                      Hipótese Diagnóstica
-                    </strong>
-
-                    <p>
-                      {
-                        record.diagnosticHypothesis
-                      }
-                    </p>
-                  </div>
-
-                  <div>
-                    <strong>
-                      Conduta
-                    </strong>
-
-                    <p>
-                      {
-                        record.conduct
-                      }
-                    </p>
-                  </div>
-
-                  <div>
-                    <strong>
-                      Prescrição
-                    </strong>
-
-                    <p>
-                      {
-                        record.prescription
-                      }
-                    </p>
-                  </div>
-
-                  <div>
-                    <strong>
-                      Observações
-                    </strong>
-
-                    <p>
-                      {record.notes}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))}
 
             {history.length ===
               0 && (
