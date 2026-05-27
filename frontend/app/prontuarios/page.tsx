@@ -663,128 +663,135 @@ ${diagnosticHypothesis}
               gap: 18,
             }}
           >
-            {history.map((record) => (
-  <div
-    key={record.id}
-    className="card"
-  >
-    {/* HEADER */}
-    <div
-      style={{
-        display: "flex",
-        justifyContent:
-          "space-between",
-        alignItems: "center",
-        marginBottom: 20,
-      }}
-    >
-      <div
-        style={{
-          color: "#64748b",
-        }}
-      >
-        {new Date(
-          record.createdAt
-        ).toLocaleString("pt-BR")}
-      </div>
+                        {history.map((record) => (
+              <div
+                key={record.id}
+                className="card"
+              >
+                {/* HEADER */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent:
+                      "space-between",
+                    alignItems:
+                      "center",
+                    marginBottom: 20,
+                  }}
+                >
+                  <div
+                    style={{
+                      color: "#64748b",
+                    }}
+                  >
+                    {new Date(
+                      record.createdAt
+                    ).toLocaleString(
+                      "pt-BR"
+                    )}
+                  </div>
 
-      <button
-        className="secondary-button"
-        onClick={() =>
-          window.open(
-            `https://medflow-mvp-production.up.railway.app/api/medical-records/pdf/${record.id}`,
-            "_blank"
-          )
-        }
-      >
-        📄 Gerar PDF
-      </button>
-    </div>
+                  <button
+                    className="secondary-button"
+                    onClick={() =>
+                      window.open(
+                        `https://medflow-mvp-production.up.railway.app/api/medical-records/pdf/${record.id}`,
+                        "_blank"
+                      )
+                    }
+                  >
+                    📄 Gerar PDF
+                  </button>
+                </div>
 
-    {/* CONTENT */}
-    <div
-      style={{
-        display: "grid",
-        gap: 18,
-      }}
-    >
-      <div>
-        <strong>
-          Queixa Principal
-        </strong>
+                {/* CONTENT */}
+                <div
+                  style={{
+                    display: "grid",
+                    gap: 18,
+                  }}
+                >
+                  <div>
+                    <strong>
+                      Queixa Principal
+                    </strong>
 
-        <p>
-          {
-            record.chiefComplaint
-          }
-        </p>
-      </div>
+                    <p>
+                      {
+                        record.chiefComplaint
+                      }
+                    </p>
+                  </div>
 
-      <div>
-        <strong>HDA</strong>
+                  <div>
+                    <strong>
+                      HDA
+                    </strong>
 
-        <p>
-          {
-            record.historyPresentIllness
-          }
-        </p>
-      </div>
+                    <p>
+                      {
+                        record.historyPresentIllness
+                      }
+                    </p>
+                  </div>
 
-      <div>
-        <strong>
-          Exame Físico
-        </strong>
+                  <div>
+                    <strong>
+                      Exame Físico
+                    </strong>
 
-        <p>
-          {
-            record.physicalExam
-          }
-        </p>
-      </div>
+                    <p>
+                      {
+                        record.physicalExam
+                      }
+                    </p>
+                  </div>
 
-      <div>
-        <strong>
-          Hipótese Diagnóstica
-        </strong>
+                  <div>
+                    <strong>
+                      Hipótese Diagnóstica
+                    </strong>
 
-        <p>
-          {
-            record.diagnosticHypothesis
-          }
-        </p>
-      </div>
+                    <p>
+                      {
+                        record.diagnosticHypothesis
+                      }
+                    </p>
+                  </div>
 
-      <div>
-        <strong>
-          Conduta
-        </strong>
+                  <div>
+                    <strong>
+                      Conduta
+                    </strong>
 
-        <p>
-          {record.conduct}
-        </p>
-      </div>
+                    <p>
+                      {
+                        record.conduct
+                      }
+                    </p>
+                  </div>
 
-      <div>
-        <strong>
-          Prescrição
-        </strong>
+                  <div>
+                    <strong>
+                      Prescrição
+                    </strong>
 
-        <p>
-          {
-            record.prescription
-          }
-        </p>
-      </div>
+                    <p>
+                      {
+                        record.prescription
+                      }
+                    </p>
+                  </div>
 
-      <div>
-        <strong>
-          Observações
-        </strong>
+                  <div>
+                    <strong>
+                      Observações
+                    </strong>
 
-        <p>
-          {record.notes}
-        </p>
-      </div>
-    </div>
-  </div>
-))}
+                    <p>
+                      {record.notes}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
