@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
 type Patient = {
   id: string;
@@ -16,52 +13,34 @@ type Patient = {
 
 type MedicalRecord = {
   id: string;
-
   chiefComplaint?: string;
-
   historyPresentIllness?: string;
-
   physicalExam?: string;
-
   diagnosticHypothesis?: string;
-
   conduct?: string;
-
   prescription?: string;
-
   notes?: string;
-
   createdAt: string;
 };
 
 export default function ProntuariosPage() {
-  /* =========================================
-     PACIENTE
-  ========================================= */
-
   const [patient, setPatient] =
-    useState<Patient | null>(
-      null
-    );
+    useState<Patient | null>(null);
 
   /* =========================================
      FORM SOAP
   ========================================= */
 
-  const [
-    chiefComplaint,
-    setChiefComplaint,
-  ] = useState("");
+  const [chiefComplaint, setChiefComplaint] =
+    useState("");
 
   const [
     historyPresentIllness,
     setHistoryPresentIllness,
   ] = useState("");
 
-  const [
-    physicalExam,
-    setPhysicalExam,
-  ] = useState("");
+  const [physicalExam, setPhysicalExam] =
+    useState("");
 
   const [
     diagnosticHypothesis,
@@ -71,10 +50,8 @@ export default function ProntuariosPage() {
   const [conduct, setConduct] =
     useState("");
 
-  const [
-    prescription,
-    setPrescription,
-  ] = useState("");
+  const [prescription, setPrescription] =
+    useState("");
 
   const [notes, setNotes] =
     useState("");
@@ -102,7 +79,7 @@ export default function ProntuariosPage() {
     useState("");
 
   /* =========================================
-     HISTORICO
+     HISTÓRICO
   ========================================= */
 
   const [history, setHistory] =
@@ -641,7 +618,7 @@ ${diagnosticHypothesis}
           </div>
         </div>
 
-        {/* HISTORICO */}
+        {/* HISTÓRICO */}
         <div
           style={{
             marginTop: 34,
@@ -663,7 +640,7 @@ ${diagnosticHypothesis}
               gap: 18,
             }}
           >
-                        {history.map((record) => (
+            {history.map((record) => (
               <div
                 key={record.id}
                 className="card"
@@ -724,9 +701,7 @@ ${diagnosticHypothesis}
                   </div>
 
                   <div>
-                    <strong>
-                      HDA
-                    </strong>
+                    <strong>HDA</strong>
 
                     <p>
                       {
@@ -795,3 +770,24 @@ ${diagnosticHypothesis}
                 </div>
               </div>
             ))}
+
+            {history.length ===
+              0 && (
+              <div
+                className="card"
+                style={{
+                  textAlign:
+                    "center",
+                  color: "#64748b",
+                }}
+              >
+                Nenhum registro clínico
+                encontrado.
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
