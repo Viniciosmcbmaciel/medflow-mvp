@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -12,12 +13,54 @@ type Medication = {
   duration: string;
 };
 
+type Patient = {
+  id: string;
+  fullName: string;
+  cpf?: string;
+  birthDate?: string;
+  phone?: string;
+  insurance?: string;
+};
+
 export default function PrescricoesPage() {
   const prescriptionRef =
     useRef<HTMLDivElement>(null);
 
   /* =========================================
-     CLINICA
+     PACIENTE SELECIONADO
+  ========================================= */
+
+  const [patient, setPatient] =
+    useState<Patient | null>(null);
+
+  useEffect(() => {
+    const storedPatient =
+      localStorage.getItem(
+        "selected_patient"
+      );
+
+    if (!storedPatient) return;
+
+    const parsed =
+      JSON.parse(storedPatient);
+
+    setPatient(parsed);
+
+    setPatientName(
+      parsed.fullName || ""
+    );
+
+    setPatientCpf(
+      parsed.cpf || ""
+    );
+
+    setPatientBirthDate(
+      parsed.birthDate || ""
+    );
+  }, []);
+
+  /* =========================================
+     CLÍNICA
   ========================================= */
 
   const [clinicName, setClinicName] =
@@ -38,7 +81,7 @@ export default function PrescricoesPage() {
   ========================================= */
 
   const [patientName, setPatientName] =
-    useState("João Silva");
+    useState("");
 
   const [patientCpf, setPatientCpf] =
     useState("");
@@ -58,7 +101,7 @@ export default function PrescricoesPage() {
     useState("");
 
   /* =========================================
-     MEDICO
+     MÉDICO
   ========================================= */
 
   const [crm, setCrm] =
@@ -68,7 +111,7 @@ export default function PrescricoesPage() {
     useState("Dr. MedFlow");
 
   /* =========================================
-     OBSERVACOES
+     OBSERVAÇÕES
   ========================================= */
 
   const [notes, setNotes] =
@@ -135,59 +178,78 @@ export default function PrescricoesPage() {
   ========================================= */
 
   async function savePrescription() {
-  try {
-    const response = await fetch(
-      "https://medflow-mvp-production.up.railway.app/api/prescriptions",
-      {
-        method: "POST",
+    try {
+      if (!patient) {
+        alert(
+          "Selecione um paciente primeiro."
+        );
 
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-
-        body: JSON.stringify({
-          medicalRecordId:
-            "cmoaotg830004l84e1urej5nv",
-
-          notes,
-
-          items: medications.map(
-            (med) => ({
-              medication:
-                med.name,
-
-              dosage:
-                med.dosage,
-
-              instructions:
-                med.dosage,
-
-              duration:
-                med.duration,
-            })
-          ),
-        }),
+        return;
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(
-        "Erro ao salvar"
+      const response = await fetch(
+        "https://medflow-mvp-production.up.railway.app/api/prescriptions",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            patientId:
+              patient.id,
+
+            notes,
+
+            cid,
+
+            allergies,
+
+            weight,
+
+            items: medications.map(
+              (med) => ({
+                medication:
+                  med.name,
+
+                dosage:
+                  med.dosage,
+
+                instructions:
+                  med.dosage,
+
+                duration:
+                  med.duration,
+              })
+            ),
+          }),
+        }
+      );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        console.log(data);
+
+        throw new Error(
+          "Erro ao salvar"
+        );
+      }
+
+      alert(
+        "Prescrição salva com sucesso!"
+      );
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Erro ao salvar prescrição"
       );
     }
-
-    alert(
-      "Prescrição salva com sucesso!"
-    );
-  } catch (error) {
-    console.error(error);
-
-    alert(
-      "Erro ao salvar prescrição"
-    );
   }
-}
 
   /* =========================================
      PDF
@@ -241,6 +303,10 @@ export default function PrescricoesPage() {
               alignItems: "center",
 
               marginBottom: 32,
+
+              flexWrap: "wrap",
+
+              gap: 12,
             }}
           >
             <div>
@@ -260,7 +326,8 @@ export default function PrescricoesPage() {
                 }}
               >
                 Receita médica
-                profissional da clínica.
+                profissional integrada
+                ao paciente.
               </p>
             </div>
 
@@ -290,7 +357,7 @@ export default function PrescricoesPage() {
             </div>
           </div>
 
-          {/* RECEITUARIO */}
+          {/* RECEITUÁRIO */}
           <div
             ref={prescriptionRef}
             style={{
@@ -304,7 +371,7 @@ export default function PrescricoesPage() {
               background: "#f0fdf4",
             }}
           >
-            {/* CABECALHO */}
+            {/* CABEÇALHO */}
             <div
               style={{
                 background: "white",
@@ -330,6 +397,10 @@ export default function PrescricoesPage() {
                     "center",
 
                   marginBottom: 18,
+
+                  flexWrap: "wrap",
+
+                  gap: 16,
                 }}
               >
                 <div>
@@ -496,6 +567,10 @@ export default function PrescricoesPage() {
                 alignItems: "center",
 
                 marginBottom: 24,
+
+                flexWrap: "wrap",
+
+                gap: 12,
               }}
             >
               <h2
@@ -644,7 +719,7 @@ export default function PrescricoesPage() {
               )}
             </div>
 
-            {/* OBS */}
+            {/* OBSERVAÇÕES */}
             <div
               style={{
                 marginTop: 30,
