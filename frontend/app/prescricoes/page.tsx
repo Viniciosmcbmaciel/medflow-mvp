@@ -22,16 +22,42 @@ type Patient = {
   insurance?: string;
 };
 
+type MedicalRecord = {
+  id: string;
+};
+
+type PrescriptionHistory = {
+  id: string;
+  createdAt: string;
+
+  items: {
+    id: string;
+    medication: string;
+    dosage: string;
+    duration?: string;
+  }[];
+};
+
 export default function PrescricoesPage() {
   const prescriptionRef =
     useRef<HTMLDivElement>(null);
 
   /* =========================================
-     PACIENTE SELECIONADO
+     PACIENTE
   ========================================= */
 
   const [patient, setPatient] =
     useState<Patient | null>(null);
+
+  const [
+    medicalRecordId,
+    setMedicalRecordId,
+  ] = useState("");
+
+  const [history, setHistory] =
+    useState<PrescriptionHistory[]>(
+      []
+    );
 
   useEffect(() => {
     const storedPatient =
@@ -57,27 +83,75 @@ export default function PrescricoesPage() {
     setPatientBirthDate(
       parsed.birthDate || ""
     );
+
+    loadHistory(parsed.id);
+
+    loadLatestMedicalRecord(
+      parsed.id
+    );
   }, []);
+
+  async function loadHistory(
+    patientId: string
+  ) {
+    try {
+      const response = await fetch(
+        `https://medflow-mvp-production.up.railway.app/api/prescriptions/patient/${patientId}`
+      );
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data =
+        await response.json();
+
+      setHistory(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function loadLatestMedicalRecord(
+    patientId: string
+  ) {
+    try {
+      const response = await fetch(
+        `https://medflow-mvp-production.up.railway.app/api/medical-records/patient/${patientId}`
+      );
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data: MedicalRecord[] =
+        await response.json();
+
+      if (data.length > 0) {
+        setMedicalRecordId(
+          data[0].id
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   /* =========================================
      CLÍNICA
   ========================================= */
 
-  const [clinicName, setClinicName] =
+  const [clinicName] =
     useState("MedFlow Clinic");
 
-  const [
-    clinicAddress,
-    setClinicAddress,
-  ] = useState(
-    "Brasília - DF"
-  );
+  const [clinicAddress] =
+    useState("Brasília - DF");
 
-  const [clinicPhone, setClinicPhone] =
+  const [clinicPhone] =
     useState("(61) 99999-9999");
 
   /* =========================================
-     PACIENTE
+     PACIENTE FORM
   ========================================= */
 
   const [patientName, setPatientName] =
@@ -104,10 +178,10 @@ export default function PrescricoesPage() {
      MÉDICO
   ========================================= */
 
-  const [crm, setCrm] =
+  const [crm] =
     useState("CRM 123456");
 
-  const [doctorName, setDoctorName] =
+  const [doctorName] =
     useState("Dr. MedFlow");
 
   /* =========================================
@@ -187,6 +261,14 @@ export default function PrescricoesPage() {
         return;
       }
 
+      if (!medicalRecordId) {
+        alert(
+          "Nenhum prontuário encontrado para o paciente."
+        );
+
+        return;
+      }
+
       const response = await fetch(
         "https://medflow-mvp-production.up.railway.app/api/prescriptions",
         {
@@ -198,16 +280,17 @@ export default function PrescricoesPage() {
           },
 
           body: JSON.stringify({
-            patientId:
-              patient.id,
+            medicalRecordId,
 
-            notes,
+            notes: `
+CID: ${cid}
 
-            cid,
+Peso: ${weight}
 
-            allergies,
+Alergias: ${allergies}
 
-            weight,
+${notes}
+            `,
 
             items: medications.map(
               (med) => ({
@@ -242,6 +325,27 @@ export default function PrescricoesPage() {
       alert(
         "Prescrição salva com sucesso!"
       );
+
+      setNotes("");
+
+      setCid("");
+
+      setWeight("");
+
+      setAllergies("");
+
+      setMedications([
+        {
+          id: "1",
+          name: "",
+          dosage: "",
+          duration: "",
+        },
+      ]);
+
+      if (patient?.id) {
+        loadHistory(patient.id);
+      }
     } catch (error) {
       console.error(error);
 
@@ -299,13 +403,9 @@ export default function PrescricoesPage() {
               display: "flex",
               justifyContent:
                 "space-between",
-
               alignItems: "center",
-
               marginBottom: 32,
-
               flexWrap: "wrap",
-
               gap: 12,
             }}
           >
@@ -326,8 +426,8 @@ export default function PrescricoesPage() {
                 }}
               >
                 Receita médica
-                profissional integrada
-                ao paciente.
+                integrada ao
+                prontuário.
               </p>
             </div>
 
@@ -363,11 +463,8 @@ export default function PrescricoesPage() {
             style={{
               border:
                 "2px solid #dcfce7",
-
               borderRadius: 24,
-
               padding: 32,
-
               background: "#f0fdf4",
             }}
           >
@@ -375,13 +472,9 @@ export default function PrescricoesPage() {
             <div
               style={{
                 background: "white",
-
                 borderRadius: 22,
-
                 padding: 24,
-
                 marginBottom: 28,
-
                 border:
                   "1px solid #dcfce7",
               }}
@@ -389,27 +482,18 @@ export default function PrescricoesPage() {
               <div
                 style={{
                   display: "flex",
-
                   justifyContent:
                     "space-between",
-
                   alignItems:
                     "center",
-
                   marginBottom: 18,
-
-                  flexWrap: "wrap",
-
-                  gap: 16,
                 }}
               >
                 <div>
                   <h1
                     style={{
                       fontSize: 30,
-
                       fontWeight: 900,
-
                       color:
                         "#166534",
                     }}
@@ -421,8 +505,6 @@ export default function PrescricoesPage() {
                     style={{
                       color:
                         "#64748b",
-
-                      marginTop: 6,
                     }}
                   >
                     {
@@ -443,26 +525,17 @@ export default function PrescricoesPage() {
                 <div
                   style={{
                     width: 82,
-
                     height: 82,
-
                     borderRadius: 20,
-
                     background:
                       "linear-gradient(135deg,#16a34a,#22c55e)",
-
                     display: "flex",
-
                     alignItems:
                       "center",
-
                     justifyContent:
                       "center",
-
                     color: "white",
-
                     fontSize: 28,
-
                     fontWeight: 900,
                   }}
                 >
@@ -475,14 +548,10 @@ export default function PrescricoesPage() {
                 style={{
                   borderTop:
                     "1px solid #dcfce7",
-
                   paddingTop: 20,
-
                   display: "grid",
-
                   gridTemplateColumns:
                     "1fr 1fr 1fr",
-
                   gap: 18,
                 }}
               >
@@ -556,27 +625,19 @@ export default function PrescricoesPage() {
               </div>
             </div>
 
-            {/* HEADER MEDICAMENTOS */}
+            {/* MEDICAMENTOS */}
             <div
               style={{
                 display: "flex",
-
                 justifyContent:
                   "space-between",
-
                 alignItems: "center",
-
                 marginBottom: 24,
-
-                flexWrap: "wrap",
-
-                gap: 12,
               }}
             >
               <h2
                 style={{
                   fontSize: 24,
-
                   fontWeight: 800,
                 }}
               >
@@ -593,7 +654,6 @@ export default function PrescricoesPage() {
               </button>
             </div>
 
-            {/* LISTA */}
             <div
               style={{
                 display: "grid",
@@ -609,11 +669,8 @@ export default function PrescricoesPage() {
                     style={{
                       background:
                         "white",
-
                       borderRadius: 20,
-
                       padding: 22,
-
                       border:
                         "1px solid #dcfce7",
                     }}
@@ -622,12 +679,9 @@ export default function PrescricoesPage() {
                       style={{
                         display:
                           "grid",
-
                         gridTemplateColumns:
                           "2fr 2fr 1fr auto",
-
                         gap: 14,
-
                         alignItems:
                           "end",
                       }}
@@ -695,18 +749,12 @@ export default function PrescricoesPage() {
                         style={{
                           background:
                             "#ef4444",
-
                           color:
                             "white",
-
-                          border:
-                            "none",
-
+                          border: "none",
                           padding:
                             "14px 16px",
-
                           borderRadius: 14,
-
                           cursor:
                             "pointer",
                         }}
@@ -744,9 +792,7 @@ export default function PrescricoesPage() {
             <div
               style={{
                 marginTop: 50,
-
                 paddingTop: 28,
-
                 borderTop:
                   "1px solid #bbf7d0",
               }}
@@ -760,7 +806,6 @@ export default function PrescricoesPage() {
                   style={{
                     borderTop:
                       "1px solid #0f172a",
-
                     marginBottom: 10,
                   }}
                 />
@@ -777,22 +822,109 @@ export default function PrescricoesPage() {
                 >
                   {crm}
                 </p>
-
-                <p
-                  style={{
-                    color:
-                      "#64748b",
-
-                    fontSize: 13,
-
-                    marginTop: 6,
-                  }}
-                >
-                  Assinatura médica
-                  digital
-                </p>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* HISTÓRICO */}
+        <div
+          style={{
+            marginTop: 32,
+          }}
+        >
+          <h2
+            style={{
+              fontSize: 30,
+              fontWeight: 800,
+              marginBottom: 24,
+            }}
+          >
+            Histórico de Prescrições
+          </h2>
+
+          <div
+            style={{
+              display: "grid",
+              gap: 18,
+            }}
+          >
+            {history.map(
+              (prescription) => (
+                <div
+                  key={prescription.id}
+                  className="card"
+                >
+                  <div
+                    style={{
+                      marginBottom: 18,
+                    }}
+                  >
+                    <strong>
+                      {new Date(
+                        prescription.createdAt
+                      ).toLocaleString(
+                        "pt-BR"
+                      )}
+                    </strong>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: 12,
+                    }}
+                  >
+                    {prescription.items.map(
+                      (item) => (
+                        <div
+                          key={item.id}
+                          style={{
+                            background:
+                              "#f8fafc",
+                            padding: 16,
+                            borderRadius: 14,
+                          }}
+                        >
+                          <strong>
+                            {
+                              item.medication
+                            }
+                          </strong>
+
+                          <p>
+                            {
+                              item.dosage
+                            }
+                          </p>
+
+                          <p>
+                            {
+                              item.duration
+                            }
+                          </p>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              )
+            )}
+
+            {history.length ===
+              0 && (
+              <div
+                className="card"
+                style={{
+                  textAlign:
+                    "center",
+                  color: "#64748b",
+                }}
+              >
+                Nenhuma prescrição
+                encontrada.
+              </div>
+            )}
           </div>
         </div>
       </main>
