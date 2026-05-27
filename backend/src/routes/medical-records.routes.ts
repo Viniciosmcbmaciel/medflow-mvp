@@ -269,4 +269,94 @@ router.get(
   }
 );
 
+/* =========================================
+   ATUALIZAR EVOLUÇÃO
+========================================= */
+
+router.put(
+  "/:id",
+  async (req, res) => {
+    try {
+      const { id } =
+        req.params;
+
+      const updated =
+        await prisma.medicalRecord.update(
+          {
+            where: { id },
+
+            data: {
+              chiefComplaint:
+                req.body
+                  .chiefComplaint,
+
+              historyPresentIllness:
+                req.body
+                  .historyPresentIllness,
+
+              physicalExam:
+                req.body
+                  .physicalExam,
+
+              diagnosticHypothesis:
+                req.body
+                  .diagnosticHypothesis,
+
+              conduct:
+                req.body
+                  .conduct,
+
+              prescription:
+                req.body
+                  .prescription,
+
+              notes:
+                req.body.notes,
+            },
+          }
+        );
+
+      return res.json(updated);
+    } catch (error) {
+      console.error(error);
+
+      return res.status(500).json({
+        message:
+          "Erro ao atualizar evolução",
+      });
+    }
+  }
+);
+
+/* =========================================
+   EXCLUIR EVOLUÇÃO
+========================================= */
+
+router.delete(
+  "/:id",
+  async (req, res) => {
+    try {
+      const { id } =
+        req.params;
+
+      await prisma.medicalRecord.delete(
+        {
+          where: { id },
+        }
+      );
+
+      return res.json({
+        success: true,
+      });
+    } catch (error) {
+      console.error(error);
+
+      return res.status(500).json({
+        message:
+          "Erro ao excluir evolução",
+      });
+    }
+  }
+);
+
 export default router;

@@ -88,6 +88,13 @@ export default function ProntuariosPage() {
   const [loading, setLoading] =
     useState(false);
 
+  const [
+    editingRecord,
+    setEditingRecord,
+  ] = useState<string | null>(
+    null
+  );
+
   /* =========================================
      LOAD
   ========================================= */
@@ -130,6 +137,95 @@ export default function ProntuariosPage() {
   }
 
   /* =========================================
+     EDITAR
+  ========================================= */
+
+  function loadRecordToEdit(
+    record: MedicalRecord
+  ) {
+    setEditingRecord(
+      record.id
+    );
+
+    setChiefComplaint(
+      record.chiefComplaint || ""
+    );
+
+    setHistoryPresentIllness(
+      record.historyPresentIllness ||
+        ""
+    );
+
+    setPhysicalExam(
+      record.physicalExam || ""
+    );
+
+    setDiagnosticHypothesis(
+      record.diagnosticHypothesis ||
+        ""
+    );
+
+    setConduct(
+      record.conduct || ""
+    );
+
+    setPrescription(
+      record.prescription || ""
+    );
+
+    setNotes(
+      record.notes || ""
+    );
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
+
+  /* =========================================
+     EXCLUIR
+  ========================================= */
+
+  async function deleteRecord(
+    id: string
+  ) {
+    const confirmDelete =
+      confirm(
+        "Deseja excluir esta evolução?"
+      );
+
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch(
+        `https://medflow-mvp-production.up.railway.app/api/medical-records/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error();
+      }
+
+      alert(
+        "Evolução excluída!"
+      );
+
+      if (patient?.id) {
+        loadHistory(patient.id);
+      }
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Erro ao excluir"
+      );
+    }
+  }
+
+  /* =========================================
      SAVE
   ========================================= */
 
@@ -146,9 +242,14 @@ export default function ProntuariosPage() {
       setLoading(true);
 
       const response = await fetch(
-        "https://medflow-mvp-production.up.railway.app/api/medical-records",
+        editingRecord
+          ? `https://medflow-mvp-production.up.railway.app/api/medical-records/${editingRecord}`
+          : "https://medflow-mvp-production.up.railway.app/api/medical-records",
         {
-          method: "POST",
+          method:
+            editingRecord
+              ? "PUT"
+              : "POST",
 
           headers: {
             "Content-Type":
@@ -200,7 +301,9 @@ ${diagnosticHypothesis}
       }
 
       alert(
-        "Prontuário salvo com sucesso!"
+        editingRecord
+          ? "Evolução atualizada!"
+          : "Prontuário salvo com sucesso!"
       );
 
       /* LIMPAR */
@@ -230,6 +333,8 @@ ${diagnosticHypothesis}
       setHeight("");
 
       setCid("");
+
+      setEditingRecord(null);
 
       await loadHistory(
         patient.id
@@ -444,7 +549,9 @@ ${diagnosticHypothesis}
               marginBottom: 28,
             }}
           >
-            Evolução Clínica
+            {editingRecord
+              ? "Editar Evolução"
+              : "Evolução Clínica"}
           </h2>
 
           <div
@@ -613,6 +720,8 @@ ${diagnosticHypothesis}
             >
               {loading
                 ? "Salvando..."
+                : editingRecord
+                ? "Atualizar Evolução"
                 : "Salvar Evolução"}
             </button>
           </div>
@@ -654,6 +763,8 @@ ${diagnosticHypothesis}
                     alignItems:
                       "center",
                     marginBottom: 20,
+                    gap: 12,
+                    flexWrap: "wrap",
                   }}
                 >
                   <div
@@ -668,17 +779,57 @@ ${diagnosticHypothesis}
                     )}
                   </div>
 
-                  <button
-                    className="secondary-button"
-                    onClick={() =>
-                      window.open(
-                        `https://medflow-mvp-production.up.railway.app/api/medical-records/pdf/${record.id}`,
-                        "_blank"
-                      )
-                    }
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 10,
+                      flexWrap: "wrap",
+                    }}
                   >
-                    📄 Gerar PDF
-                  </button>
+                    <button
+                      className="secondary-button"
+                      onClick={() =>
+                        loadRecordToEdit(
+                          record
+                        )
+                      }
+                    >
+                      ✏️ Editar
+                    </button>
+
+                    <button
+                      className="secondary-button"
+                      onClick={() =>
+                        window.open(
+                          `https://medflow-mvp-production.up.railway.app/api/medical-records/pdf/${record.id}`,
+                          "_blank"
+                        )
+                      }
+                    >
+                      📄 PDF
+                    </button>
+
+                    <button
+                      style={{
+                        background:
+                          "#ef4444",
+                        color: "white",
+                        border: "none",
+                        borderRadius: 14,
+                        padding:
+                          "12px 16px",
+                        cursor: "pointer",
+                        fontWeight: 700,
+                      }}
+                      onClick={() =>
+                        deleteRecord(
+                          record.id
+                        )
+                      }
+                    >
+                      🗑 Excluir
+                    </button>
+                  </div>
                 </div>
 
                 {/* CONTENT */}
