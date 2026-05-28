@@ -6,6 +6,8 @@ import {
   useState,
 } from "react";
 
+import { medicationsDatabase } from "../data/medications";
+
 type Medication = {
   id: string;
   name: string;
@@ -63,19 +65,6 @@ export default function PrescricoesPage() {
      AUTOCOMPLETE PREMIUM
   ========================================= */
 
-  const medicationsDatabase = [
-    "Dipirona 500mg",
-    "Paracetamol 750mg",
-    "Ibuprofeno 600mg",
-    "Amoxicilina 500mg",
-    "Azitromicina 500mg",
-    "Losartana 50mg",
-    "Omeprazol 20mg",
-    "Prednisona 20mg",
-    "Metformina 850mg",
-    "Nimesulida 100mg",
-  ];
-
   const [
     activeSuggestions,
     setActiveSuggestions,
@@ -84,7 +73,13 @@ export default function PrescricoesPage() {
   const [
     activeMedicationId,
     setActiveMedicationId,
-  ] = useState<string | null>(null);
+  ] = useState<string | null>(
+    null
+  );
+
+  /* =========================================
+     LOAD
+  ========================================= */
 
   useEffect(() => {
     const storedPatient =
@@ -126,9 +121,7 @@ export default function PrescricoesPage() {
         `https://medflow-mvp-production.up.railway.app/api/prescriptions/patient/${patientId}`
       );
 
-      if (!response.ok) {
-        return;
-      }
+      if (!response.ok) return;
 
       const data =
         await response.json();
@@ -147,9 +140,7 @@ export default function PrescricoesPage() {
         `https://medflow-mvp-production.up.railway.app/api/medical-records/patient/${patientId}`
       );
 
-      if (!response.ok) {
-        return;
-      }
+      if (!response.ok) return;
 
       const data: MedicalRecord[] =
         await response.json();
@@ -286,14 +277,19 @@ export default function PrescricoesPage() {
       const filtered =
         medicationsDatabase.filter(
           (medication) =>
-            medication
+            medication.name
               .toLowerCase()
               .includes(
                 value.toLowerCase()
               )
         );
 
-      setActiveSuggestions(filtered);
+      setActiveSuggestions(
+        filtered.map(
+          (medication) =>
+            medication.name
+        )
+      );
     }
   }
 
@@ -302,12 +298,30 @@ export default function PrescricoesPage() {
   ) {
     if (!activeMedicationId) return;
 
+    const medicationData =
+      medicationsDatabase.find(
+        (medication) =>
+          medication.name ===
+          medicationName
+      );
+
     setMedications((prev) =>
       prev.map((med) =>
         med.id === activeMedicationId
           ? {
               ...med,
-              name: medicationName,
+
+              name:
+                medicationData?.name ||
+                medicationName,
+
+              dosage:
+                medicationData?.dosage ||
+                "",
+
+              duration:
+                medicationData?.duration ||
+                "",
             }
           : med
       )
@@ -317,7 +331,7 @@ export default function PrescricoesPage() {
   }
 
   /* =========================================
-     TEMPLATE RÁPIDO
+     TEMPLATES
   ========================================= */
 
   function applyQuickTemplate(
@@ -393,7 +407,7 @@ export default function PrescricoesPage() {
 
       if (!medicalRecordId) {
         alert(
-          "Nenhum prontuário encontrado para o paciente."
+          "Nenhum prontuário encontrado."
         );
 
         return;
@@ -441,19 +455,14 @@ ${notes}
         }
       );
 
-      const data =
-        await response.json();
-
       if (!response.ok) {
-        console.log(data);
-
         throw new Error(
           "Erro ao salvar"
         );
       }
 
       alert(
-        "Prescrição salva com sucesso!"
+        "Prescrição salva!"
       );
 
       setNotes("");
@@ -495,39 +504,11 @@ ${notes}
 
   return (
     <div className="dashboard-layout">
-      {/* SIDEBAR */}
-      <aside className="sidebar">
-        <h1 className="sidebar-title">
-          MedFlow
-        </h1>
-
-        <nav className="sidebar-menu">
-          <a href="/agenda">
-            Agenda
-          </a>
-
-          <a href="/pacientes">
-            Pacientes
-          </a>
-
-          <a href="/prontuarios">
-            Prontuários
-          </a>
-
-          <a href="/prescricoes">
-            Prescrições
-          </a>
-
-          <a href="/historico">
-            Histórico
-          </a>
-        </nav>
-      </aside>
-
-      {/* MAIN */}
       <main className="main-content">
         <div className="card">
+
           {/* HEADER */}
+
           <div
             style={{
               display: "flex",
@@ -535,8 +516,6 @@ ${notes}
                 "space-between",
               alignItems: "center",
               marginBottom: 32,
-              flexWrap: "wrap",
-              gap: 12,
             }}
           >
             <div>
@@ -548,17 +527,6 @@ ${notes}
               >
                 Prescrição Médica
               </h1>
-
-              <p
-                style={{
-                  color: "#64748b",
-                  marginTop: 8,
-                }}
-              >
-                Receita médica
-                integrada ao
-                prontuário.
-              </p>
             </div>
 
             <div
@@ -582,12 +550,13 @@ ${notes}
                   generatePDF
                 }
               >
-                📄 Gerar PDF
+                📄 PDF
               </button>
             </div>
           </div>
 
           {/* TEMPLATES */}
+
           <div
             style={{
               display: "flex",
@@ -630,533 +599,156 @@ ${notes}
             </button>
           </div>
 
-          {/* RECEITUÁRIO */}
-          <div
-            ref={prescriptionRef}
-            style={{
-              border:
-                "2px solid #dcfce7",
-              borderRadius: 24,
-              padding: 32,
-              background: "#f0fdf4",
-            }}
-          >
-            {/* CABEÇALHO */}
-            <div
-              style={{
-                background: "white",
-                borderRadius: 22,
-                padding: 24,
-                marginBottom: 28,
-                border:
-                  "1px solid #dcfce7",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent:
-                    "space-between",
-                  alignItems:
-                    "center",
-                  marginBottom: 18,
-                }}
-              >
-                <div>
-                  <h1
-                    style={{
-                      fontSize: 30,
-                      fontWeight: 900,
-                      color:
-                        "#166534",
-                    }}
-                  >
-                    {clinicName}
-                  </h1>
-
-                  <p
-                    style={{
-                      color:
-                        "#64748b",
-                    }}
-                  >
-                    {
-                      clinicAddress
-                    }
-                  </p>
-
-                  <p
-                    style={{
-                      color:
-                        "#64748b",
-                    }}
-                  >
-                    {clinicPhone}
-                  </p>
-                </div>
-
-                <div
-                  style={{
-                    width: 82,
-                    height: 82,
-                    borderRadius: 20,
-                    background:
-                      "linear-gradient(135deg,#16a34a,#22c55e)",
-                    display: "flex",
-                    alignItems:
-                      "center",
-                    justifyContent:
-                      "center",
-                    color: "white",
-                    fontSize: 28,
-                    fontWeight: 900,
-                  }}
-                >
-                  M
-                </div>
-              </div>
-
-              {/* DADOS */}
-              <div
-                style={{
-                  borderTop:
-                    "1px solid #dcfce7",
-                  paddingTop: 20,
-                  display: "grid",
-                  gridTemplateColumns:
-                    "1fr 1fr 1fr",
-                  gap: 18,
-                }}
-              >
-                <input
-                  className="modal-input"
-                  placeholder="Paciente"
-                  value={patientName}
-                  onChange={(e) =>
-                    setPatientName(
-                      e.target.value
-                    )
-                  }
-                />
-
-                <input
-                  className="modal-input"
-                  placeholder="CPF"
-                  value={patientCpf}
-                  onChange={(e) =>
-                    setPatientCpf(
-                      e.target.value
-                    )
-                  }
-                />
-
-                <input
-                  type="date"
-                  className="modal-input"
-                  value={
-                    patientBirthDate
-                  }
-                  onChange={(e) =>
-                    setPatientBirthDate(
-                      e.target.value
-                    )
-                  }
-                />
-
-                <input
-                  className="modal-input"
-                  placeholder="CID"
-                  value={cid}
-                  onChange={(e) =>
-                    setCid(
-                      e.target.value
-                    )
-                  }
-                />
-
-                <input
-                  className="modal-input"
-                  placeholder="Peso"
-                  value={weight}
-                  onChange={(e) =>
-                    setWeight(
-                      e.target.value
-                    )
-                  }
-                />
-
-                <input
-                  className="modal-input"
-                  placeholder="Alergias"
-                  value={allergies}
-                  onChange={(e) =>
-                    setAllergies(
-                      e.target.value
-                    )
-                  }
-                />
-              </div>
-            </div>
-
-            {/* MEDICAMENTOS */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent:
-                  "space-between",
-                alignItems: "center",
-                marginBottom: 24,
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: 24,
-                  fontWeight: 800,
-                }}
-              >
-                Medicamentos
-              </h2>
-
-              <button
-                className="primary-button"
-                onClick={
-                  addMedication
-                }
-              >
-                + Medicamento
-              </button>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gap: 20,
-              }}
-            >
-              {medications.map(
-                (medication) => (
-                  <div
-                    key={
-                      medication.id
-                    }
-                    style={{
-                      background:
-                        "white",
-                      borderRadius: 20,
-                      padding: 22,
-                      border:
-                        "1px solid #dcfce7",
-                      position:
-                        "relative",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display:
-                          "grid",
-                        gridTemplateColumns:
-                          "2fr 2fr 1fr auto",
-                        gap: 14,
-                        alignItems:
-                          "end",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position:
-                            "relative",
-                        }}
-                      >
-                        <input
-                          className="modal-input"
-                          placeholder="Medicamento"
-                          value={
-                            medication.name
-                          }
-                          onChange={(
-                            e
-                          ) =>
-                            updateMedication(
-                              medication.id,
-                              "name",
-                              e.target
-                                .value
-                            )
-                          }
-                        />
-
-                        {activeMedicationId ===
-                          medication.id &&
-                          activeSuggestions.length >
-                            0 && (
-                            <div
-                              style={{
-                                position:
-                                  "absolute",
-                                top: 58,
-                                left: 0,
-                                right: 0,
-                                background:
-                                  "white",
-                                border:
-                                  "1px solid #e2e8f0",
-                                borderRadius: 12,
-                                zIndex: 999,
-                                overflow:
-                                  "hidden",
-                              }}
-                            >
-                              {activeSuggestions.map(
-                                (
-                                  suggestion
-                                ) => (
-                                  <div
-                                    key={
-                                      suggestion
-                                    }
-                                    onClick={() =>
-                                      selectMedication(
-                                        suggestion
-                                      )
-                                    }
-                                    style={{
-                                      padding: 12,
-                                      cursor:
-                                        "pointer",
-                                      borderBottom:
-                                        "1px solid #f1f5f9",
-                                    }}
-                                  >
-                                    {
-                                      suggestion
-                                    }
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          )}
-                      </div>
-
-                      <input
-                        className="modal-input"
-                        placeholder="Posologia"
-                        value={
-                          medication.dosage
-                        }
-                        onChange={(
-                          e
-                        ) =>
-                          updateMedication(
-                            medication.id,
-                            "dosage",
-                            e.target
-                              .value
-                          )
-                        }
-                      />
-
-                      <input
-                        className="modal-input"
-                        placeholder="Duração"
-                        value={
-                          medication.duration
-                        }
-                        onChange={(
-                          e
-                        ) =>
-                          updateMedication(
-                            medication.id,
-                            "duration",
-                            e.target
-                              .value
-                          )
-                        }
-                      />
-
-                      <button
-                        onClick={() =>
-                          removeMedication(
-                            medication.id
-                          )
-                        }
-                        style={{
-                          background:
-                            "#ef4444",
-                          color:
-                            "white",
-                          border: "none",
-                          padding:
-                            "14px 16px",
-                          borderRadius: 14,
-                          cursor:
-                            "pointer",
-                        }}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
-
-            {/* OBSERVAÇÕES */}
-            <div
-              style={{
-                marginTop: 30,
-              }}
-            >
-              <textarea
-                className="modal-input"
-                placeholder="Observações médicas..."
-                value={notes}
-                onChange={(e) =>
-                  setNotes(
-                    e.target.value
-                  )
-                }
-                style={{
-                  minHeight: 150,
-                }}
-              />
-            </div>
-
-            {/* ASSINATURA */}
-            <div
-              style={{
-                marginTop: 50,
-                paddingTop: 28,
-                borderTop:
-                  "1px solid #bbf7d0",
-              }}
-            >
-              <div
-                style={{
-                  width: 320,
-                }}
-              >
-                <div
-                  style={{
-                    borderTop:
-                      "1px solid #0f172a",
-                    marginBottom: 10,
-                  }}
-                />
-
-                <strong>
-                  {doctorName}
-                </strong>
-
-                <p
-                  style={{
-                    color:
-                      "#64748b",
-                  }}
-                >
-                  {crm}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* HISTÓRICO */}
-        <div
-          style={{
-            marginTop: 32,
-          }}
-        >
-          <h2
-            style={{
-              fontSize: 30,
-              fontWeight: 800,
-              marginBottom: 24,
-            }}
-          >
-            Histórico de Prescrições
-          </h2>
+          {/* MEDICAMENTOS */}
 
           <div
             style={{
               display: "grid",
-              gap: 18,
+              gap: 20,
             }}
           >
-            {history.map(
-              (prescription) => (
+            {medications.map(
+              (medication) => (
                 <div
-                  key={prescription.id}
-                  className="card"
+                  key={
+                    medication.id
+                  }
+                  style={{
+                    position:
+                      "relative",
+                    background:
+                      "white",
+                    borderRadius: 20,
+                    padding: 22,
+                    border:
+                      "1px solid #dcfce7",
+                  }}
                 >
                   <div
                     style={{
-                      marginBottom: 18,
+                      display:
+                        "grid",
+                      gridTemplateColumns:
+                        "2fr 2fr 1fr auto",
+                      gap: 14,
                     }}
                   >
-                    <strong>
-                      {new Date(
-                        prescription.createdAt
-                      ).toLocaleString(
-                        "pt-BR"
-                      )}
-                    </strong>
-                  </div>
+                    <div
+                      style={{
+                        position:
+                          "relative",
+                      }}
+                    >
+                      <input
+                        className="modal-input"
+                        placeholder="Medicamento"
+                        value={
+                          medication.name
+                        }
+                        onChange={(
+                          e
+                        ) =>
+                          updateMedication(
+                            medication.id,
+                            "name",
+                            e.target
+                              .value
+                          )
+                        }
+                      />
 
-                  <div
-                    style={{
-                      display: "grid",
-                      gap: 12,
-                    }}
-                  >
-                    {prescription.items.map(
-                      (item) => (
-                        <div
-                          key={item.id}
-                          style={{
-                            background:
-                              "#f8fafc",
-                            padding: 16,
-                            borderRadius: 14,
-                          }}
-                        >
-                          <strong>
-                            {
-                              item.medication
-                            }
-                          </strong>
+                      {activeMedicationId ===
+                        medication.id &&
+                        activeSuggestions.length >
+                          0 && (
+                          <div
+                            style={{
+                              position:
+                                "absolute",
+                              top: 58,
+                              left: 0,
+                              right: 0,
+                              background:
+                                "white",
+                              border:
+                                "1px solid #e2e8f0",
+                              borderRadius: 12,
+                              zIndex: 999,
+                            }}
+                          >
+                            {activeSuggestions.map(
+                              (
+                                suggestion
+                              ) => (
+                                <div
+                                  key={
+                                    suggestion
+                                  }
+                                  onClick={() =>
+                                    selectMedication(
+                                      suggestion
+                                    )
+                                  }
+                                  style={{
+                                    padding: 12,
+                                    cursor:
+                                      "pointer",
+                                  }}
+                                >
+                                  {
+                                    suggestion
+                                  }
+                                </div>
+                              )
+                            )}
+                          </div>
+                        )}
+                    </div>
 
-                          <p>
-                            {
-                              item.dosage
-                            }
-                          </p>
+                    <input
+                      className="modal-input"
+                      placeholder="Posologia"
+                      value={
+                        medication.dosage
+                      }
+                      onChange={(e) =>
+                        updateMedication(
+                          medication.id,
+                          "dosage",
+                          e.target
+                            .value
+                        )
+                      }
+                    />
 
-                          <p>
-                            {
-                              item.duration
-                            }
-                          </p>
-                        </div>
-                      )
-                    )}
+                    <input
+                      className="modal-input"
+                      placeholder="Duração"
+                      value={
+                        medication.duration
+                      }
+                      onChange={(e) =>
+                        updateMedication(
+                          medication.id,
+                          "duration",
+                          e.target
+                            .value
+                        )
+                      }
+                    />
+
+                    <button
+                      onClick={() =>
+                        removeMedication(
+                          medication.id
+                        )
+                      }
+                    >
+                      ✕
+                    </button>
                   </div>
                 </div>
               )
-            )}
-
-            {history.length ===
-              0 && (
-              <div
-                className="card"
-                style={{
-                  textAlign:
-                    "center",
-                  color: "#64748b",
-                }}
-              >
-                Nenhuma prescrição
-                encontrada.
-              </div>
             )}
           </div>
         </div>
