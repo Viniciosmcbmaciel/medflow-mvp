@@ -1,6 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+
+import {
+  useEffect,
+  useState,
+} from "react";
 
 type Appointment = {
   id: string;
@@ -28,10 +43,6 @@ export default function DashboardPage() {
   const [loading, setLoading] =
     useState(true);
 
-  /* =========================================
-     LOAD DASHBOARD
-  ========================================= */
-
   useEffect(() => {
     loadDashboard();
   }, []);
@@ -39,8 +50,6 @@ export default function DashboardPage() {
   async function loadDashboard() {
     try {
       setLoading(true);
-
-      /* CONSULTAS */
 
       const appointmentsResponse =
         await fetch(
@@ -51,8 +60,6 @@ export default function DashboardPage() {
         appointmentsResponse.ok
           ? await appointmentsResponse.json()
           : [];
-
-      /* PRONTUÁRIOS */
 
       const recordsResponse =
         await fetch(
@@ -77,28 +84,75 @@ export default function DashboardPage() {
   }
 
   /* =========================================
-     STATS
+     METRICAS
   ========================================= */
 
-  const todayAppointments =
-    appointments.length;
-
-  const completedAppointments =
+  const completed =
     appointments.filter(
-      (appointment) =>
-        appointment.status ===
+      (a) =>
+        a.status ===
         "COMPLETED"
     ).length;
 
-  const pendingAppointments =
+  const pending =
     appointments.filter(
-      (appointment) =>
-        appointment.status !==
-        "COMPLETED"
+      (a) =>
+        a.status ===
+        "SCHEDULED"
     ).length;
 
-  const totalRecords =
-    records.length;
+  const canceled =
+    appointments.filter(
+      (a) =>
+        a.status ===
+        "CANCELED"
+    ).length;
+
+  const chartData = [
+    {
+      name: "Concluídas",
+      total: completed,
+    },
+    {
+      name: "Pendentes",
+      total: pending,
+    },
+    {
+      name: "Canceladas",
+      total: canceled,
+    },
+  ];
+
+  const pieData = [
+    {
+      name: "Concluídas",
+      value: completed,
+      color: "#22c55e",
+    },
+    {
+      name: "Pendentes",
+      value: pending,
+      color: "#f59e0b",
+    },
+    {
+      name: "Canceladas",
+      value: canceled,
+      color: "#ef4444",
+    },
+  ];
+
+  /* =========================================
+     FINANCEIRO MOCK
+  ========================================= */
+
+  const dailyRevenue =
+    completed * 250;
+
+  const weeklyRevenue =
+    dailyRevenue * 5;
+
+  const monthlyRevenue =
+    weeklyRevenue * 4;
 
   return (
     <div className="dashboard-layout">
@@ -128,10 +182,6 @@ export default function DashboardPage() {
           <a href="/prescricoes">
             Prescrições
           </a>
-
-          <a href="/historico">
-            Histórico
-          </a>
         </nav>
       </aside>
 
@@ -140,12 +190,12 @@ export default function DashboardPage() {
         {/* HEADER */}
         <div
           style={{
-            marginBottom: 32,
+            marginBottom: 30,
           }}
         >
           <h1
             style={{
-              fontSize: 38,
+              fontSize: 40,
               fontWeight: 900,
             }}
           >
@@ -156,25 +206,23 @@ export default function DashboardPage() {
             style={{
               color: "#64748b",
               marginTop: 10,
-              fontSize: 16,
             }}
           >
-            Visão geral da clínica e
-            atendimentos.
+            Painel clínico inteligente
+            da clínica.
           </p>
         </div>
 
-        {/* CARDS */}
+        {/* TOP CARDS */}
         <div
           style={{
             display: "grid",
             gridTemplateColumns:
               "repeat(auto-fit,minmax(240px,1fr))",
             gap: 20,
-            marginBottom: 32,
+            marginBottom: 28,
           }}
         >
-          {/* CARD 1 */}
           <div
             className="card"
             style={{
@@ -183,28 +231,21 @@ export default function DashboardPage() {
               color: "white",
             }}
           >
-            <p
-              style={{
-                opacity: 0.9,
-                marginBottom: 12,
-              }}
-            >
-              Consultas Hoje
-            </p>
+            <p>Consultas</p>
 
             <h2
               style={{
                 fontSize: 42,
                 fontWeight: 900,
+                marginTop: 10,
               }}
             >
               {
-                todayAppointments
+                appointments.length
               }
             </h2>
           </div>
 
-          {/* CARD 2 */}
           <div
             className="card"
             style={{
@@ -213,28 +254,19 @@ export default function DashboardPage() {
               color: "white",
             }}
           >
-            <p
-              style={{
-                opacity: 0.9,
-                marginBottom: 12,
-              }}
-            >
-              Atendimentos Concluídos
-            </p>
+            <p>Prontuários</p>
 
             <h2
               style={{
                 fontSize: 42,
                 fontWeight: 900,
+                marginTop: 10,
               }}
             >
-              {
-                completedAppointments
-              }
+              {records.length}
             </h2>
           </div>
 
-          {/* CARD 3 */}
           <div
             className="card"
             style={{
@@ -243,28 +275,19 @@ export default function DashboardPage() {
               color: "white",
             }}
           >
-            <p
-              style={{
-                opacity: 0.9,
-                marginBottom: 12,
-              }}
-            >
-              Pendentes
-            </p>
+            <p>Faturamento Diário</p>
 
             <h2
               style={{
-                fontSize: 42,
+                fontSize: 34,
                 fontWeight: 900,
+                marginTop: 10,
               }}
             >
-              {
-                pendingAppointments
-              }
+              R$ {dailyRevenue}
             </h2>
           </div>
 
-          {/* CARD 4 */}
           <div
             className="card"
             style={{
@@ -273,312 +296,224 @@ export default function DashboardPage() {
               color: "white",
             }}
           >
-            <p
-              style={{
-                opacity: 0.9,
-                marginBottom: 12,
-              }}
-            >
-              Evoluções Clínicas
-            </p>
+            <p>Faturamento Mensal</p>
 
             <h2
               style={{
-                fontSize: 42,
+                fontSize: 34,
                 fontWeight: 900,
+                marginTop: 10,
               }}
             >
-              {totalRecords}
+              R$ {monthlyRevenue}
             </h2>
           </div>
         </div>
 
-        {/* GRID */}
+        {/* GRAFICOS */}
         <div
           style={{
             display: "grid",
             gridTemplateColumns:
               "2fr 1fr",
             gap: 24,
+            marginBottom: 28,
           }}
         >
-          {/* AGENDA */}
+          {/* BAR CHART */}
           <div className="card">
-            <div
+            <h2
               style={{
-                display: "flex",
-                justifyContent:
-                  "space-between",
-                alignItems:
-                  "center",
+                fontSize: 28,
+                fontWeight: 800,
                 marginBottom: 24,
               }}
             >
-              <h2
-                style={{
-                  fontSize: 28,
-                  fontWeight: 800,
-                }}
-              >
-                Agenda do Dia
-              </h2>
-
-              <a
-                href="/agenda"
-                className="primary-button"
-              >
-                Ver Agenda
-              </a>
-            </div>
+              Consultas da Clínica
+            </h2>
 
             <div
               style={{
-                display: "grid",
-                gap: 18,
+                width: "100%",
+                height: 320,
               }}
             >
-              {appointments
-                .slice(0, 6)
-                .map(
-                  (
-                    appointment
-                  ) => (
-                    <div
-                      key={
-                        appointment.id
-                      }
-                      style={{
-                        background:
-                          "#f8fafc",
-                        border:
-                          "1px solid #e2e8f0",
-                        borderRadius: 20,
-                        padding: 20,
-                      }}
-                    >
-                      <div
-                        style={{
-                          display:
-                            "flex",
-                          justifyContent:
-                            "space-between",
-                          alignItems:
-                            "center",
-                        }}
-                      >
-                        <div>
-                          <h3
-                            style={{
-                              fontWeight: 800,
-                              fontSize: 18,
-                            }}
-                          >
-                            {
-                              appointment.patientName
-                            }
-                          </h3>
-
-                          <p
-                            style={{
-                              color:
-                                "#64748b",
-                              marginTop: 6,
-                            }}
-                          >
-                            {new Date(
-                              appointment.date
-                            ).toLocaleString(
-                              "pt-BR"
-                            )}
-                          </p>
-                        </div>
-
-                        <div
-                          style={{
-                            background:
-                              "#dbeafe",
-                            color:
-                              "#2563eb",
-                            padding:
-                              "8px 14px",
-                            borderRadius: 12,
-                            fontWeight: 700,
-                          }}
-                        >
-                          {
-                            appointment.status
-                          }
-                        </div>
-                      </div>
-                    </div>
-                  )
-                )}
-
-              {appointments.length ===
-                0 && (
-                <div
-                  style={{
-                    textAlign:
-                      "center",
-                    padding: 30,
-                    color:
-                      "#64748b",
-                  }}
+              <ResponsiveContainer>
+                <BarChart
+                  data={chartData}
                 >
-                  Nenhuma consulta
-                  encontrada.
-                </div>
-              )}
+                  <XAxis dataKey="name" />
+
+                  <YAxis />
+
+                  <Tooltip />
+
+                  <Bar
+                    dataKey="total"
+                    radius={[
+                      10,
+                      10,
+                      0,
+                      0,
+                    ]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
-          {/* LATERAL */}
+          {/* PIE */}
+          <div className="card">
+            <h2
+              style={{
+                fontSize: 28,
+                fontWeight: 800,
+                marginBottom: 24,
+              }}
+            >
+              Status
+            </h2>
+
+            <div
+              style={{
+                width: "100%",
+                height: 320,
+              }}
+            >
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    outerRadius={110}
+                  >
+                    {pieData.map(
+                      (
+                        entry,
+                        index
+                      ) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={
+                            entry.color
+                          }
+                        />
+                      )
+                    )}
+                  </Pie>
+
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* ULTIMAS EVOLUCOES */}
+        <div className="card">
+          <h2
+            style={{
+              fontSize: 30,
+              fontWeight: 800,
+              marginBottom: 28,
+            }}
+          >
+            Últimas Evoluções
+          </h2>
+
           <div
             style={{
               display: "grid",
-              gap: 24,
+              gap: 18,
             }}
           >
-            {/* ATALHOS */}
-            <div className="card">
-              <h2
-                style={{
-                  fontSize: 24,
-                  fontWeight: 800,
-                  marginBottom: 22,
-                }}
-              >
-                Atalhos
-              </h2>
-
-              <div
-                style={{
-                  display: "grid",
-                  gap: 14,
-                }}
-              >
-                <a
-                  href="/agenda"
-                  className="primary-button"
+            {records
+              .slice(0, 5)
+              .map((record) => (
+                <div
+                  key={record.id}
+                  style={{
+                    background:
+                      "#f8fafc",
+                    border:
+                      "1px solid #e2e8f0",
+                    borderRadius: 20,
+                    padding: 22,
+                  }}
                 >
-                  📅 Nova Consulta
-                </a>
-
-                <a
-                  href="/pacientes"
-                  className="secondary-button"
-                >
-                  👤 Novo Paciente
-                </a>
-
-                <a
-                  href="/prontuarios"
-                  className="secondary-button"
-                >
-                  📄 Novo Prontuário
-                </a>
-
-                <a
-                  href="/prescricoes"
-                  className="secondary-button"
-                >
-                  💊 Nova Prescrição
-                </a>
-              </div>
-            </div>
-
-            {/* ÚLTIMAS EVOLUÇÕES */}
-            <div className="card">
-              <h2
-                style={{
-                  fontSize: 24,
-                  fontWeight: 800,
-                  marginBottom: 22,
-                }}
-              >
-                Últimas Evoluções
-              </h2>
-
-              <div
-                style={{
-                  display: "grid",
-                  gap: 18,
-                }}
-              >
-                {records
-                  .slice(0, 5)
-                  .map((record) => (
-                    <div
-                      key={record.id}
-                      style={{
-                        paddingBottom: 16,
-                        borderBottom:
-                          "1px solid #e2e8f0",
-                      }}
-                    >
-                      <p
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent:
+                        "space-between",
+                      alignItems:
+                        "center",
+                    }}
+                  >
+                    <div>
+                      <h3
                         style={{
-                          fontWeight: 700,
+                          fontSize: 18,
+                          fontWeight: 800,
                         }}
                       >
                         {
                           record.patient
                             ?.fullName
                         }
-                      </p>
+                      </h3>
 
                       <p
                         style={{
+                          marginTop: 8,
                           color:
                             "#64748b",
-                          marginTop: 6,
-                          fontSize: 14,
                         }}
                       >
                         {
                           record.chiefComplaint
                         }
                       </p>
-
-                      <p
-                        style={{
-                          color:
-                            "#94a3b8",
-                          marginTop: 8,
-                          fontSize: 12,
-                        }}
-                      >
-                        {new Date(
-                          record.createdAt
-                        ).toLocaleString(
-                          "pt-BR"
-                        )}
-                      </p>
                     </div>
-                  ))}
 
-                {records.length ===
-                  0 && (
-                  <div
-                    style={{
-                      textAlign:
-                        "center",
-                      color:
-                        "#64748b",
-                    }}
-                  >
-                    Nenhuma evolução.
+                    <div
+                      style={{
+                        color:
+                          "#94a3b8",
+                        fontSize: 13,
+                      }}
+                    >
+                      {new Date(
+                        record.createdAt
+                      ).toLocaleString(
+                        "pt-BR"
+                      )}
+                    </div>
                   </div>
-                )}
+                </div>
+              ))}
+
+            {records.length ===
+              0 && (
+              <div
+                style={{
+                  textAlign:
+                    "center",
+                  color:
+                    "#64748b",
+                }}
+              >
+                Nenhuma evolução
+                encontrada.
               </div>
-            </div>
+            )}
           </div>
         </div>
 
         {loading && (
           <div
             style={{
-              marginTop: 24,
+              marginTop: 20,
               color: "#64748b",
             }}
           >
