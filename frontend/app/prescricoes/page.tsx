@@ -59,6 +59,33 @@ export default function PrescricoesPage() {
       []
     );
 
+  /* =========================================
+     AUTOCOMPLETE PREMIUM
+  ========================================= */
+
+  const medicationsDatabase = [
+    "Dipirona 500mg",
+    "Paracetamol 750mg",
+    "Ibuprofeno 600mg",
+    "Amoxicilina 500mg",
+    "Azitromicina 500mg",
+    "Losartana 50mg",
+    "Omeprazol 20mg",
+    "Prednisona 20mg",
+    "Metformina 850mg",
+    "Nimesulida 100mg",
+  ];
+
+  const [
+    activeSuggestions,
+    setActiveSuggestions,
+  ] = useState<string[]>([]);
+
+  const [
+    activeMedicationId,
+    setActiveMedicationId,
+  ] = useState<string | null>(null);
+
   useEffect(() => {
     const storedPatient =
       localStorage.getItem(
@@ -245,6 +272,109 @@ export default function PrescricoesPage() {
           : med
       )
     );
+
+    /* AUTOCOMPLETE */
+
+    if (field === "name") {
+      setActiveMedicationId(id);
+
+      if (!value.trim()) {
+        setActiveSuggestions([]);
+        return;
+      }
+
+      const filtered =
+        medicationsDatabase.filter(
+          (medication) =>
+            medication
+              .toLowerCase()
+              .includes(
+                value.toLowerCase()
+              )
+        );
+
+      setActiveSuggestions(filtered);
+    }
+  }
+
+  function selectMedication(
+    medicationName: string
+  ) {
+    if (!activeMedicationId) return;
+
+    setMedications((prev) =>
+      prev.map((med) =>
+        med.id === activeMedicationId
+          ? {
+              ...med,
+              name: medicationName,
+            }
+          : med
+      )
+    );
+
+    setActiveSuggestions([]);
+  }
+
+  /* =========================================
+     TEMPLATE RÁPIDO
+  ========================================= */
+
+  function applyQuickTemplate(
+    type: string
+  ) {
+    if (type === "gripe") {
+      setMedications([
+        {
+          id: Date.now().toString(),
+          name:
+            "Paracetamol 750mg",
+          dosage:
+            "1 comprimido de 6/6h",
+          duration: "5 dias",
+        },
+        {
+          id: (
+            Date.now() + 1
+          ).toString(),
+          name:
+            "Ibuprofeno 600mg",
+          dosage:
+            "1 comprimido de 8/8h",
+          duration: "5 dias",
+        },
+      ]);
+
+      setCid("J11");
+    }
+
+    if (type === "sinusite") {
+      setMedications([
+        {
+          id: Date.now().toString(),
+          name:
+            "Amoxicilina 500mg",
+          dosage:
+            "1 cápsula de 8/8h",
+          duration: "7 dias",
+        },
+      ]);
+
+      setCid("J01");
+    }
+
+    if (type === "dor") {
+      setMedications([
+        {
+          id: Date.now().toString(),
+          name:
+            "Dipirona 500mg",
+          dosage:
+            "1 comprimido se dor",
+          duration: "3 dias",
+        },
+      ]);
+    }
   }
 
   /* =========================================
@@ -455,6 +585,49 @@ ${notes}
                 📄 Gerar PDF
               </button>
             </div>
+          </div>
+
+          {/* TEMPLATES */}
+          <div
+            style={{
+              display: "flex",
+              gap: 12,
+              marginBottom: 24,
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              className="secondary-button"
+              onClick={() =>
+                applyQuickTemplate(
+                  "gripe"
+                )
+              }
+            >
+              🤧 Gripe
+            </button>
+
+            <button
+              className="secondary-button"
+              onClick={() =>
+                applyQuickTemplate(
+                  "sinusite"
+                )
+              }
+            >
+              🫁 Sinusite
+            </button>
+
+            <button
+              className="secondary-button"
+              onClick={() =>
+                applyQuickTemplate(
+                  "dor"
+                )
+              }
+            >
+              💊 Dor
+            </button>
           </div>
 
           {/* RECEITUÁRIO */}
@@ -673,6 +846,8 @@ ${notes}
                       padding: 22,
                       border:
                         "1px solid #dcfce7",
+                      position:
+                        "relative",
                     }}
                   >
                     <div
@@ -686,23 +861,81 @@ ${notes}
                           "end",
                       }}
                     >
-                      <input
-                        className="modal-input"
-                        placeholder="Medicamento"
-                        value={
-                          medication.name
-                        }
-                        onChange={(
-                          e
-                        ) =>
-                          updateMedication(
-                            medication.id,
-                            "name",
-                            e.target
-                              .value
-                          )
-                        }
-                      />
+                      <div
+                        style={{
+                          position:
+                            "relative",
+                        }}
+                      >
+                        <input
+                          className="modal-input"
+                          placeholder="Medicamento"
+                          value={
+                            medication.name
+                          }
+                          onChange={(
+                            e
+                          ) =>
+                            updateMedication(
+                              medication.id,
+                              "name",
+                              e.target
+                                .value
+                            )
+                          }
+                        />
+
+                        {activeMedicationId ===
+                          medication.id &&
+                          activeSuggestions.length >
+                            0 && (
+                            <div
+                              style={{
+                                position:
+                                  "absolute",
+                                top: 58,
+                                left: 0,
+                                right: 0,
+                                background:
+                                  "white",
+                                border:
+                                  "1px solid #e2e8f0",
+                                borderRadius: 12,
+                                zIndex: 999,
+                                overflow:
+                                  "hidden",
+                              }}
+                            >
+                              {activeSuggestions.map(
+                                (
+                                  suggestion
+                                ) => (
+                                  <div
+                                    key={
+                                      suggestion
+                                    }
+                                    onClick={() =>
+                                      selectMedication(
+                                        suggestion
+                                      )
+                                    }
+                                    style={{
+                                      padding: 12,
+                                      cursor:
+                                        "pointer",
+                                      borderBottom:
+                                        "1px solid #f1f5f9",
+                                    }}
+                                  >
+                                    {
+                                      suggestion
+                                    }
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          )}
+                      </div>
 
                       <input
                         className="modal-input"
