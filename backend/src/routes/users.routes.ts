@@ -63,7 +63,12 @@ router.post("/", ensureAdmin, async (req, res) => {
     name: z.string().min(2),
     email: z.string().email(),
     password: z.string().min(6),
-    role: z.enum(["ADMIN", "MEDICO", "SECRETARIA"]),
+    role: z.enum([
+  "ADMIN",
+  "MEDICO",
+  "SECRETARIA",
+  "RECEPCAO",
+]),
     crm: z.string().optional(),
     specialty: z.string().optional(),
   });

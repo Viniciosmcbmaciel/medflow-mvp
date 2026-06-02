@@ -6,7 +6,11 @@ import { getStoredUser, useRequireAuth } from "../../lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-type UserRole = "ADMIN" | "MEDICO" | "RECEPCAO";
+type UserRole =
+  | "ADMIN"
+  | "MEDICO"
+  | "SECRETARIA"
+  | "RECEPCAO";
 
 type User = {
   id: string;
@@ -31,10 +35,16 @@ function getRoleLabel(role: UserRole) {
   switch (role) {
     case "ADMIN":
       return "Administrador";
+
     case "MEDICO":
       return "Médico";
+
+    case "SECRETARIA":
+      return "Secretária";
+
     case "RECEPCAO":
-      return "Secretaria";
+      return "Recepção";
+
     default:
       return role;
   }
@@ -195,9 +205,21 @@ function UsuariosPageContent() {
               value={role}
               onChange={(e) => setRole(e.target.value as UserRole)}
             >
-              <option value="MEDICO">Médico</option>
-              <option value="RECEPCAO">Secretaria</option>
-              <option value="ADMIN">Administrador</option>
+              <option value="MEDICO">
+  Médico
+</option>
+
+<option value="SECRETARIA">
+  Secretária
+</option>
+
+<option value="RECEPCAO">
+  Recepção
+</option>
+
+<option value="ADMIN">
+  Administrador
+</option>
             </select>
           </div>
 
