@@ -24,4 +24,4 @@ export const permissions = {
     "/agenda",
     "/pacientes",
   ],
-};
+} as const;
