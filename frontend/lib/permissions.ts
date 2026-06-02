@@ -18,7 +18,6 @@ export const permissions = {
   SECRETARIA: [
     "/agenda",
     "/pacientes",
-    "/dashboard",
   ],
 
   RECEPCAO: [
