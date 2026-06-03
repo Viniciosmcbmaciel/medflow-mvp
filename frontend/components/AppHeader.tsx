@@ -40,10 +40,10 @@ export default function AppHeader() {
           </Link>
 
           {user?.role === "ADMIN" && (
-            <Link href="/usuarios" className="nav-link">
-              Usuários
-            </Link>
-          )}
+  <Link href="/usuarios">
+    Usuários
+  </Link>
+)}
 
           <button
             type="button"

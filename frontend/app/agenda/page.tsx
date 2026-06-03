@@ -1,17 +1,17 @@
 "use client";
 
 import FullCalendar from "@fullcalendar/react";
-
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-
 import ptBrLocale from "@fullcalendar/core/locales/pt-br";
 
 import {
   useEffect,
   useState,
 } from "react";
+
+import Sidebar from "../../components/Sidebar";
 
 type Appointment = {
   id: string;
@@ -333,37 +333,11 @@ export default function AgendaPage() {
   }
 
   return (
-    <div className="dashboard-layout">
-      <aside className="sidebar">
-        <h1 className="sidebar-title">
-          MedFlow
-        </h1>
+  <div className="dashboard-layout">
+    <Sidebar />
 
-        <nav className="sidebar-menu">
-          <a href="/agenda">
-            Agenda
-          </a>
-
-          <a href="/pacientes">
-            Pacientes
-          </a>
-
-          <a href="/prontuarios">
-            Prontuários
-          </a>
-
-          <a href="/prescricoes">
-            Prescrições
-          </a>
-
-          <a href="/historico">
-            Histórico
-          </a>
-        </nav>
-      </aside>
-
-      <main className="main-content">
-        <div className="card">
+    <main className="main-content">
+      <div className="card">
           <div
             style={{
               marginBottom: 24,
