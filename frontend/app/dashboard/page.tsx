@@ -1,5 +1,7 @@
 "use client";
 
+import Sidebar from "../../components/Sidebar";
+
 import {
   BarChart,
   Bar,
@@ -52,9 +54,9 @@ export default function DashboardPage() {
       setLoading(true);
 
       const appointmentsResponse =
-        await fetch(
-          "https://medflow-mvp-production.up.railway.app/api/appointments"
-        );
+  await fetch(
+    `${API_URL}/api/appointments`
+  );;
 
       const appointmentsData =
         appointmentsResponse.ok
@@ -62,9 +64,9 @@ export default function DashboardPage() {
           : [];
 
       const recordsResponse =
-        await fetch(
-          "https://medflow-mvp-production.up.railway.app/api/medical-records"
-        );
+  await fetch(
+    `${API_URL}/api/medical-records`
+  );
 
       const recordsData =
         recordsResponse.ok
@@ -155,35 +157,10 @@ export default function DashboardPage() {
     weeklyRevenue * 4;
 
   return (
-    <div className="dashboard-layout">
-      {/* SIDEBAR */}
-      <aside className="sidebar">
-        <h1 className="sidebar-title">
-          MedFlow
-        </h1>
+  <div className="dashboard-layout">
+    <Sidebar />
 
-        <nav className="sidebar-menu">
-          <a href="/dashboard">
-            Dashboard
-          </a>
-
-          <a href="/agenda">
-            Agenda
-          </a>
-
-          <a href="/pacientes">
-            Pacientes
-          </a>
-
-          <a href="/prontuarios">
-            Prontuários
-          </a>
-
-          <a href="/prescricoes">
-            Prescrições
-          </a>
-        </nav>
-      </aside>
+    <main className="main-content">
 
       {/* MAIN */}
       <main className="main-content">
