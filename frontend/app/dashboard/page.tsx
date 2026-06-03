@@ -1,49 +1,26 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-import {
-  useEffect,
-  useState,
-} from "react";
-
-type Appointment = {
-  id: string;
-  patientName: string;
-  date: string;
-  status: string;
-};
-
-type MedicalRecord = {
-  id: string;
-  chiefComplaint?: string;
-  createdAt: string;
-  patient?: {
-    fullName: string;
-  };
+type DashboardStats = {
+  totalPatients: number;
+  totalAppointments: number;
+  totalRecords: number;
+  totalPrescriptions: number;
 };
 
 export default function DashboardPage() {
-  const [appointments, setAppointments] =
-    useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [records, setRecords] =
-    useState<MedicalRecord[]>([]);
-
-  const [loading, setLoading] =
-    useState(true);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalPatients: 0,
+    totalAppointments: 0,
+    totalRecords: 0,
+    totalPrescriptions: 0,
+  });
 
   useEffect(() => {
     loadDashboard();
@@ -53,31 +30,40 @@ export default function DashboardPage() {
     try {
       setLoading(true);
 
-      const appointmentsResponse =
-  await fetch(
-    `${API_URL}/api/appointments`
-  );;
+      const [
+        patientsResponse,
+        appointmentsResponse,
+        recordsResponse,
+        prescriptionsResponse,
+      ] = await Promise.all([
+        fetch(`${API_URL}/patients`),
+        fetch(`${API_URL}/appointments`),
+        fetch(`${API_URL}/medical-records`),
+        fetch(`${API_URL}/prescriptions`),
+      ]);
 
-      const appointmentsData =
-        appointmentsResponse.ok
-          ? await appointmentsResponse.json()
-          : [];
+      const patients = patientsResponse.ok
+        ? await patientsResponse.json()
+        : [];
 
-      const recordsResponse =
-  await fetch(
-    `${API_URL}/api/medical-records`
-  );
+      const appointments = appointmentsResponse.ok
+        ? await appointmentsResponse.json()
+        : [];
 
-      const recordsData =
-        recordsResponse.ok
-          ? await recordsResponse.json()
-          : [];
+      const records = recordsResponse.ok
+        ? await recordsResponse.json()
+        : [];
 
-      setAppointments(
-        appointmentsData
-      );
+      const prescriptions = prescriptionsResponse.ok
+        ? await prescriptionsResponse.json()
+        : [];
 
-      setRecords(recordsData);
+      setStats({
+        totalPatients: patients.length,
+        totalAppointments: appointments.length,
+        totalRecords: records.length,
+        totalPrescriptions: prescriptions.length,
+      });
     } catch (error) {
       console.error(error);
     } finally {
@@ -85,95 +71,16 @@ export default function DashboardPage() {
     }
   }
 
-  /* =========================================
-     METRICAS
-  ========================================= */
-
-  const completed =
-    appointments.filter(
-      (a) =>
-        a.status ===
-        "COMPLETED"
-    ).length;
-
-  const pending =
-    appointments.filter(
-      (a) =>
-        a.status ===
-        "SCHEDULED"
-    ).length;
-
-  const canceled =
-    appointments.filter(
-      (a) =>
-        a.status ===
-        "CANCELED"
-    ).length;
-
-  const chartData = [
-    {
-      name: "Concluídas",
-      total: completed,
-    },
-    {
-      name: "Pendentes",
-      total: pending,
-    },
-    {
-      name: "Canceladas",
-      total: canceled,
-    },
-  ];
-
-  const pieData = [
-    {
-      name: "Concluídas",
-      value: completed,
-      color: "#22c55e",
-    },
-    {
-      name: "Pendentes",
-      value: pending,
-      color: "#f59e0b",
-    },
-    {
-      name: "Canceladas",
-      value: canceled,
-      color: "#ef4444",
-    },
-  ];
-
-  /* =========================================
-     FINANCEIRO MOCK
-  ========================================= */
-
-  const dailyRevenue =
-    completed * 250;
-
-  const weeklyRevenue =
-    dailyRevenue * 5;
-
-  const monthlyRevenue =
-    weeklyRevenue * 4;
-
   return (
-  <div className="dashboard-layout">
-    <Sidebar />
+    <div className="dashboard-layout">
+      <Sidebar />
 
-    <main className="main-content">
-
-      {/* MAIN */}
       <main className="main-content">
-        {/* HEADER */}
-        <div
-          style={{
-            marginBottom: 30,
-          }}
-        >
+        <div style={{ marginBottom: 32 }}>
           <h1
             style={{
-              fontSize: 40,
-              fontWeight: 900,
+              fontSize: 42,
+              fontWeight: 800,
             }}
           >
             Dashboard Médico
@@ -182,320 +89,154 @@ export default function DashboardPage() {
           <p
             style={{
               color: "#64748b",
-              marginTop: 10,
+              marginTop: 8,
             }}
           >
-            Painel clínico inteligente
-            da clínica.
+            Visão geral da clínica em tempo real.
           </p>
         </div>
 
-        {/* TOP CARDS */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit,minmax(240px,1fr))",
-            gap: 20,
-            marginBottom: 28,
-          }}
-        >
-          <div
-            className="card"
-            style={{
-              background:
-                "linear-gradient(135deg,#2563eb,#3b82f6)",
-              color: "white",
-            }}
-          >
-            <p>Consultas</p>
-
-            <h2
-              style={{
-                fontSize: 42,
-                fontWeight: 900,
-                marginTop: 10,
-              }}
-            >
-              {
-                appointments.length
-              }
-            </h2>
-          </div>
-
-          <div
-            className="card"
-            style={{
-              background:
-                "linear-gradient(135deg,#16a34a,#22c55e)",
-              color: "white",
-            }}
-          >
-            <p>Prontuários</p>
-
-            <h2
-              style={{
-                fontSize: 42,
-                fontWeight: 900,
-                marginTop: 10,
-              }}
-            >
-              {records.length}
-            </h2>
-          </div>
-
-          <div
-            className="card"
-            style={{
-              background:
-                "linear-gradient(135deg,#f59e0b,#fbbf24)",
-              color: "white",
-            }}
-          >
-            <p>Faturamento Diário</p>
-
-            <h2
-              style={{
-                fontSize: 34,
-                fontWeight: 900,
-                marginTop: 10,
-              }}
-            >
-              R$ {dailyRevenue}
-            </h2>
-          </div>
-
-          <div
-            className="card"
-            style={{
-              background:
-                "linear-gradient(135deg,#7c3aed,#8b5cf6)",
-              color: "white",
-            }}
-          >
-            <p>Faturamento Mensal</p>
-
-            <h2
-              style={{
-                fontSize: 34,
-                fontWeight: 900,
-                marginTop: 10,
-              }}
-            >
-              R$ {monthlyRevenue}
-            </h2>
-          </div>
-        </div>
-
-        {/* GRAFICOS */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "2fr 1fr",
-            gap: 24,
-            marginBottom: 28,
-          }}
-        >
-          {/* BAR CHART */}
+        {loading ? (
           <div className="card">
-            <h2
-              style={{
-                fontSize: 28,
-                fontWeight: 800,
-                marginBottom: 24,
-              }}
-            >
-              Consultas da Clínica
-            </h2>
-
-            <div
-              style={{
-                width: "100%",
-                height: 320,
-              }}
-            >
-              <ResponsiveContainer>
-                <BarChart
-                  data={chartData}
-                >
-                  <XAxis dataKey="name" />
-
-                  <YAxis />
-
-                  <Tooltip />
-
-                  <Bar
-                    dataKey="total"
-                    radius={[
-                      10,
-                      10,
-                      0,
-                      0,
-                    ]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* PIE */}
-          <div className="card">
-            <h2
-              style={{
-                fontSize: 28,
-                fontWeight: 800,
-                marginBottom: 24,
-              }}
-            >
-              Status
-            </h2>
-
-            <div
-              style={{
-                width: "100%",
-                height: 320,
-              }}
-            >
-              <ResponsiveContainer>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    dataKey="value"
-                    outerRadius={110}
-                  >
-                    {pieData.map(
-                      (
-                        entry,
-                        index
-                      ) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={
-                            entry.color
-                          }
-                        />
-                      )
-                    )}
-                  </Pie>
-
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-
-        {/* ULTIMAS EVOLUCOES */}
-        <div className="card">
-          <h2
-            style={{
-              fontSize: 30,
-              fontWeight: 800,
-              marginBottom: 28,
-            }}
-          >
-            Últimas Evoluções
-          </h2>
-
-          <div
-            style={{
-              display: "grid",
-              gap: 18,
-            }}
-          >
-            {records
-              .slice(0, 5)
-              .map((record) => (
-                <div
-                  key={record.id}
-                  style={{
-                    background:
-                      "#f8fafc",
-                    border:
-                      "1px solid #e2e8f0",
-                    borderRadius: 20,
-                    padding: 22,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent:
-                        "space-between",
-                      alignItems:
-                        "center",
-                    }}
-                  >
-                    <div>
-                      <h3
-                        style={{
-                          fontSize: 18,
-                          fontWeight: 800,
-                        }}
-                      >
-                        {
-                          record.patient
-                            ?.fullName
-                        }
-                      </h3>
-
-                      <p
-                        style={{
-                          marginTop: 8,
-                          color:
-                            "#64748b",
-                        }}
-                      >
-                        {
-                          record.chiefComplaint
-                        }
-                      </p>
-                    </div>
-
-                    <div
-                      style={{
-                        color:
-                          "#94a3b8",
-                        fontSize: 13,
-                      }}
-                    >
-                      {new Date(
-                        record.createdAt
-                      ).toLocaleString(
-                        "pt-BR"
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-            {records.length ===
-              0 && (
-              <div
-                style={{
-                  textAlign:
-                    "center",
-                  color:
-                    "#64748b",
-                }}
-              >
-                Nenhuma evolução
-                encontrada.
-              </div>
-            )}
-          </div>
-        </div>
-
-        {loading && (
-          <div
-            style={{
-              marginTop: 20,
-              color: "#64748b",
-            }}
-          >
             Carregando dashboard...
           </div>
+        ) : (
+          <>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(auto-fit,minmax(250px,1fr))",
+                gap: 20,
+              }}
+            >
+              <div
+                className="card"
+                style={{
+                  background:
+                    "linear-gradient(135deg,#2563eb,#3b82f6)",
+                  color: "white",
+                }}
+              >
+                <h3>Total de Pacientes</h3>
+
+                <h1
+                  style={{
+                    fontSize: 42,
+                    marginTop: 16,
+                  }}
+                >
+                  {stats.totalPatients}
+                </h1>
+              </div>
+
+              <div
+                className="card"
+                style={{
+                  background:
+                    "linear-gradient(135deg,#16a34a,#22c55e)",
+                  color: "white",
+                }}
+              >
+                <h3>Consultas</h3>
+
+                <h1
+                  style={{
+                    fontSize: 42,
+                    marginTop: 16,
+                  }}
+                >
+                  {stats.totalAppointments}
+                </h1>
+              </div>
+
+              <div
+                className="card"
+                style={{
+                  background:
+                    "linear-gradient(135deg,#f59e0b,#fbbf24)",
+                  color: "white",
+                }}
+              >
+                <h3>Prontuários</h3>
+
+                <h1
+                  style={{
+                    fontSize: 42,
+                    marginTop: 16,
+                  }}
+                >
+                  {stats.totalRecords}
+                </h1>
+              </div>
+
+              <div
+                className="card"
+                style={{
+                  background:
+                    "linear-gradient(135deg,#7c3aed,#8b5cf6)",
+                  color: "white",
+                }}
+              >
+                <h3>Prescrições</h3>
+
+                <h1
+                  style={{
+                    fontSize: 42,
+                    marginTop: 16,
+                  }}
+                >
+                  {stats.totalPrescriptions}
+                </h1>
+              </div>
+            </div>
+
+            <div
+              className="card"
+              style={{
+                marginTop: 30,
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: 28,
+                  fontWeight: 700,
+                  marginBottom: 20,
+                }}
+              >
+                Resumo Operacional
+              </h2>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    "repeat(auto-fit,minmax(300px,1fr))",
+                  gap: 20,
+                }}
+              >
+                <div>
+                  <strong>Pacientes cadastrados</strong>
+                  <p>{stats.totalPatients}</p>
+                </div>
+
+                <div>
+                  <strong>Consultas registradas</strong>
+                  <p>{stats.totalAppointments}</p>
+                </div>
+
+                <div>
+                  <strong>Prontuários emitidos</strong>
+                  <p>{stats.totalRecords}</p>
+                </div>
+
+                <div>
+                  <strong>Prescrições realizadas</strong>
+                  <p>{stats.totalPrescriptions}</p>
+                </div>
+              </div>
+            </div>
+          </>
         )}
       </main>
     </div>
